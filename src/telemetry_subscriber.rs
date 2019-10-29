@@ -1,0 +1,265 @@
+use crate::telemetry::Telemetry;
+use crate::types::{RefCt, TraceId, SpanData, TelemetryObject};
+use crate::visitor::HoneycombVisitor;
+use ::libhoney::json;
+use chashmap::CHashMap;
+use chrono::Utc;
+use std::cell::RefCell;
+use std::collections::HashMap;
+use tracing::span::{Attributes, Id, Record};
+use tracing::{Event, Metadata, Subscriber};
+use tracing_core::span::Current;
+use rand::Rng;
+
+// used by this subscriber to track the current span
+thread_local! {
+    static CURRENT_SPAN: RefCell<Vec<Id>> = RefCell::new(vec!());
+}
+
+pub struct TelemetrySubscriber {
+    telem: Telemetry,
+    spans: CHashMap<Id, RefCt<SpanData>>,
+    service_name: String,
+    // gen_trace_ids: Bool, /// if true, trace ids will be generated if not provided (todo better descr?)
+}
+
+
+impl TelemetrySubscriber {
+    pub fn new(service_name: String, telem: Telemetry) -> Self {
+        TelemetrySubscriber {
+            spans: CHashMap::new(),
+            service_name,
+            telem,
+        }
+    }
+
+    /// this function provides lazy initialization of trace ids (only generated when req'd to observe honeycomb event/span)
+    /// when a span's trace id is requested, that span and any parent spans can have their trace id evaluated and saved
+    /// this function maintains an explicit stack of write guards to ensure no invalid trace id hierarchies result
+    fn get_or_gen_trace_id(&self, target_id: &Id) -> TraceId {
+        let mut path: Vec<chashmap::WriteGuard<Id, RefCt<SpanData>>> = vec![];
+        let mut id = target_id.clone();
+
+        let trace_id: TraceId = loop {
+            match self.spans.get_mut(&id) {
+                Some(mut span) => {
+                    match &span.trace_id {
+                        Some(tid) => {
+                            // found already-eval'd trace id
+                            break tid.clone();
+                        }
+                        None => {
+                            // span has no trace, must be updated as part of this call
+                            match &span.parent_id {
+                                Some(parent_id) => {
+                                    id = parent_id.clone();
+                                }
+                                None => {
+                                    // found root span with no trace id, generate trace_id
+                                    let trace_id = TraceId::generate();
+                                    // subsequent break means we won't push span onto path so just update inline
+                                    span.trace_id = Some(trace_id);
+                                    break trace_id;
+                                }
+                            };
+
+                            path.push(span);
+                        }
+                    };
+                }
+                None => {
+                    // TODO: should I just panic if this happens?
+                    println!("did not expect this to happen - id deref fail during parent trace. generating trace id");
+                    break TraceId::generate();
+                }
+            }
+        };
+
+        for mut span in path {
+            span.trace_id = Some(trace_id.clone());
+        }
+
+        trace_id
+    }
+
+    fn peek_current_span(&self) -> Option<Id> {
+        CURRENT_SPAN.with(|c| c.borrow().last().cloned())
+    }
+    fn pop_current_span(&self) -> Option<Id> {
+        CURRENT_SPAN.with(|c| c.borrow_mut().pop())
+    }
+    fn push_current_span(&self, id: Id) {
+        CURRENT_SPAN.with(|c| c.borrow_mut().push(id))
+    }
+
+    // get (trace_id, parent_id). will generate a new trace id if none are available
+    fn build_span<T: TelemetryObject>(&self, t: &T) -> (Id, SpanData) {
+        let now = Utc::now();
+        // TODO: random local u32 + counter or similar(?) to provide unique Id's
+        let mut u: u64 = 0;
+        while u == 0 {
+            // random gen until != 0 (disallowed)
+            u = rand::thread_rng().gen();
+        } // random u64 != 0 required
+        let id = Id::from_u64(u);
+
+        let mut values = HashMap::new();
+        let mut visitor = HoneycombVisitor {
+            accumulator: &mut values,
+            explicit_trace_id: None,
+        };
+        t.t_record(&mut visitor);
+
+        let parent_id = if let Some(parent_id) = t.t_parent() {
+            // explicit parent
+            Some(parent_id.clone())
+        } else if t.t_is_root() {
+            // don't bother checking thread local if span is explicitly root according to this fn
+            None
+        } else if let Some(parent_id) = self.peek_current_span() {
+            // implicit parent from threadlocal ctx
+            Some(parent_id)
+        } else {
+            // no parent span, thus this is a root span
+            None
+        };
+
+        (
+            id,
+            SpanData {
+                initialized_at: now,
+                metadata: t.t_metadata(),
+                trace_id: visitor.explicit_trace_id, // lazy, unless explicit trace id provided
+                parent_id,
+                values,
+            },
+        )
+    }
+}
+
+impl Subscriber for TelemetrySubscriber {
+    fn enabled(&self, metadata: &Metadata<'_>) -> bool {
+        metadata.level() == &tracing::Level::INFO
+            || metadata.level() == &tracing::Level::WARN
+            || metadata.level() == &tracing::Level::ERROR
+    }
+
+    fn new_span(&self, span: &Attributes<'_>) -> Id {
+        let (id, new_span) = self.build_span(span);
+
+        println!(":: build new span with id {:?} for {:?}", id, span);
+
+        // FIXME: what if span id already exists in map? should I handle? assume no overlap possible b/c random?
+        // ASSERTION: there should be no collisions here
+        // insert attributes from span into map
+        self.spans.insert(
+            id.clone(),
+            RefCt {
+                ref_ct: 1,
+                inner: new_span,
+            },
+        );
+
+        id
+    }
+
+    // record additional values on span map
+    fn record(&self, span: &Id, values: &Record<'_>) {
+        if let Some(mut span_data) = self.spans.get_mut(&span) {
+            let mut visitor = HoneycombVisitor {
+                accumulator: &mut span_data.values,
+                explicit_trace_id: None,
+            };
+            values.record(&mut visitor);
+
+            if let Some(explicit_trace_id) = visitor.explicit_trace_id {
+                match span_data.trace_id {
+                    Some(preexisting) => {
+                        println!("trying to set trace id to {:?} for span which already has one, {:?}, no-op", &explicit_trace_id, &preexisting);
+                    }
+                    None => {
+                        span_data.trace_id = Some(explicit_trace_id);
+                    }
+                }
+            }
+        }
+    }
+
+    fn record_follows_from(&self, _span: &Id, _follows: &Id) {}
+
+    // record event (publish directly to telemetry, not a span)
+    fn event(&self, event: &Event<'_>) {
+        // report as span with zero-length interval
+        let (span_id, new_span) = self.build_span(event);
+
+        // use parent trace id, if it exists
+        let trace_id = new_span.parent_id.as_ref().map(|pid| {
+            self.get_or_gen_trace_id(pid)
+        });
+
+        let values = new_span.into_values(self.service_name.clone(), trace_id, span_id);
+
+        self.telem.report_data(values);
+    }
+
+    fn enter(&self, span: &Id) {
+        println!(":: enter span {:?}", span);
+        self.push_current_span(span.clone());
+    }
+    fn exit(&self, span: &Id) {
+        println!(":: exit span {:?}", span);
+        self.pop_current_span();
+    }
+
+    fn clone_span(&self, id: &Id) -> Id {
+        if let Some(mut span_data) = self.spans.get_mut(id) {
+            // should always be present
+            span_data.ref_ct += 1;
+        }
+        id.clone() // type sig of this function seems to compel cloning of id (&X -> X)
+    }
+
+    fn try_close(&self, id: Id) -> bool {
+        let dropped_span: Option<(SpanData, TraceId)> = {
+            if let Some(mut span_data) = self.spans.get_mut(&id) {
+                span_data.ref_ct -= 1; // decrement ref ct
+                let ref_ct = span_data.ref_ct;
+                drop(span_data); // explicit drop to avoid deadlock on subsequent removal
+
+                if ref_ct == 0 {
+                    // gen trace id _must_ be run before removing node from map b/c it used lookup.. mild wart...
+                    let trace_id = self.get_or_gen_trace_id(&id);
+                    self.spans.remove(&id).map(move |e| (e.inner, trace_id))
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        };
+
+        if let Some((dropped, trace_id)) = dropped_span {
+            let now = Utc::now();
+            let now = now.timestamp_subsec_millis();
+            let init_at = dropped.initialized_at.timestamp_subsec_millis();
+            let elapsed = now - init_at;
+
+            let mut values = dropped.into_values(self.service_name.clone(), Some(trace_id), id);
+            values.insert("duration_ms".to_string(), json!(elapsed));
+
+            self.telem.report_data(values);
+            true
+        } else {
+            false
+        }
+    }
+
+    fn current_span(&self) -> Current {
+        if let Some(id) = self.peek_current_span() {
+            if let Some(meta) = self.spans.get(&id).map(|span| span.metadata) {
+                return Current::new(id, meta);
+            }
+        }
+        Current::none()
+    }
+}
