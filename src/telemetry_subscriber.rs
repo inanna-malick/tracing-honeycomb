@@ -1,15 +1,15 @@
 use crate::telemetry::Telemetry;
-use crate::types::{RefCt, TraceId, SpanData, TelemetryObject};
+use crate::types::{RefCt, SpanData, TelemetryObject, TraceId};
 use crate::visitor::HoneycombVisitor;
 use ::libhoney::json;
 use chashmap::CHashMap;
 use chrono::Utc;
+use rand::Rng;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use tracing::span::{Attributes, Id, Record};
 use tracing::{Event, Metadata, Subscriber};
 use tracing_core::span::Current;
-use rand::Rng;
 
 // used by this subscriber to track the current span
 thread_local! {
@@ -22,7 +22,6 @@ pub struct TelemetrySubscriber {
     service_name: String,
     // gen_trace_ids: Bool, /// if true, trace ids will be generated if not provided (todo better descr?)
 }
-
 
 impl TelemetrySubscriber {
     pub fn new(service_name: String, telem: Telemetry) -> Self {
@@ -58,7 +57,7 @@ impl TelemetrySubscriber {
                                     // found root span with no trace id, generate trace_id
                                     let trace_id = TraceId::generate();
                                     // subsequent break means we won't push span onto path so just update inline
-                                    span.trace_id = Some(trace_id);
+                                    span.trace_id = Some(trace_id.clone());
                                     break trace_id;
                                 }
                             };
@@ -147,8 +146,6 @@ impl Subscriber for TelemetrySubscriber {
     fn new_span(&self, span: &Attributes<'_>) -> Id {
         let (id, new_span) = self.build_span(span);
 
-        println!(":: build new span with id {:?} for {:?}", id, span);
-
         // FIXME: what if span id already exists in map? should I handle? assume no overlap possible b/c random?
         // ASSERTION: there should be no collisions here
         // insert attributes from span into map
@@ -173,7 +170,7 @@ impl Subscriber for TelemetrySubscriber {
             values.record(&mut visitor);
 
             if let Some(explicit_trace_id) = visitor.explicit_trace_id {
-                match span_data.trace_id {
+                match &span_data.trace_id {
                     Some(preexisting) => {
                         println!("trying to set trace id to {:?} for span which already has one, {:?}, no-op", &explicit_trace_id, &preexisting);
                     }
@@ -193,9 +190,10 @@ impl Subscriber for TelemetrySubscriber {
         let (span_id, new_span) = self.build_span(event);
 
         // use parent trace id, if it exists
-        let trace_id = new_span.parent_id.as_ref().map(|pid| {
-            self.get_or_gen_trace_id(pid)
-        });
+        let trace_id = new_span
+            .parent_id
+            .as_ref()
+            .map(|pid| self.get_or_gen_trace_id(pid));
 
         let values = new_span.into_values(self.service_name.clone(), trace_id, span_id);
 
@@ -203,11 +201,9 @@ impl Subscriber for TelemetrySubscriber {
     }
 
     fn enter(&self, span: &Id) {
-        println!(":: enter span {:?}", span);
         self.push_current_span(span.clone());
     }
-    fn exit(&self, span: &Id) {
-        println!(":: exit span {:?}", span);
+    fn exit(&self, _span: &Id) {
         self.pop_current_span();
     }
 

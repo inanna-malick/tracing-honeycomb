@@ -1,8 +1,11 @@
+use crate::types::TraceId;
 use ::libhoney::{json, Value};
 use std::collections::HashMap;
 use std::fmt;
 use tracing::field::{Field, Visit};
-use crate::types::TraceId;
+
+// magic tracing id field name - used to report tracing id to span;
+pub static MAGIC_TRACING_ID_FIELD_NAME: &'static str = "magic_tracing_id_field_name";
 
 // just clone values into telemetry-appropriate hash map
 pub struct HoneycombVisitor<'a> {
@@ -11,10 +14,10 @@ pub struct HoneycombVisitor<'a> {
 }
 
 impl<'a> Visit for HoneycombVisitor<'a> {
-    fn record_u64(&mut self, field: &Field, value: u64) {
-        if field.name() == "trace_id".to_string() {
+    fn record_str(&mut self, field: &Field, value: &str) {
+        if field.name() == MAGIC_TRACING_ID_FIELD_NAME {
             println!("found explicit trace id {}", &value);
-            self.explicit_trace_id = Some(TraceId::new(value));
+            self.explicit_trace_id = Some(TraceId::new(value.to_string()));
         } else {
             self.accumulator
                 .insert(format!("telemetry.{}", field.name()), json!(value));

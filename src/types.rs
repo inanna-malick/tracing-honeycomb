@@ -1,24 +1,32 @@
+use crate::visitor::MAGIC_TRACING_ID_FIELD_NAME;
 use ::libhoney::{json, Value};
 use chrono::{DateTime, Utc};
+use rand::Rng;
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 use tracing::field::Visit;
-use tracing::span::{Attributes, Id};
+use tracing::span::{Attributes, Id, Span};
 use tracing::{Event, Metadata};
-use rand::Rng;
 
-#[derive(PartialEq, Eq, Hash, Copy, Clone, Debug)]
-pub struct TraceId(u64);
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+pub struct TraceId(String);
 
 impl TraceId {
-    pub fn new(u: u64) -> TraceId {
+    pub fn record_current(&self) {
+        self.record_on(tracing::Span::current())
+    }
+
+    pub fn record_on(&self, span: Span) {
+        let to_record: &str = &self.0;
+        span.record::<str, &str>(MAGIC_TRACING_ID_FIELD_NAME, &to_record);
+    }
+
+    pub fn new(u: String) -> TraceId {
         TraceId(u)
     }
     pub fn generate() -> TraceId {
-        // NOTE: using u64 for trace id's b/c tracing has a u64-specific handler but not u128
-        // TODO: impl u128 specific handler (maybe)
-        let u = rand::thread_rng().gen();
-        TraceId(u)
+        let u: u128 = rand::thread_rng().gen();
+        TraceId(format!("trace-{}", u))
     }
 }
 
