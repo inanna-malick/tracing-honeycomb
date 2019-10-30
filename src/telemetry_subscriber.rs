@@ -49,37 +49,28 @@ impl TelemetrySubscriber {
         let mut id = target_id.clone();
 
         let trace_id: TraceId = loop {
-            match self.spans.get_mut(&id) {
-                Some(mut span) => {
-                    match &span.trace_id {
-                        Some(tid) => {
-                            // found already-eval'd trace id
-                            break tid.clone();
-                        }
-                        None => {
-                            // span has no trace, must be updated as part of this call
-                            match &span.parent_id {
-                                Some(parent_id) => {
-                                    id = parent_id.clone();
-                                }
-                                None => {
-                                    // found root span with no trace id, generate trace_id
-                                    let trace_id = TraceId::generate();
-                                    // subsequent break means we won't push span onto path so just update inline
-                                    span.trace_id = Some(trace_id.clone());
-                                    break trace_id;
-                                }
-                            };
-
-                            path.push(span);
-                        }
+            if let Some(mut span) = self.spans.get_mut(&id) {
+                if let Some(tid) = &span.trace_id {
+                    // found already-eval'd trace id
+                    break tid.clone();
+                } else {
+                    // span has no trace, must be updated as part of this call
+                    if let Some(parent_id) = &span.parent_id {
+                        id = parent_id.clone();
+                    } else {
+                        // found root span with no trace id, generate trace_id
+                        let trace_id = TraceId::generate();
+                        // subsequent break means we won't push span onto path so just update inline
+                        span.trace_id = Some(trace_id.clone());
+                        break trace_id;
                     };
-                }
-                None => {
-                    // TODO: should I just panic if this happens?
-                    println!("did not expect this to happen - id deref fail during parent trace. generating trace id");
-                    break TraceId::generate();
-                }
+
+                    path.push(span);
+                };
+            } else {
+                // TODO: should I just panic if this happens?
+                println!("did not expect this to happen - id deref fail during parent trace. generating trace id");
+                break TraceId::generate();
             }
         };
 
@@ -194,7 +185,7 @@ impl Subscriber for TelemetrySubscriber {
             .as_ref()
             .map(|pid| self.get_or_gen_trace_id(pid));
 
-        let values = new_span.into_values(self.service_name.clone(), trace_id, span_id);
+        let values = new_span.into_values(&self.service_name, trace_id, &span_id);
 
         self.telem.report_data(values);
     }
@@ -242,7 +233,7 @@ impl Subscriber for TelemetrySubscriber {
             let init_at = dropped.initialized_at.timestamp_subsec_millis();
             let elapsed = now - init_at;
 
-            let mut values = dropped.into_values(self.service_name.clone(), Some(trace_id), id);
+            let mut values = dropped.into_values(&self.service_name, Some(trace_id), &id);
             values.insert("duration_ms".to_string(), json!(elapsed));
 
             self.telem.report_data(values);

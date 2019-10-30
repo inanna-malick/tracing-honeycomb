@@ -22,10 +22,10 @@ impl TraceId {
         })
     }
 
-    pub fn new(u: String) -> TraceId {
+    pub fn new(u: String) -> Self {
         TraceId(u)
     }
-    pub fn generate() -> TraceId {
+    pub fn generate() -> Self {
         let u: u128 = rand::thread_rng().gen();
         TraceId(format!("trace-{}", u))
     }
@@ -43,9 +43,9 @@ pub struct SpanData {
 impl SpanData {
     pub fn into_values(
         self,
-        service_name: String,
+        service_name: &str,
         trace_id: Option<TraceId>,
-        id: Id,
+        id: &Id,
     ) -> HashMap<String, Value> {
         let mut values = self.values;
         values.insert(
@@ -93,7 +93,7 @@ impl SpanData {
 }
 
 /// ref-counted wrapper around some inner value 'T' used to manually
-/// count references and trigger behavior when ref_ct reaches 0
+/// count references and trigger behavior when `ref_ct` reaches 0
 pub struct RefCt<T> {
     pub ref_ct: u64,
     pub inner: T,
