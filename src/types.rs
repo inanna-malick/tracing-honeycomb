@@ -1,24 +1,25 @@
-use crate::visitor::MAGIC_TRACING_ID_FIELD_NAME;
+use crate::telemetry_subscriber::TelemetrySubscriber;
 use ::libhoney::{json, Value};
 use chrono::{DateTime, Utc};
 use rand::Rng;
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 use tracing::field::Visit;
-use tracing::span::{Attributes, Id, Span};
+use tracing::span::{Attributes, Id};
 use tracing::{Event, Metadata};
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct TraceId(String);
 
 impl TraceId {
-    pub fn record_current(&self) {
-        self.record_on(tracing::Span::current())
-    }
-
-    pub fn record_on(&self, span: Span) {
-        let to_record: &str = &self.0;
-        span.record::<str, &str>(MAGIC_TRACING_ID_FIELD_NAME, &to_record);
+    pub fn record_on_current_span(self) {
+        tracing::dispatcher::get_default(|d| {
+            if let Some(s) = d.downcast_ref::<TelemetrySubscriber>() {
+                s.record_trace_id(self.clone()) // FIXME: don't clone string here
+            } else {
+                println!("unable to record TraceId, this thread does not have TelemetrySubscriber registered as default")
+            }
+        })
     }
 
     pub fn new(u: String) -> TraceId {
@@ -59,7 +60,7 @@ impl SpanData {
                 // magic honeycomb string (trace.trace_id)
                 "trace.trace_id".to_string(),
                 // using explicit trace id passed in from ctx (req'd for lazy eval)
-                json!(format!("trace-{}", trace_id.0)),
+                json!(trace_id.0),
             );
         };
 

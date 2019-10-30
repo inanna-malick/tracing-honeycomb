@@ -32,6 +32,17 @@ impl TelemetrySubscriber {
         }
     }
 
+    pub fn record_trace_id(&self, trace_id: TraceId) {
+        if let Some(id) = self.peek_current_span() {
+            if let Some(mut s) = self.spans.get_mut(&id) {
+                // open questions:
+                // - what if this node is not a parent node? (actually this is fine I think)
+                // - what if this node already has a trace id (currently overwrites, mb panic?)
+                s.trace_id = Some(trace_id);
+            }
+        }
+    }
+
     /// this function provides lazy initialization of trace ids (only generated when req'd to observe honeycomb event/span)
     /// when a span's trace id is requested, that span and any parent spans can have their trace id evaluated and saved
     /// this function maintains an explicit stack of write guards to ensure no invalid trace id hierarchies result
@@ -94,10 +105,8 @@ impl TelemetrySubscriber {
     // get (trace_id, parent_id). will generate a new trace id if none are available
     fn build_span<T: TelemetryObject>(&self, t: &T) -> (Id, SpanData) {
         let now = Utc::now();
-        // TODO: random local u32 + counter or similar(?) to provide unique Id's
         let mut u: u64 = 0;
         while u == 0 {
-            // random gen until != 0 (disallowed)
             u = rand::thread_rng().gen();
         } // random u64 != 0 required
         let id = Id::from_u64(u);
@@ -105,7 +114,6 @@ impl TelemetrySubscriber {
         let mut values = HashMap::new();
         let mut visitor = HoneycombVisitor {
             accumulator: &mut values,
-            explicit_trace_id: None,
         };
         t.t_record(&mut visitor);
 
@@ -128,7 +136,7 @@ impl TelemetrySubscriber {
             SpanData {
                 initialized_at: now,
                 metadata: t.t_metadata(),
-                trace_id: visitor.explicit_trace_id, // lazy, unless explicit trace id provided
+                trace_id: None, // always lazy
                 parent_id,
                 values,
             },
@@ -165,20 +173,13 @@ impl Subscriber for TelemetrySubscriber {
         if let Some(mut span_data) = self.spans.get_mut(&span) {
             let mut visitor = HoneycombVisitor {
                 accumulator: &mut span_data.values,
-                explicit_trace_id: None,
             };
             values.record(&mut visitor);
-
-            if let Some(explicit_trace_id) = visitor.explicit_trace_id {
-                match &span_data.trace_id {
-                    Some(preexisting) => {
-                        println!("trying to set trace id to {:?} for span which already has one, {:?}, no-op", &explicit_trace_id, &preexisting);
-                    }
-                    None => {
-                        span_data.trace_id = Some(explicit_trace_id);
-                    }
-                }
-            }
+        } else {
+            println!(
+                "no span in map when recording to span with id {:?}, possible bug",
+                span
+            )
         }
     }
 
