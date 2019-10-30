@@ -31,7 +31,7 @@ impl TraceId {
     }
 }
 
-/// TODO docs (esp. req'd here)
+/// Used to track spans in memory
 pub struct SpanData {
     pub trace_id: Option<TraceId>, // option used to impl cached lazy eval
     pub parent_id: Option<Id>,
@@ -41,7 +41,6 @@ pub struct SpanData {
 }
 
 impl SpanData {
-    /// FIXME: figure out how to resolve collisions between strings reserved by honeycomb and tracing fields
     pub fn into_values(
         self,
         service_name: String,
@@ -93,7 +92,8 @@ impl SpanData {
     }
 }
 
-/// TODO docs
+/// ref-counted wrapper around some inner value 'T' used to manually
+/// count references and trigger behavior when ref_ct reaches 0
 pub struct RefCt<T> {
     pub ref_ct: u64,
     pub inner: T,
@@ -115,7 +115,6 @@ impl<T> DerefMut for RefCt<T> {
 
 /// Shim so I can write code that abstracts over span/event
 pub trait TelemetryObject {
-    // event or span atributes
     fn t_record(&self, visitor: &mut dyn Visit);
     fn t_metadata(&self) -> &'static Metadata<'static>;
     fn t_is_root(&self) -> bool;

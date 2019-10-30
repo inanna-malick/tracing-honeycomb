@@ -20,7 +20,6 @@ pub struct TelemetrySubscriber {
     telem: Telemetry,
     spans: CHashMap<Id, RefCt<SpanData>>,
     service_name: String,
-    // gen_trace_ids: Bool, /// if true, trace ids will be generated if not provided (todo better descr?)
 }
 
 impl TelemetrySubscriber {
@@ -36,7 +35,6 @@ impl TelemetrySubscriber {
         if let Some(id) = self.peek_current_span() {
             if let Some(mut s) = self.spans.get_mut(&id) {
                 // open questions:
-                // - what if this node is not a parent node? (actually this is fine I think)
                 // - what if this node already has a trace id (currently overwrites, mb panic?)
                 s.trace_id = Some(trace_id);
             }
@@ -221,10 +219,13 @@ impl Subscriber for TelemetrySubscriber {
             if let Some(mut span_data) = self.spans.get_mut(&id) {
                 span_data.ref_ct -= 1; // decrement ref ct
                 let ref_ct = span_data.ref_ct;
-                drop(span_data); // explicit drop to avoid deadlock on subsequent removal
+                drop(span_data); // explicit drop to avoid deadlock on subsequent removal of this key from map
 
                 if ref_ct == 0 {
-                    // gen trace id _must_ be run before removing node from map b/c it used lookup.. mild wart...
+                    // IDEA: what if gen_trace_id _also_ does removal?
+                    // IDEA: what if gen_trace_id is always run _post_ removal and is provided with a TelemetryObject that it consumes?
+                    // TODO: ^^
+                    // gen trace id _must_ be run before removing node from map b/c it uses lookup.. mild wart...
                     let trace_id = self.get_or_gen_trace_id(&id);
                     self.spans.remove(&id).map(move |e| (e.inner, trace_id))
                 } else {

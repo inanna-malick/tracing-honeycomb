@@ -20,10 +20,10 @@ impl Telemetry {
         let mut client = self.0.lock().unwrap();
         let mut ev = client.new_event();
         ev.add(data);
-        let res = ev.send(&mut client); // todo check res? (FIXME)
+        let res = ev.send(&mut client);
         if let Err(err) = res {
-            // TODO: ideally, want to log this but ??? can't ??? b/c can't use tracing here
-            println!("error sending event to honeycomb, {:?}", err);
+            // unable to report telemetry so log msg to stderr
+            eprintln!("error sending event to honeycomb, {:?}", err);
         }
     }
 }
