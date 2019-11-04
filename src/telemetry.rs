@@ -1,10 +1,9 @@
 use crate::types::{Event, Span};
 use libhoney::FieldHolder;
 use std::collections::HashMap;
-use std::sync::Mutex;
 #[cfg(test)]
 use std::sync::Arc;
-
+use std::sync::Mutex;
 
 pub trait TelemetryCap {
     fn report_span(&self, span: Span);

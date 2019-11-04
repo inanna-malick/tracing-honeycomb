@@ -17,7 +17,6 @@ impl TraceId {
         self.record_on_current_span_::<HoneycombTelemetry>();
     }
 
-
     #[cfg(test)]
     pub fn record_on_current_span_test(self) {
         // telemetry used in non-test scenarios

@@ -17,3 +17,6 @@ rand = "0.7" # for generating random tracing id's if none are provided
 
 [dev-dependencies]
 tracing-attributes = "0.1.4"
+futures-preview = { version = "0.3.0-alpha.14", features = ["compat"] }
+tokio = "0.2.0-alpha.6"
+tracing-futures = {version = "0.1.0", features = ["futures-preview", "tokio-alpha"]}

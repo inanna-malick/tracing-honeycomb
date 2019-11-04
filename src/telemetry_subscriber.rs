@@ -273,17 +273,15 @@ impl<T: TelemetryCap + 'static> Subscriber for TelemetrySubscriber<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tracing::instrument;
-    use std::sync::Mutex;
     use std::sync::Arc;
+    use std::sync::Mutex;
+    use std::time::Duration;
+    use tokio::runtime::current_thread::Runtime;
+    use tracing::instrument;
 
     #[test]
     fn test_instrument() {
-        let spans = Arc::new(Mutex::new(Vec::new()));
-        let events = Arc::new(Mutex::new(Vec::new()));
-        let cap = crate::telemetry::TestTelemetry::new(spans.clone(), events.clone());
-        let subscriber = TelemetrySubscriber::test_new("test-svc-name".to_string(), cap);
-        tracing::subscriber::with_default(subscriber, || {
+        with_harness(|| {
             #[instrument]
             fn f(ns: Vec<u64>) {
                 let explicit_trace_id = TraceId::new("test-trace-id".to_string());
@@ -300,6 +298,40 @@ mod tests {
 
             f(vec![1, 2, 3]);
         });
+    }
+
+    // run async fn (with multiple entry and exit for each span due to delay) with test scenario
+    #[test]
+    fn test_async_instrument() {
+        with_harness(|| {
+            #[instrument]
+            async fn f(ns: Vec<u64>) {
+                let explicit_trace_id = TraceId::new("test-trace-id".to_string());
+                explicit_trace_id.record_on_current_span_test();
+                for n in ns {
+                    g(format!("{}", n)).await;
+                }
+            }
+
+            #[instrument]
+            async fn g(s: String) {
+                tokio::timer::delay_for(Duration::from_millis(100)).await;
+                tracing::info!("s: {}", s);
+            }
+            let mut rt = Runtime::new().unwrap();
+            rt.block_on(f(vec![1, 2, 3]));
+        });
+    }
+
+    fn with_harness<F>(f: F)
+    where
+        F: Fn() -> (),
+    {
+        let spans = Arc::new(Mutex::new(Vec::new()));
+        let events = Arc::new(Mutex::new(Vec::new()));
+        let cap = crate::telemetry::TestTelemetry::new(spans.clone(), events.clone());
+        let subscriber = TelemetrySubscriber::test_new("test-svc-name".to_string(), cap);
+        tracing::subscriber::with_default(subscriber, f);
 
         let spans = spans.lock().unwrap();
         let events = events.lock().unwrap();
@@ -314,9 +346,12 @@ mod tests {
             h
         }
 
-        let expected_trace_id =  TraceId::new("test-trace-id".to_string());
+        let expected_trace_id = TraceId::new("test-trace-id".to_string());
 
-        assert_eq!(root_span.values, expected("ns".to_string(), libhoney::json!("[1, 2, 3]")));
+        assert_eq!(
+            root_span.values,
+            expected("ns".to_string(), libhoney::json!("[1, 2, 3]"))
+        );
         assert_eq!(root_span.parent_id, None);
         assert_eq!(root_span.trace_id, expected_trace_id);
 
