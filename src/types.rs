@@ -59,7 +59,8 @@ pub struct Span {
 
 impl Span {
     pub fn into_values(self) -> HashMap<String, Value> {
-        let mut values = HashMap::new();
+        let mut values = self.values;
+
         values.insert(
             // magic honeycomb string (trace.span_id)
             "trace.span_id".to_string(),
@@ -117,7 +118,7 @@ pub struct Event {
 
 impl Event {
     pub fn into_values(self) -> HashMap<String, Value> {
-        let mut values = HashMap::new();
+        let mut values = self.values;
         // note: this is not a span, does honeycomb require a span id for events in a trace? let's find out!
         values.insert(
             // magic honeycomb string (trace.span_id)
