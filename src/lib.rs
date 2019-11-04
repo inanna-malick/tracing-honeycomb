@@ -1,4 +1,4 @@
-// #![deny(warnings, rust_2018_idioms)]
+#![deny(warnings)]
 mod telemetry;
 mod telemetry_subscriber;
 mod types;
