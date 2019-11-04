@@ -191,7 +191,7 @@ impl<T: TelemetryCap + 'static> Subscriber for TelemetrySubscriber<T> {
     // record event (publish directly to telemetry, not a span)
     fn event(&self, event: &Event<'_>) {
         // report as span with zero-length interval
-        let (span_id, new_span) = self.build_span(event);
+        let (_span_id, new_span) = self.build_span(event);
 
         // use parent trace id, if it exists
         let trace_id = new_span
@@ -204,7 +204,7 @@ impl<T: TelemetryCap + 'static> Subscriber for TelemetrySubscriber<T> {
             .unwrap_or_else(TraceId::generate);
 
         // TODO: mb have reference to string on Event instead of full string? (for service_name)
-        let event = new_span.into_event(self.service_name.clone(), trace_id, span_id);
+        let event = new_span.into_event(self.service_name.clone(), trace_id);
 
         self.telemetry_cap.report_event(event);
     }

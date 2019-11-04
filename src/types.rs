@@ -105,7 +105,6 @@ impl Span {
 
 #[derive(Debug)]
 pub struct Event {
-    pub id: Id, // events are treated as a 0-length span and must have an Id
     pub trace_id: TraceId,
     pub parent_id: Option<Id>,
     pub initialized_at: DateTime<Utc>,
@@ -119,12 +118,6 @@ pub struct Event {
 impl Event {
     pub fn into_values(self) -> HashMap<String, Value> {
         let mut values = self.values;
-        // note: this is not a span, does honeycomb require a span id for events in a trace? let's find out!
-        values.insert(
-            // magic honeycomb string (trace.span_id)
-            "trace.span_id".to_string(),
-            json!(format!("span-{}", self.id.into_u64())),
-        );
 
         values.insert(
             // magic honeycomb string (trace.trace_id)
@@ -200,7 +193,7 @@ impl SpanData {
     }
 
     // TODO: try reporting event w/ parent trace id but no span id
-    pub fn into_event(self, service_name: String, trace_id: TraceId, id: Id) -> Event {
+    pub fn into_event(self, service_name: String, trace_id: TraceId) -> Event {
         let SpanData {
             parent_id,
             initialized_at,
@@ -213,7 +206,6 @@ impl SpanData {
             name: metadata.name().to_string(),
             target: metadata.target().to_string(),
             level: metadata.level().clone(),
-            id,
             trace_id,
             parent_id,
             initialized_at,
