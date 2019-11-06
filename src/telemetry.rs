@@ -1,13 +1,12 @@
 use crate::types::{Event, Span};
 use libhoney::FieldHolder;
 use std::collections::HashMap;
-#[cfg(test)]
-use std::sync::Arc;
 use std::sync::Mutex;
 
+// TODO(maybe): backup telemetry such that instead of eprintln can (eg) print span or event (via display) to stdout/stderr
 pub trait TelemetryCap {
-    fn report_span(&self, span: Span);
-    fn report_event(&self, event: Event);
+    fn report_span<'a>(&self, span: Span<'a>);
+    fn report_event<'a>(&self, event: Event<'a>);
 }
 
 pub struct HoneycombTelemetry {
@@ -18,7 +17,8 @@ impl HoneycombTelemetry {
     pub fn new(cfg: libhoney::Config) -> Self {
         let honeycomb_client = libhoney::init(cfg);
 
-        // publishing requires &mut so just mutex-wrap it (FIXME; perf?)
+        // publishing requires &mut so just mutex-wrap it
+        // FIXME: may not be performant, investigate options (eg mpsc)
         let honeycomb_client = Mutex::new(honeycomb_client);
 
         HoneycombTelemetry { honeycomb_client }
@@ -49,31 +49,37 @@ impl TelemetryCap for HoneycombTelemetry {
     }
 }
 
-/// Mock telemetry capability
 #[cfg(test)]
-pub struct TestTelemetry {
-    spans: Arc<Mutex<Vec<Span>>>,
-    events: Arc<Mutex<Vec<Event>>>,
-}
+pub mod test {
+    use super::*;
+    use std::sync::Arc;
 
-#[cfg(test)]
-impl TestTelemetry {
-    pub fn new(spans: Arc<Mutex<Vec<Span>>>, events: Arc<Mutex<Vec<Event>>>) -> Self {
-        TestTelemetry { spans, events }
-    }
-}
-
-#[cfg(test)]
-impl TelemetryCap for TestTelemetry {
-    fn report_span(&self, span: Span) {
-        // succeed or die. failure is unrecoverable (mutex poisoned)
-        let mut spans = self.spans.lock().unwrap();
-        spans.push(span);
+    /// Mock telemetry capability
+    pub struct TestTelemetry {
+        spans: Arc<Mutex<Vec<Span<'static>>>>,
+        events: Arc<Mutex<Vec<Event<'static>>>>,
     }
 
-    fn report_event(&self, event: Event) {
-        // succeed or die. failure is unrecoverable (mutex poisoned)
-        let mut events = self.events.lock().unwrap();
-        events.push(event);
+    impl TestTelemetry {
+        pub fn new(
+            spans: Arc<Mutex<Vec<Span<'static>>>>,
+            events: Arc<Mutex<Vec<Event<'static>>>>,
+        ) -> Self {
+            TestTelemetry { spans, events }
+        }
+    }
+
+    impl TelemetryCap for TestTelemetry {
+        fn report_span(&self, span: Span) {
+            // succeed or die. failure is unrecoverable (mutex poisoned)
+            let mut spans = self.spans.lock().unwrap();
+            spans.push(span.into_static());
+        }
+
+        fn report_event(&self, event: Event) {
+            // succeed or die. failure is unrecoverable (mutex poisoned)
+            let mut events = self.events.lock().unwrap();
+            events.push(event.into_static());
+        }
     }
 }

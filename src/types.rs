@@ -1,4 +1,3 @@
-use crate::telemetry::HoneycombTelemetry;
 use crate::telemetry_subscriber::TelemetrySubscriber;
 use ::libhoney::{json, Value};
 use chrono::{DateTime, Utc};
@@ -11,25 +10,16 @@ use tracing::span::{Attributes, Id};
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct TraceId(String);
 
+
 impl TraceId {
     pub fn record_on_current_span(self) {
-        // telemetry used in non-test scenarios
-        self.record_on_current_span_::<HoneycombTelemetry>();
-    }
-
-    #[cfg(test)]
-    pub fn record_on_current_span_test(self) {
-        // telemetry used in non-test scenarios
-        self.record_on_current_span_::<crate::telemetry::TestTelemetry>();
-    }
-
-    fn record_on_current_span_<T: 'static>(self) {
         tracing::dispatcher::get_default(|d| {
-            // non-test cases are always honeycomb telemetry, export alias to avoid exposing complexity to users
-            if let Some(s) = d.downcast_ref::<TelemetrySubscriber<T>>() {
-                s.record_trace_id(self.clone()) // FIXME: don't clone string here
+            if let Some(s) = d.downcast_ref::<TelemetrySubscriber>() {
+                // clone required b/c get_default takes FnMut & not FnOnce
+                s.record_trace_id(self.clone())
             } else {
-                println!("unable to record TraceId, this thread does not have TelemetrySubscriber registered as default")
+                // TODO: does this merit a panic? probably yes.
+                panic!("unable to record TraceId, this thread does not have TelemetrySubscriber registered as default")
             }
         })
     }
@@ -43,21 +33,38 @@ impl TraceId {
     }
 }
 
-#[derive(Debug)]
-pub struct Span {
+#[derive(Debug, Clone)]
+pub struct Span<'a> {
     pub id: Id,
     pub trace_id: TraceId,
     pub parent_id: Option<Id>,
     pub initialized_at: DateTime<Utc>,
-    pub elapsed_ms: u32,
+    pub elapsed_ms: i64,
     pub level: tracing::Level,
-    pub name: String,
-    pub target: String,
-    pub service_name: String,
+    pub name: &'a str,
+    pub target: &'a str,
+    pub service_name: &'a str,
     pub values: HashMap<String, Value>, // bag of misc values
 }
 
-impl Span {
+impl<'a> Span<'a> {
+    #[cfg(test)]
+    pub fn into_static(self) -> Span<'static> {
+        let e: Span<'static> = Span {
+            name: lift_to_static(self.name),
+            target: lift_to_static(self.target),
+            service_name: lift_to_static(self.service_name),
+            id: self.id,
+            trace_id: self.trace_id,
+            parent_id: self.parent_id,
+            initialized_at: self.initialized_at,
+            elapsed_ms: self.elapsed_ms,
+            level: self.level,
+            values: self.values,
+        };
+        e
+    }
+
     pub fn into_values(self) -> HashMap<String, Value> {
         let mut values = self.values;
 
@@ -103,19 +110,36 @@ impl Span {
     }
 }
 
-#[derive(Debug)]
-pub struct Event {
+// copy strings into lazy static ref in tests
+
+#[derive(Clone, Debug)]
+pub struct Event<'a> {
     pub trace_id: TraceId,
     pub parent_id: Option<Id>,
     pub initialized_at: DateTime<Utc>,
     pub level: tracing::Level,
-    pub name: String,
-    pub target: String,
-    pub service_name: String,
+    pub name: &'a str,
+    pub target: &'a str,
+    pub service_name: &'a str,
     pub values: HashMap<String, Value>, // bag of misc values
 }
 
-impl Event {
+impl<'a> Event<'a> {
+    #[cfg(test)]
+    pub fn into_static(self) -> Event<'static> {
+        let e: Event<'static> = Event {
+            name: lift_to_static(self.name),
+            target: lift_to_static(self.target),
+            service_name: lift_to_static(self.service_name),
+            trace_id: self.trace_id,
+            parent_id: self.parent_id,
+            initialized_at: self.initialized_at,
+            level: self.level,
+            values: self.values,
+        };
+        e
+    }
+
     pub fn into_values(self) -> HashMap<String, Value> {
         let mut values = self.values;
 
@@ -162,13 +186,13 @@ pub struct SpanData {
 }
 
 impl SpanData {
-    pub fn into_span(
+    pub fn into_span<'a>(
         self,
-        elapsed_ms: u32,
-        service_name: String,
+        elapsed_ms: i64,
+        service_name: &'a str,
         trace_id: TraceId,
         id: Id,
-    ) -> Span {
+    ) -> Span<'a> {
         // let SpanData { .. } = self;
         let SpanData {
             parent_id,
@@ -179,9 +203,9 @@ impl SpanData {
         } = self;
         Span {
             // TODO: pull any other useful values out of metadata
-            name: metadata.name().to_string(),
-            target: metadata.target().to_string(),
-            level: metadata.level().clone(),
+            name: metadata.name(),
+            target: metadata.target(),
+            level: metadata.level().clone(), // copy on inner type
             id,
             trace_id,
             parent_id,
@@ -192,8 +216,7 @@ impl SpanData {
         }
     }
 
-    // TODO: try reporting event w/ parent trace id but no span id
-    pub fn into_event(self, service_name: String, trace_id: TraceId) -> Event {
+    pub fn into_event<'a>(self, service_name: &'a str, trace_id: TraceId) -> Event<'a> {
         let SpanData {
             parent_id,
             initialized_at,
@@ -203,9 +226,9 @@ impl SpanData {
         } = self;
         Event {
             // TODO: pull any other useful values out of metadata
-            name: metadata.name().to_string(),
-            target: metadata.target().to_string(),
-            level: metadata.level().clone(),
+            name: metadata.name(),
+            target: metadata.target(),
+            level: metadata.level().clone(), // copy on inner type
             trace_id,
             parent_id,
             initialized_at,
@@ -272,4 +295,18 @@ impl<'a> TelemetryObject for tracing::Event<'a> {
     fn t_parent(&self) -> Option<&Id> {
         self.parent()
     }
+}
+
+#[cfg(test)]
+fn lift_to_static(s: &'_ str) -> &'static str {
+    // couldn't use mutex,
+    // ref into vec was scoped on mutex _lock_
+    // (b/c removal possible)
+    use aovec::Aovec;
+    lazy_static! {
+        static ref STATIC_STRING_STORAGE: Aovec<String> = Aovec::new(256);
+    }
+
+    let idx = STATIC_STRING_STORAGE.push(s.to_string());
+    STATIC_STRING_STORAGE.get(idx).unwrap()
 }

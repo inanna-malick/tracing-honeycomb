@@ -3,6 +3,13 @@ name = "honeycomb-tracing"
 version = "0.0.1"
 authors = ["pk <pkinsky@gmail.com>"]
 edition = "2018"
+description = "provides a tracing subscriber that publishes spans and events to honeycomb.io"
+# documentation = "" TODO
+homepage = "https://github.com/pkinsky/honeycomb-tracing"
+repository = "https://github.com/pkinsky/honeycomb-tracing"
+keywords = ["tracing", "honeycomb"]
+license = "MIT"
+readme = "README.md"
 
 [dependencies]
 tracing = "0.1.9"
@@ -20,3 +27,5 @@ tracing-attributes = "0.1.4"
 futures-preview = { version = "0.3.0-alpha.14", features = ["compat"] }
 tokio = "0.2.0-alpha.6"
 tracing-futures = {version = "0.1.0", features = ["futures-preview", "tokio-alpha"]}
+aovec = "1.1.0"
+lazy_static = "1.4.0"

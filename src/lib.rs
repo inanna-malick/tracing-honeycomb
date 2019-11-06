@@ -1,9 +1,17 @@
-#![deny(warnings)]
+// #![deny(warnings)]
 mod telemetry;
 mod telemetry_subscriber;
 mod types;
 mod visitor;
 
+// TODO: test-only, somehow?
+
+#[cfg(test)]
+#[macro_use]
+#[cfg(test)]
+extern crate lazy_static;
+
 pub use crate::telemetry::{HoneycombTelemetry, TelemetryCap};
 pub use crate::telemetry_subscriber::TelemetrySubscriber;
 pub use crate::types::TraceId;
+

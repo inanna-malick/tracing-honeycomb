@@ -10,41 +10,30 @@ use tracing::span::{Attributes, Id, Record};
 use tracing::{Event, Metadata, Subscriber};
 use tracing_core::span::Current;
 
-// used by this subscriber to track the current span
+// used within this subscriber to track the current span
 thread_local! {
     static CURRENT_SPAN: RefCell<Vec<Id>> = RefCell::new(vec!());
 }
 
-pub struct TelemetrySubscriber<T> {
-    telemetry_cap: T,
+pub struct TelemetrySubscriber {
+    telemetry_cap: Box<dyn TelemetryCap + Send + Sync + 'static>,
     spans: CHashMap<Id, RefCt<SpanData>>,
     service_name: String,
+    log_level: tracing::Level, // minimum log level
 }
 
-impl TelemetrySubscriber<HoneycombTelemetry> {
-    pub fn new(service_name: String, config: libhoney::Config) -> Self {
-        let telemetry_cap = HoneycombTelemetry::new(config);
+impl TelemetrySubscriber {
+    pub fn new(service_name: String, config: libhoney::Config, log_level: tracing::Level) -> Self {
+        let telemetry_cap = Box::new(HoneycombTelemetry::new(config));
 
         TelemetrySubscriber {
             spans: CHashMap::new(),
             service_name,
             telemetry_cap,
+            log_level,
         }
     }
-}
 
-#[cfg(test)]
-impl TelemetrySubscriber<crate::telemetry::TestTelemetry> {
-    pub fn test_new(service_name: String, telemetry_cap: crate::telemetry::TestTelemetry) -> Self {
-        TelemetrySubscriber {
-            spans: CHashMap::new(),
-            service_name,
-            telemetry_cap,
-        }
-    }
-}
-
-impl<T> TelemetrySubscriber<T> {
     pub fn record_trace_id(&self, trace_id: TraceId) {
         if let Some(id) = self.peek_current_span() {
             if let Some(mut s) = self.spans.get_mut(&id) {
@@ -82,9 +71,10 @@ impl<T> TelemetrySubscriber<T> {
                     path.push(span);
                 };
             } else {
-                // TODO: should I just panic if this happens?
-                println!("did not expect this to happen - id deref fail during parent trace. generating trace id");
-                break TraceId::generate();
+                // panic if this happens, it indicates a bug/invalid state
+                // println!("unable to traverse link to parent span about to panic..");
+
+                panic!("BUG[honeycomb-telemetry] unable to traverse link to parent span, span data not found");
             }
         };
 
@@ -106,13 +96,8 @@ impl<T> TelemetrySubscriber<T> {
     }
 
     // get (trace_id, parent_id). will generate a new trace id if none are available
-    fn build_span<X: TelemetryObject>(&self, t: &X) -> (Id, SpanData) {
+    fn build_span<X: TelemetryObject>(&self, t: &X) -> SpanData {
         let now = Utc::now();
-        let mut u: u64 = 0;
-        while u == 0 {
-            u = rand::thread_rng().gen();
-        } // random u64 != 0 required
-        let id = Id::from_u64(u);
 
         let mut values = HashMap::new();
         let mut visitor = HoneycombVisitor {
@@ -134,32 +119,32 @@ impl<T> TelemetrySubscriber<T> {
             None
         };
 
-        (
-            id,
-            SpanData {
-                initialized_at: now,
-                metadata: t.t_metadata(),
-                lazy_trace_id: None, // not yet evaluated
-                parent_id,
-                values,
-            },
-        )
+        SpanData {
+            initialized_at: now,
+            metadata: t.t_metadata(),
+            lazy_trace_id: None, // not yet evaluated
+            parent_id,
+            values,
+        }
     }
 }
 
-impl<T: TelemetryCap + 'static> Subscriber for TelemetrySubscriber<T> {
+impl Subscriber for TelemetrySubscriber {
     fn enabled(&self, metadata: &Metadata<'_>) -> bool {
-        metadata.level() == &tracing::Level::INFO
-            || metadata.level() == &tracing::Level::WARN
-            || metadata.level() == &tracing::Level::ERROR
+        metadata.level() <= &self.log_level
     }
 
     fn new_span(&self, span: &Attributes<'_>) -> Id {
-        let (id, new_span) = self.build_span(span);
+        let new_span = self.build_span(span);
+        let id = loop {
+            // collision is extremely unlikely (random u64), handle anyway
+            // v. unlikely but possible: identical id is gen'd between 'contains_key' and 'insert'
+            let id = generate_span_id();
+            if !self.spans.contains_key(&id) {
+                break id;
+            };
+        };
 
-        // FIXME: what if span id already exists in map? should I handle? assume no overlap possible b/c random?
-        // ASSERTION: there should be no collisions here
-        // insert attributes from span into map
         self.spans.insert(
             id.clone(),
             RefCt {
@@ -191,20 +176,19 @@ impl<T: TelemetryCap + 'static> Subscriber for TelemetrySubscriber<T> {
     // record event (publish directly to telemetry, not a span)
     fn event(&self, event: &Event<'_>) {
         // report as span with zero-length interval
-        let (_span_id, new_span) = self.build_span(event);
+        let new_span = self.build_span(event);
 
         // use parent trace id, if it exists
         let trace_id = new_span
             .parent_id
             .as_ref()
             .map(|pid| self.get_or_gen_trace_id(pid))
-            // FIXME: does this make sense?
             // if this event doesn't belong to a trace,
             // just generate a top-level trace id for it
+            // TODO: consider allowing events w/ no trace id
             .unwrap_or_else(TraceId::generate);
 
-        // TODO: mb have reference to string on Event instead of full string? (for service_name)
-        let event = new_span.into_event(self.service_name.clone(), trace_id);
+        let event = new_span.into_event(&self.service_name, trace_id);
 
         self.telemetry_cap.report_event(event);
     }
@@ -248,11 +232,11 @@ impl<T: TelemetryCap + 'static> Subscriber for TelemetrySubscriber<T> {
 
         if let Some((dropped, trace_id)) = dropped_span {
             let now = Utc::now();
-            let now = now.timestamp_subsec_millis();
-            let init_at = dropped.initialized_at.timestamp_subsec_millis();
+            let now = now.timestamp_millis();
+            let init_at = dropped.initialized_at.timestamp_millis();
             let elapsed_ms = now - init_at;
 
-            let span = dropped.into_span(elapsed_ms, self.service_name.clone(), trace_id, id);
+            let span = dropped.into_span(elapsed_ms, &self.service_name, trace_id, id);
             self.telemetry_cap.report_span(span);
             true
         } else {
@@ -270,6 +254,15 @@ impl<T: TelemetryCap + 'static> Subscriber for TelemetrySubscriber<T> {
     }
 }
 
+fn generate_span_id() -> Id {
+    let mut u: u64 = 0;
+    let mut rng = rand::thread_rng();
+    while u == 0 {
+        u = rng.gen();
+    } // random u64 != 0 required
+    Id::from_u64(u)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -281,19 +274,26 @@ mod tests {
 
     #[test]
     fn test_instrument() {
-        with_harness(|| {
+        with_test_scenario_runner(|| {
             #[instrument]
             fn f(ns: Vec<u64>) {
                 let explicit_trace_id = TraceId::new("test-trace-id".to_string());
-                explicit_trace_id.record_on_current_span_test();
+                explicit_trace_id.record_on_current_span();
                 for n in ns {
                     g(format!("{}", n));
                 }
             }
 
             #[instrument]
-            fn g(s: String) {
-                tracing::info!("s: {}", s);
+            fn g(_s: String) {
+                let use_of_reserved_word = "timestamp-value";
+                tracing::event!(
+                    tracing::Level::INFO,
+                    timestamp = use_of_reserved_word,
+                    foo = "bar"
+                );
+                // should not be reported due to level = INFO
+                tracing::event!(tracing::Level::TRACE, msg = "trace_msg");
             }
 
             f(vec![1, 2, 3]);
@@ -303,11 +303,11 @@ mod tests {
     // run async fn (with multiple entry and exit for each span due to delay) with test scenario
     #[test]
     fn test_async_instrument() {
-        with_harness(|| {
+        with_test_scenario_runner(|| {
             #[instrument]
             async fn f(ns: Vec<u64>) {
                 let explicit_trace_id = TraceId::new("test-trace-id".to_string());
-                explicit_trace_id.record_on_current_span_test();
+                explicit_trace_id.record_on_current_span();
                 for n in ns {
                     g(format!("{}", n)).await;
                 }
@@ -315,22 +315,37 @@ mod tests {
 
             #[instrument]
             async fn g(s: String) {
+                // delay to force multiple span entry (because it isn't immediately ready)
                 tokio::timer::delay_for(Duration::from_millis(100)).await;
-                tracing::info!("s: {}", s);
+                let use_of_reserved_word = "timestamp-value";
+                tracing::event!(
+                    tracing::Level::INFO,
+                    timestamp = use_of_reserved_word,
+                    foo = "bar"
+                );
+                // should not be reported due to level = INFO
+                tracing::event!(tracing::Level::TRACE, msg = "trace_msg");
             }
+
             let mut rt = Runtime::new().unwrap();
             rt.block_on(f(vec![1, 2, 3]));
         });
     }
 
-    fn with_harness<F>(f: F)
+    fn with_test_scenario_runner<F>(f: F)
     where
         F: Fn() -> (),
     {
         let spans = Arc::new(Mutex::new(Vec::new()));
         let events = Arc::new(Mutex::new(Vec::new()));
-        let cap = crate::telemetry::TestTelemetry::new(spans.clone(), events.clone());
-        let subscriber = TelemetrySubscriber::test_new("test-svc-name".to_string(), cap);
+        let cap = crate::telemetry::test::TestTelemetry::new(spans.clone(), events.clone());
+        let subscriber = TelemetrySubscriber {
+            spans: CHashMap::new(),
+            service_name: "test_svc_name".to_string(),
+            telemetry_cap: Box::new(cap),
+            log_level: tracing::Level::INFO,
+        };
+
         tracing::subscriber::with_default(subscriber, f);
 
         let spans = spans.lock().unwrap();
@@ -356,10 +371,18 @@ mod tests {
         assert_eq!(root_span.trace_id, expected_trace_id);
 
         for (span, event) in child_spans.iter().zip(events.iter()) {
+            // confirm parent and trace ids are as expected
             assert_eq!(span.parent_id, Some(root_span.id.clone()));
             assert_eq!(event.parent_id, Some(span.id.clone()));
             assert_eq!(span.trace_id, expected_trace_id);
             assert_eq!(event.trace_id, expected_trace_id);
+
+            // test that reserved word field names are modified
+            // (field names like "trace.span_id", "timestamp", etc are ok)
+            assert_eq!(
+                event.values["tracing.timestamp"],
+                libhoney::json!("timestamp-value")
+            )
         }
     }
 }
