@@ -216,10 +216,7 @@ impl Subscriber for TelemetrySubscriber {
                 drop(span_data); // explicit drop to avoid deadlock on subsequent removal of this key from map
 
                 if ref_ct == 0 {
-                    // IDEA: what if gen_trace_id _also_ does removal?
-                    // IDEA: what if gen_trace_id is always run _post_ removal and is provided with a TelemetryObject that it consumes?
-                    // TODO: ^^
-                    // gen trace id _must_ be run before removing node from map b/c it uses lookup.. mild wart...
+                    // gen trace id _must_ be run before removing node from map b/c it looks up node.. mild wart
                     let trace_id = self.get_or_gen_trace_id(&id);
                     self.spans.remove(&id).map(move |e| (e.inner, trace_id))
                 } else {

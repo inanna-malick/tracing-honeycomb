@@ -3,7 +3,6 @@ use libhoney::FieldHolder;
 use std::collections::HashMap;
 use std::sync::Mutex;
 
-// TODO(maybe): backup telemetry such that instead of eprintln can (eg) print span or event (via display) to stdout/stderr
 pub trait TelemetryCap {
     fn report_span<'a>(&self, span: Span<'a>);
     fn report_event<'a>(&self, event: Event<'a>);
@@ -31,7 +30,8 @@ impl HoneycombTelemetry {
         ev.add(data);
         let res = ev.send(&mut client);
         if let Err(err) = res {
-            // unable to report telemetry so log msg to stderr
+            // unable to report telemetry (buffer full) so log msg to stderr
+            // TODO: figure out strategy for handling this (eg report data loss event)
             eprintln!("error sending event to honeycomb, {:?}", err);
         }
     }
