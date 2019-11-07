@@ -3,7 +3,7 @@ use libhoney::FieldHolder;
 use std::collections::HashMap;
 use std::sync::Mutex;
 
-pub trait TelemetryCap {
+pub(crate) trait Telemetry {
     fn report_span<'a>(&self, span: Span<'a>);
     fn report_event<'a>(&self, event: Event<'a>);
 }
@@ -13,10 +13,10 @@ pub struct HoneycombTelemetry {
 }
 
 impl HoneycombTelemetry {
-    pub fn new(cfg: libhoney::Config) -> Self {
+    pub(crate) fn new(cfg: libhoney::Config) -> Self {
         let honeycomb_client = libhoney::init(cfg);
 
-        // publishing requires &mut so just mutex-wrap it
+        // pub(crate)lishing requires &mut so just mutex-wrap it
         // FIXME: may not be performant, investigate options (eg mpsc)
         let honeycomb_client = Mutex::new(honeycomb_client);
 
@@ -37,7 +37,7 @@ impl HoneycombTelemetry {
     }
 }
 
-impl TelemetryCap for HoneycombTelemetry {
+impl Telemetry for HoneycombTelemetry {
     fn report_span(&self, span: Span) {
         let data = span.into_values();
         self.report_data(data);
@@ -50,18 +50,18 @@ impl TelemetryCap for HoneycombTelemetry {
 }
 
 #[cfg(test)]
-pub mod test {
+pub(crate) mod test {
     use super::*;
     use std::sync::Arc;
 
     /// Mock telemetry capability
-    pub struct TestTelemetry {
+    pub(crate) struct TestTelemetry {
         spans: Arc<Mutex<Vec<Span<'static>>>>,
         events: Arc<Mutex<Vec<Event<'static>>>>,
     }
 
     impl TestTelemetry {
-        pub fn new(
+        pub(crate) fn new(
             spans: Arc<Mutex<Vec<Span<'static>>>>,
             events: Arc<Mutex<Vec<Event<'static>>>>,
         ) -> Self {
@@ -69,7 +69,7 @@ pub mod test {
         }
     }
 
-    impl TelemetryCap for TestTelemetry {
+    impl Telemetry for TestTelemetry {
         fn report_span(&self, span: Span) {
             // succeed or die. failure is unrecoverable (mutex poisoned)
             let mut spans = self.spans.lock().unwrap();

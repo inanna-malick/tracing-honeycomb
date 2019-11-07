@@ -1,4 +1,4 @@
-use crate::telemetry::{HoneycombTelemetry, TelemetryCap};
+use crate::telemetry::{HoneycombTelemetry, Telemetry};
 use crate::types::{RefCt, SpanData, TelemetryObject, TraceId};
 use crate::visitor::HoneycombVisitor;
 use chashmap::CHashMap;
@@ -6,6 +6,7 @@ use chrono::Utc;
 use rand::Rng;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicU64, Ordering};
 use tracing::span::{Attributes, Id, Record};
 use tracing::{Event, Metadata, Subscriber};
 use tracing_core::span::Current;
@@ -15,26 +16,46 @@ thread_local! {
     static CURRENT_SPAN: RefCell<Vec<Id>> = RefCell::new(vec!());
 }
 
+// TODO: debug impl?
 pub struct TelemetrySubscriber {
-    telemetry_cap: Box<dyn TelemetryCap + Send + Sync + 'static>,
-    spans: CHashMap<Id, RefCt<SpanData>>,
+    telemetry: Box<dyn Telemetry + Send + Sync + 'static>,
     service_name: String,
-    log_level: tracing::Level, // minimum log level
+    spans: CHashMap<Id, RefCt<SpanData>>,
+    // used to construct span ids to avoid collisions
+    instance_id: u64,
+    // performant source of locally unique ids
+    local_id_source: AtomicU64,
 }
 
 impl TelemetrySubscriber {
-    pub fn new(service_name: String, config: libhoney::Config, log_level: tracing::Level) -> Self {
-        let telemetry_cap = Box::new(HoneycombTelemetry::new(config));
+    pub fn new(service_name: String, config: libhoney::Config) -> Self {
+        let telemetry = Box::new(HoneycombTelemetry::new(config));
+        Self::new_(service_name, telemetry)
+    }
+
+    pub(crate) fn new_(
+        service_name: String,
+        telemetry: Box<dyn Telemetry + Send + Sync + 'static>,
+    ) -> Self {
+        // must start with 1, 0 not allowed as id
+        let local_id_source = AtomicU64::new(1);
+        let instance_id = rand::thread_rng().gen();
 
         TelemetrySubscriber {
             spans: CHashMap::new(),
+            instance_id,
+            local_id_source,
             service_name,
-            telemetry_cap,
-            log_level,
+            telemetry,
         }
     }
 
-    pub fn record_trace_id(&self, trace_id: TraceId) {
+    fn next_id(&self) -> Id {
+        let id = self.local_id_source.fetch_add(1, Ordering::Relaxed);
+        Id::from_u64(id)
+    }
+
+    pub(crate) fn record_trace_id(&self, trace_id: TraceId) {
         if let Some(id) = self.peek_current_span() {
             if let Some(mut s) = self.spans.get_mut(&id) {
                 // open questions:
@@ -130,20 +151,13 @@ impl TelemetrySubscriber {
 }
 
 impl Subscriber for TelemetrySubscriber {
-    fn enabled(&self, metadata: &Metadata<'_>) -> bool {
-        metadata.level() <= &self.log_level
+    fn enabled(&self, _metadata: &Metadata<'_>) -> bool {
+        true
     }
 
     fn new_span(&self, span: &Attributes<'_>) -> Id {
         let new_span = self.build_span(span);
-        let id = loop {
-            // collision is extremely unlikely (random u64), handle anyway
-            // v. unlikely but possible: identical id is gen'd between 'contains_key' and 'insert'
-            let id = generate_span_id();
-            if !self.spans.contains_key(&id) {
-                break id;
-            };
-        };
+        let id = self.next_id();
 
         self.spans.insert(
             id.clone(),
@@ -173,7 +187,7 @@ impl Subscriber for TelemetrySubscriber {
 
     fn record_follows_from(&self, _span: &Id, _follows: &Id) {}
 
-    // record event (publish directly to telemetry, not a span)
+    // record event (pub(crate)lish directly to telemetry, not a span)
     fn event(&self, event: &Event<'_>) {
         // report as span with zero-length interval
         let new_span = self.build_span(event);
@@ -188,9 +202,9 @@ impl Subscriber for TelemetrySubscriber {
             // TODO: consider allowing events w/ no trace id
             .unwrap_or_else(TraceId::generate);
 
-        let event = new_span.into_event(&self.service_name, trace_id);
+        let event = new_span.into_event(&self.service_name, self.instance_id, trace_id);
 
-        self.telemetry_cap.report_event(event);
+        self.telemetry.report_event(event);
     }
 
     fn enter(&self, span: &Id) {
@@ -233,8 +247,14 @@ impl Subscriber for TelemetrySubscriber {
             let init_at = dropped.initialized_at.timestamp_millis();
             let elapsed_ms = now - init_at;
 
-            let span = dropped.into_span(elapsed_ms, &self.service_name, trace_id, id);
-            self.telemetry_cap.report_span(span);
+            let span = dropped.into_span(
+                elapsed_ms,
+                &self.service_name,
+                self.instance_id,
+                trace_id,
+                id,
+            );
+            self.telemetry.report_span(span);
             true
         } else {
             false
@@ -251,15 +271,6 @@ impl Subscriber for TelemetrySubscriber {
     }
 }
 
-fn generate_span_id() -> Id {
-    let mut u: u64 = 0;
-    let mut rng = rand::thread_rng();
-    while u == 0 {
-        u = rng.gen();
-    } // random u64 != 0 required
-    Id::from_u64(u)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -268,6 +279,8 @@ mod tests {
     use std::time::Duration;
     use tokio::runtime::current_thread::Runtime;
     use tracing::instrument;
+    use tracing_subscriber::filter::LevelFilter;
+    use tracing_subscriber::layer::Layer;
 
     #[test]
     fn test_instrument() {
@@ -289,8 +302,6 @@ mod tests {
                     timestamp = use_of_reserved_word,
                     foo = "bar"
                 );
-                // should not be reported due to level = INFO
-                tracing::event!(tracing::Level::TRACE, msg = "trace_msg");
             }
 
             f(vec![1, 2, 3]);
@@ -320,8 +331,6 @@ mod tests {
                     timestamp = use_of_reserved_word,
                     foo = "bar"
                 );
-                // should not be reported due to level = INFO
-                tracing::event!(tracing::Level::TRACE, msg = "trace_msg");
             }
 
             let mut rt = Runtime::new().unwrap();
@@ -336,12 +345,10 @@ mod tests {
         let spans = Arc::new(Mutex::new(Vec::new()));
         let events = Arc::new(Mutex::new(Vec::new()));
         let cap = crate::telemetry::test::TestTelemetry::new(spans.clone(), events.clone());
-        let subscriber = TelemetrySubscriber {
-            spans: CHashMap::new(),
-            service_name: "test_svc_name".to_string(),
-            telemetry_cap: Box::new(cap),
-            log_level: tracing::Level::INFO,
-        };
+        let subscriber = TelemetrySubscriber::new_("test_svc_name".to_string(), Box::new(cap));
+
+        // filter out tracing noise
+        let subscriber = LevelFilter::INFO.with_subscriber(subscriber);
 
         tracing::subscriber::with_default(subscriber, f);
 
