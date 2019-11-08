@@ -16,7 +16,7 @@ impl HoneycombTelemetry {
     pub(crate) fn new(cfg: libhoney::Config) -> Self {
         let honeycomb_client = libhoney::init(cfg);
 
-        // pub(crate)lishing requires &mut so just mutex-wrap it
+        // publishing requires &mut so just mutex-wrap it
         // FIXME: may not be performant, investigate options (eg mpsc)
         let honeycomb_client = Mutex::new(honeycomb_client);
 
