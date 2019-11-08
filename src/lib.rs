@@ -1,4 +1,4 @@
-#![deny(warnings)]
+// #![deny(warnings)]
 mod telemetry;
 mod telemetry_subscriber;
 mod types;

@@ -1,12 +1,13 @@
 use crate::telemetry::{HoneycombTelemetry, Telemetry};
 use crate::types::{RefCt, SpanData, TelemetryObject, TraceId};
 use crate::visitor::HoneycombVisitor;
-use chashmap::CHashMap;
 use chrono::Utc;
 use rand::Rng;
+use sharded_slab::{Guard, Slab};
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Arc;
+use std::sync::{RwLock, RwLockWriteGuard};
 use tracing::span::{Attributes, Id, Record};
 use tracing::{Event, Metadata, Subscriber};
 use tracing_core::span::Current;
@@ -20,11 +21,9 @@ thread_local! {
 pub struct TelemetrySubscriber {
     telemetry: Box<dyn Telemetry + Send + Sync + 'static>,
     service_name: String,
-    spans: CHashMap<Id, RefCt<SpanData>>,
+    spans: Arc<Slab<RwLock<RefCt<SpanData>>>>,
     // used to construct span ids to avoid collisions
     instance_id: u64,
-    // performant source of locally unique ids
-    local_id_source: AtomicU64,
 }
 
 impl TelemetrySubscriber {
@@ -37,43 +36,37 @@ impl TelemetrySubscriber {
         service_name: String,
         telemetry: Box<dyn Telemetry + Send + Sync + 'static>,
     ) -> Self {
-        // must start with 1, 0 not allowed as id
-        let local_id_source = AtomicU64::new(1);
         let instance_id = rand::thread_rng().gen();
 
         TelemetrySubscriber {
-            spans: CHashMap::new(),
+            spans: Arc::new(Slab::new()), // uses default config
             instance_id,
-            local_id_source,
             service_name,
             telemetry,
         }
     }
 
-    fn next_id(&self) -> Id {
-        let id = self.local_id_source.fetch_add(1, Ordering::Relaxed);
-        Id::from_u64(id)
-    }
-
     pub(crate) fn record_trace_id(&self, trace_id: TraceId) {
         if let Some(id) = self.peek_current_span() {
-            if let Some(mut s) = self.spans.get_mut(&id) {
+            if let Some(rw_lock) = self.spans.get(id_to_idx(&id)) {
+                let mut span_data = rw_lock.write().unwrap();
                 // open questions:
                 // - what if this node already has a trace id (currently overwrites, mb panic?)
-                s.lazy_trace_id = Some(trace_id);
+                span_data.lazy_trace_id = Some(trace_id);
             }
         }
     }
 
     /// this function provides lazy initialization of trace ids (only generated when req'd to observe honeycomb event/span)
     /// when a span's trace id is requested, that span and any parent spans can have their trace id evaluated and saved
-    /// this function maintains an explicit stack of write guards to ensure no invalid trace id hierarchies result
     fn get_or_gen_trace_id(&self, target_id: &Id) -> TraceId {
-        let mut path: Vec<chashmap::WriteGuard<Id, RefCt<SpanData>>> = vec![];
+        let mut path: Vec<Guard<RwLock<RefCt<SpanData>>>> = vec![];
+
         let mut id = target_id.clone();
 
         let trace_id: TraceId = loop {
-            if let Some(mut span) = self.spans.get_mut(&id) {
+            if let Some(guard) = self.spans.get(id_to_idx(&id)) {
+                let span = guard.read().unwrap();
                 if let Some(tid) = &span.lazy_trace_id {
                     // found already-eval'd trace id
                     break tid.clone();
@@ -81,29 +74,38 @@ impl TelemetrySubscriber {
                     // span has no trace, must be updated as part of this call
                     if let Some(parent_id) = &span.parent_id {
                         id = parent_id.clone();
+                        drop(span);
+                        path.push(guard);
                     } else {
                         // found root span with no trace id, generate trace_id
                         let trace_id = TraceId::generate();
-                        // subsequent break means we won't push span onto path so just update inline
-                        span.lazy_trace_id = Some(trace_id.clone());
+                        drop(span);
+                        path.push(guard);
                         break trace_id;
                     };
-
-                    path.push(span);
                 };
             } else {
-                // panic if this happens, it indicates a bug/invalid state
-                // println!("unable to traverse link to parent span about to panic..");
-
+                // invalid state
                 panic!("BUG[honeycomb-telemetry] unable to traverse link to parent span, span data not found");
             }
         };
 
-        for mut span in path {
-            span.lazy_trace_id = Some(trace_id.clone());
-        }
+        // get write guards for path
+        let path: Vec<RwLockWriteGuard<RefCt<SpanData>>> =
+            path.iter().map(|g| g.write().unwrap()).collect();
 
-        trace_id
+        // check to see if any write guard'd span has had its lazy_trace_id set since we read it
+        if let Some(_) = path.iter().find(|span| span.lazy_trace_id.is_some()) {
+            // if so, abort and retry. path now contains trace id
+            self.get_or_gen_trace_id(target_id)
+        } else {
+            // otherwise, update each write guard'd span, setting their trace id
+            for mut span in path {
+                span.lazy_trace_id = Some(trace_id.clone());
+            }
+
+            trace_id
+        }
     }
 
     fn peek_current_span(&self) -> Option<Id> {
@@ -157,22 +159,22 @@ impl Subscriber for TelemetrySubscriber {
 
     fn new_span(&self, span: &Attributes<'_>) -> Id {
         let new_span = self.build_span(span);
-        let id = self.next_id();
 
-        self.spans.insert(
-            id.clone(),
-            RefCt {
+        let idx: usize = self
+            .spans
+            .insert(RwLock::new(RefCt {
                 ref_ct: 1,
                 inner: new_span,
-            },
-        );
+            }))
+            .expect("unable to add span to slab (OOM?)");
 
-        id
+        idx_to_id(idx)
     }
 
     // record additional values on span map
-    fn record(&self, span: &Id, values: &Record<'_>) {
-        if let Some(mut span_data) = self.spans.get_mut(&span) {
+    fn record(&self, id: &Id, values: &Record<'_>) {
+        if let Some(rw_lock) = self.spans.get(id_to_idx(id)) {
+            let mut span_data = rw_lock.write().unwrap();
             let mut visitor = HoneycombVisitor {
                 accumulator: &mut span_data.values,
             };
@@ -180,7 +182,7 @@ impl Subscriber for TelemetrySubscriber {
         } else {
             println!(
                 "no span in map when recording to span with id {:?}, possible bug",
-                span
+               id
             )
         }
     }
@@ -215,8 +217,8 @@ impl Subscriber for TelemetrySubscriber {
     }
 
     fn clone_span(&self, id: &Id) -> Id {
-        if let Some(mut span_data) = self.spans.get_mut(id) {
-            // should always be present
+        if let Some(rw_lock) = self.spans.get(id_to_idx(id)) {
+            let mut span_data = rw_lock.write().unwrap();
             span_data.ref_ct += 1;
         }
         id.clone() // type sig of this function seems to compel cloning of id (&X -> X)
@@ -224,15 +226,20 @@ impl Subscriber for TelemetrySubscriber {
 
     fn try_close(&self, id: Id) -> bool {
         let dropped_span: Option<(SpanData, TraceId)> = {
-            if let Some(mut span_data) = self.spans.get_mut(&id) {
+            if let Some(rw_lock) = self.spans.get(id_to_idx(&id)) {
+                let mut span_data = rw_lock.write().unwrap();
                 span_data.ref_ct -= 1; // decrement ref ct
                 let ref_ct = span_data.ref_ct;
-                drop(span_data); // explicit drop to avoid deadlock on subsequent removal of this key from map
+
+                drop(span_data);
+                drop(rw_lock); // explicit drop to avoid deadlock on subsequent removal of this key from map
 
                 if ref_ct == 0 {
                     // gen trace id _must_ be run before removing node from map b/c it looks up node.. mild wart
                     let trace_id = self.get_or_gen_trace_id(&id);
-                    self.spans.remove(&id).map(move |e| (e.inner, trace_id))
+                    self.spans
+                        .take(id_to_idx(&id))
+                        .map(move |rw| (rw.into_inner().unwrap().inner, trace_id))
                 } else {
                     None
                 }
@@ -263,12 +270,26 @@ impl Subscriber for TelemetrySubscriber {
 
     fn current_span(&self) -> Current {
         if let Some(id) = self.peek_current_span() {
-            if let Some(meta) = self.spans.get(&id).map(|span| span.metadata) {
+            if let Some(meta) = self
+                .spans
+                .get(id_to_idx(&id))
+                .map(|rw_lock| rw_lock.read().unwrap().metadata)
+            {
                 return Current::new(id, meta);
             }
         }
         Current::none()
     }
+}
+
+fn id_to_idx(id: &Id) -> usize {
+    let idx = id.into_u64() as usize;
+    idx - 1
+}
+
+fn idx_to_id(idx: usize) -> Id {
+    let id = idx as u64;
+    Id::from_u64(id + 1)
 }
 
 #[cfg(test)]
