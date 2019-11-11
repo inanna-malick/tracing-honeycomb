@@ -1,15 +1,14 @@
-use crate::telemetry::{HoneycombTelemetry, Telemetry};
-use crate::types::{RefCt, SpanData, TelemetryObject, TraceId};
+use crate::telemetry::{Event, HoneycombTelemetry, Span, SpanId, Telemetry, TraceId};
 use crate::visitor::HoneycombVisitor;
-use chrono::Utc;
+use chrono::{DateTime, Utc};
+use core::sync::atomic::{AtomicUsize, Ordering};
 use rand::Rng;
 use sharded_slab::{Guard, Slab};
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::sync::Arc;
 use std::sync::{RwLock, RwLockWriteGuard};
 use tracing::span::{Attributes, Id, Record};
-use tracing::{Event, Metadata, Subscriber};
+use tracing::{Metadata, Subscriber};
 use tracing_core::span::Current;
 
 // used within this subscriber to track the current span
@@ -21,7 +20,7 @@ thread_local! {
 pub struct TelemetrySubscriber {
     telemetry: Box<dyn Telemetry + Send + Sync + 'static>,
     service_name: String,
-    spans: Arc<Slab<RwLock<RefCt<SpanData>>>>,
+    spans: Slab<RefCt<SpanData>>,
     // used to construct span ids to avoid collisions
     instance_id: u64,
 }
@@ -39,7 +38,7 @@ impl TelemetrySubscriber {
         let instance_id = rand::thread_rng().gen();
 
         TelemetrySubscriber {
-            spans: Arc::new(Slab::new()), // uses default config
+            spans: Slab::new(), // uses default config
             instance_id,
             service_name,
             telemetry,
@@ -48,8 +47,8 @@ impl TelemetrySubscriber {
 
     pub(crate) fn record_trace_id(&self, trace_id: TraceId) {
         if let Some(id) = self.peek_current_span() {
-            if let Some(rw_lock) = self.spans.get(id_to_idx(&id)) {
-                let mut span_data = rw_lock.write().unwrap();
+            if let Some(span) = self.spans.get(id_to_idx(&id)) {
+                let mut span_data = span.inner.write().unwrap();
                 // open questions:
                 // - what if this node already has a trace id (currently overwrites, mb panic?)
                 span_data.lazy_trace_id = Some(trace_id);
@@ -60,13 +59,13 @@ impl TelemetrySubscriber {
     /// this function provides lazy initialization of trace ids (only generated when req'd to observe honeycomb event/span)
     /// when a span's trace id is requested, that span and any parent spans can have their trace id evaluated and saved
     fn get_or_gen_trace_id(&self, target_id: &Id) -> TraceId {
-        let mut path: Vec<Guard<RwLock<RefCt<SpanData>>>> = vec![];
+        let mut path: Vec<Guard<RefCt<SpanData>>> = Vec::new();
 
         let mut id = target_id.clone();
 
         let trace_id: TraceId = loop {
             if let Some(guard) = self.spans.get(id_to_idx(&id)) {
-                let span = guard.read().unwrap();
+                let span = guard.inner.read().unwrap();
                 if let Some(tid) = &span.lazy_trace_id {
                     // found already-eval'd trace id
                     break tid.clone();
@@ -91,8 +90,10 @@ impl TelemetrySubscriber {
         };
 
         // get write guards for path
-        let path: Vec<RwLockWriteGuard<RefCt<SpanData>>> =
-            path.iter().map(|g| g.write().unwrap()).collect();
+        let path: Vec<RwLockWriteGuard<SpanData>> = path
+            .iter()
+            .map(|guard| guard.inner.write().unwrap())
+            .collect();
 
         // check to see if any write guard'd span has had its lazy_trace_id set since we read it
         if let Some(_) = path.iter().find(|span| span.lazy_trace_id.is_some()) {
@@ -162,10 +163,10 @@ impl Subscriber for TelemetrySubscriber {
 
         let idx: usize = self
             .spans
-            .insert(RwLock::new(RefCt {
-                ref_ct: 1,
-                inner: new_span,
-            }))
+            .insert(RefCt {
+                ref_ct: AtomicUsize::new(1),
+                inner: RwLock::new(new_span),
+            })
             .expect("unable to add span to slab (OOM?)");
 
         idx_to_id(idx)
@@ -173,8 +174,8 @@ impl Subscriber for TelemetrySubscriber {
 
     // record additional values on span map
     fn record(&self, id: &Id, values: &Record<'_>) {
-        if let Some(rw_lock) = self.spans.get(id_to_idx(id)) {
-            let mut span_data = rw_lock.write().unwrap();
+        if let Some(span) = self.spans.get(id_to_idx(id)) {
+            let mut span_data = span.inner.write().unwrap();
             let mut visitor = HoneycombVisitor {
                 accumulator: &mut span_data.values,
             };
@@ -189,8 +190,8 @@ impl Subscriber for TelemetrySubscriber {
 
     fn record_follows_from(&self, _span: &Id, _follows: &Id) {}
 
-    // record event (pub(crate)lish directly to telemetry, not a span)
-    fn event(&self, event: &Event<'_>) {
+    // record event (publish directly to telemetry, not a span)
+    fn event(&self, event: &tracing::Event<'_>) {
         // report as span with zero-length interval
         let new_span = self.build_span(event);
 
@@ -217,29 +218,26 @@ impl Subscriber for TelemetrySubscriber {
     }
 
     fn clone_span(&self, id: &Id) -> Id {
-        if let Some(rw_lock) = self.spans.get(id_to_idx(id)) {
-            let mut span_data = rw_lock.write().unwrap();
-            span_data.ref_ct += 1;
+        if let Some(span) = self.spans.get(id_to_idx(id)) {
+            span.ref_ct.fetch_add(1, Ordering::SeqCst);
         }
         id.clone() // type sig of this function seems to compel cloning of id (&X -> X)
     }
 
     fn try_close(&self, id: Id) -> bool {
         let dropped_span: Option<(SpanData, TraceId)> = {
-            if let Some(rw_lock) = self.spans.get(id_to_idx(&id)) {
-                let mut span_data = rw_lock.write().unwrap();
-                span_data.ref_ct -= 1; // decrement ref ct
-                let ref_ct = span_data.ref_ct;
+            if let Some(span_data) = self.spans.get(id_to_idx(&id)) {
+                let ref_ct = span_data.ref_ct.fetch_sub(1, Ordering::SeqCst); // decrement ref ct, return previous value
 
-                drop(span_data);
-                drop(rw_lock); // explicit drop to avoid deadlock on subsequent removal of this key from map
+                drop(span_data); // explicit drop to avoid deadlock on subsequent removal of this key from map
 
-                if ref_ct == 0 {
+                if ref_ct == 1 {
+                    // we're dropping the last reference to this span
                     // gen trace id _must_ be run before removing node from map b/c it looks up node.. mild wart
                     let trace_id = self.get_or_gen_trace_id(&id);
                     self.spans
                         .take(id_to_idx(&id))
-                        .map(move |rw| (rw.into_inner().unwrap().inner, trace_id))
+                        .map(move |ref_ct| (ref_ct.inner.into_inner().unwrap(), trace_id))
                 } else {
                     None
                 }
@@ -273,7 +271,7 @@ impl Subscriber for TelemetrySubscriber {
             if let Some(meta) = self
                 .spans
                 .get(id_to_idx(&id))
-                .map(|rw_lock| rw_lock.read().unwrap().metadata)
+                .map(|span| span.inner.read().unwrap().metadata)
             {
                 return Current::new(id, meta);
             }
@@ -290,6 +288,104 @@ fn id_to_idx(id: &Id) -> usize {
 fn idx_to_id(idx: usize) -> Id {
     let id = idx as u64;
     Id::from_u64(id + 1)
+}
+
+/// ref-counted wrapper around some inner value 'T' used to manually
+/// count references and trigger behavior when `ref_ct` reaches 0
+struct RefCt<T> {
+    ref_ct: AtomicUsize,
+    inner: RwLock<T>,
+}
+
+/// Used to track spans in memory
+struct SpanData {
+    lazy_trace_id: Option<TraceId>, // option used to impl cached lazy eval
+    parent_id: Option<Id>,
+    initialized_at: DateTime<Utc>,
+    metadata: &'static tracing::Metadata<'static>,
+    values: HashMap<String, libhoney::Value>,
+}
+
+impl SpanData {
+    fn into_span<'a>(
+        self,
+        elapsed_ms: i64,
+        service_name: &'a str,
+        instance_id: u64,
+        trace_id: TraceId,
+        id: Id,
+    ) -> Span<'a> {
+        Span {
+            // TODO: pull any other useful values out of metadata
+            name: self.metadata.name(),
+            target: self.metadata.target(),
+            level: self.metadata.level().clone(), // copy on inner type
+            parent_id: self.parent_id.map(|i| SpanId::from_id(i, instance_id)),
+            id: SpanId::from_id(id, instance_id),
+            values: self.values,
+            initialized_at: self.initialized_at,
+            trace_id,
+            elapsed_ms,
+            service_name,
+        }
+    }
+
+    fn into_event<'a>(
+        self,
+        service_name: &'a str,
+        instance_id: u64,
+        trace_id: TraceId,
+    ) -> Event<'a> {
+        Event {
+            // TODO: pull any other useful values out of metadata
+            name: self.metadata.name(),
+            target: self.metadata.target(),
+            level: self.metadata.level().clone(), // copy on inner type
+            parent_id: self.parent_id.map(|i| SpanId::from_id(i, instance_id)),
+            values: self.values,
+            initialized_at: self.initialized_at,
+            trace_id,
+            service_name,
+        }
+    }
+}
+
+/// Shim so I can write code that abstracts over tracing::Span/tracing::Event
+trait TelemetryObject {
+    fn t_record(&self, visitor: &mut dyn tracing::field::Visit);
+    fn t_metadata(&self) -> &'static tracing::Metadata<'static>;
+    fn t_is_root(&self) -> bool;
+    fn t_parent(&self) -> Option<&Id>;
+}
+
+impl<'a> TelemetryObject for Attributes<'a> {
+    fn t_record(&self, visitor: &mut dyn tracing::field::Visit) {
+        self.record(visitor)
+    }
+    fn t_metadata(&self) -> &'static tracing::Metadata<'static> {
+        self.metadata()
+    }
+    fn t_is_root(&self) -> bool {
+        self.is_root()
+    }
+    fn t_parent(&self) -> Option<&Id> {
+        self.parent()
+    }
+}
+
+impl<'a> TelemetryObject for tracing::Event<'a> {
+    fn t_record(&self, visitor: &mut dyn tracing::field::Visit) {
+        self.record(visitor)
+    }
+    fn t_metadata(&self) -> &'static tracing::Metadata<'static> {
+        self.metadata()
+    }
+    fn t_is_root(&self) -> bool {
+        self.is_root()
+    }
+    fn t_parent(&self) -> Option<&Id> {
+        self.parent()
+    }
 }
 
 #[cfg(test)]

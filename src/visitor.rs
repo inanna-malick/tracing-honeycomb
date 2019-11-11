@@ -9,7 +9,7 @@ pub(crate) struct HoneycombVisitor<'a> {
 }
 
 // reserved field names (TODO: document)
-static RESERVED_WORDS: [&'static str; 9] = [
+static RESERVED_WORDS: [&str; 9] = [
     "trace.span_id",
     "trace.trace_id",
     "trace.parent_id",
