@@ -4,12 +4,12 @@ use std::fmt;
 use tracing::field::{Field, Visit};
 
 // visitor that builds honeycomb-compatible values from tracing fields
-pub struct HoneycombVisitor<'a> {
-    pub accumulator: &'a mut HashMap<String, Value>,
+pub(crate) struct HoneycombVisitor<'a> {
+    pub(crate) accumulator: &'a mut HashMap<String, Value>,
 }
 
 // reserved field names (TODO: document)
-static RESERVED_WORDS: [&'static str; 9] = [
+static RESERVED_WORDS: [&str; 9] = [
     "trace.span_id",
     "trace.trace_id",
     "trace.parent_id",
