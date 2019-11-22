@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Client","Client represents an object that can create new builders and events and send them somewhere."],["Options","Options is a subset of the global libhoney config that focuses on the configuration of the client itself."]]});

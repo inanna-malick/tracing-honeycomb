@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Options","Options includes various options to tweak the behavious of the sender."],["Transmission","`Transmission` handles collecting and sending individual events to Honeycomb"]]});

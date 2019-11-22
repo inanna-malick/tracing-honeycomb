@@ -1,0 +1,143 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `libhoney` crate."><meta name="keywords" content="rust, rustlang, rust-lang, libhoney"><title>libhoney - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../dark.css"><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="shortcut icon" href="../favicon.ico"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../libhoney/index.html'><div class='logo-container'><img src='../rust-logo.png' alt='logo'></div></a><p class='location'>Crate libhoney</p><div class="sidebar-elems"><a id='all-types' href='all.html'><p>See all libhoney's items</p></a><div class="block items"><ul><li><a href="#reexports">Re-exports</a></li><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li><li><a href="#functions">Functions</a></li><li><a href="#types">Type Definitions</a></li></ul></div><p class='location'></p><script>window.sidebarCurrent = {name: 'libhoney', ty: 'mod', relpath: '../'};</script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../src/libhoney/lib.rs.html#1-216' title='goto source code'>[src]</a></span><span class='in-band'>Crate <a class="mod" href=''>libhoney</a></span></h1><div class='docblock'><p>Rust library for sending data to Honeycomb.</p>
+<p>I'd be forever greatful if you can try it out and provide feedback. There are a few
+reasons why I think this may not yet be ready for production use:</p>
+<ul>
+<li>
+<p>Honeycomb uses the singleton pattern for the libraries but I decided not to use it here (mostly due to: harder to get right, it feels to me like a rust anti-pattern). If you think I should have, please let me know.</p>
+</li>
+<li>
+<p>I'm not convinced of the threading code. Although &quot;it works&quot; it probably isn't great - any feedback would be greatly appreciated.</p>
+</li>
+</ul>
+<p>For these reasons, you're probably better waiting for a 1.0.0 release (I'll follow
+<a href="https://semver.org">semantic versioning</a>). Having said that, if you still want to use
+this, thank you for being brave, and make sure to open bugs against it!</p>
+<h1 id="libhoney" class="section-header"><a href="#libhoney">libhoney</a></h1>
+<p>Rust library for sending events to Honeycomb, a service for debugging your software in
+production.</p>
+<ul>
+<li><a href="#usage-and-examples">Usage and Examples</a></li>
+<li><a href="https://docs.rs/libhoney-rust">API Reference</a></li>
+</ul>
+<h1 id="usage-and-examples" class="section-header"><a href="#usage-and-examples">Usage and Examples</a></h1><h2 id="initialization" class="section-header"><a href="#initialization">Initialization</a></h2>
+<p>Initialize the library by passing in your Team API key and the default dataset name to
+which it should send events. When you call the library’s initialization routine, it spins
+up background threads to handle sending all the events. Calling .close() on the client
+will terminate all background threads.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">let</span> <span class="ident">client</span> <span class="op">=</span> <span class="ident">libhoney</span>::<span class="ident">init</span>(<span class="ident">libhoney</span>::<span class="ident">Config</span>{
+  <span class="ident">options</span>: <span class="ident">libhoney</span>::<span class="ident">client</span>::<span class="ident">Options</span> {
+    <span class="ident">api_key</span>: <span class="string">&quot;YOUR_API_KEY&quot;</span>.<span class="ident">to_string</span>(),
+    <span class="ident">dataset</span>: <span class="string">&quot;honeycomb-rust-example&quot;</span>.<span class="ident">to_string</span>(),
+    ..<span class="ident">libhoney</span>::<span class="ident">client</span>::<span class="ident">Options</span>::<span class="ident">default</span>()
+  },
+  <span class="ident">transmission_options</span>: <span class="ident">libhoney</span>::<span class="ident">transmission</span>::<span class="ident">Options</span>::<span class="ident">default</span>(),
+});
+
+<span class="ident">client</span>.<span class="ident">close</span>();</pre></div>
+<p>Further configuration options can be found in the <a href="https://docs.rs/libhoney-rust">API reference</a>.</p>
+<h2 id="building-and-sending-events" class="section-header"><a href="#building-and-sending-events">Building and Sending Events</a></h2>
+<p>Once initialized, the libhoney client is ready to send events. Events go through three
+phases:</p>
+<ul>
+<li>Creation <code>event := builder.new_event()</code></li>
+<li>Adding fields <code>event.add_field(&quot;key&quot;, Value::String(&quot;val&quot;.to_string()))</code>, <code>event.add(data)</code></li>
+<li>Transmission <code>event.send(&amp;mut client)</code></li>
+</ul>
+<p>Upon calling .send(), the event is dispatched to be sent to Honeycomb. All libraries set
+defaults that will allow your application to function as smoothly as possible during error
+conditions.</p>
+<p>In its simplest form, you can add a single attribute to an event with the <code>.add_field(k, v)</code> method. If you add the same key multiple times, only the last value added will be
+kept.</p>
+<p>More complex structures (maps and structs—things that can be serialized into a JSON
+object) can be added to an event with the .add(data) method.</p>
+<p>Events can have metadata associated with them that is not sent to Honeycomb. This metadata
+is used to identify the event when processing the response. More detail about metadata is
+below in the Response section.</p>
+<h2 id="handling-responses" class="section-header"><a href="#handling-responses">Handling responses</a></h2>
+<p>Sending an event is an asynchronous action and will avoid blocking by default. .send()
+will enqueue the event to be sent as soon as possible (thus, the return value doesn’t
+indicate that the event was successfully sent). Use the Vec returned by .responses() to
+check whether events were successfully received by Honeycomb’s servers.</p>
+<p>Before sending an event, you have the option to attach metadata to that event. This
+metadata is not sent to Honeycomb; instead, it’s used to help you match up individual
+responses with sent events. When sending an event, libhoney will take the metadata from
+the event and attach it to the response object for you to consume. Add metadata by
+populating the .metadata attribute directly on an event.</p>
+<p>Responses have a number of fields describing the result of an attempted event send:</p>
+<ul>
+<li>
+<p><code>metadata</code>: the metadata you attached to the event to which this response corresponds</p>
+</li>
+<li>
+<p><code>status_code</code>: the HTTP status code returned by Honeycomb when trying to send the event. 2xx indicates success.</p>
+</li>
+<li>
+<p><code>duration</code>: the time.Duration it took to send the event.</p>
+</li>
+<li>
+<p><code>body</code>: the body of the HTTP response from Honeycomb. On failures, this body contains some more information about the failure.</p>
+</li>
+<li>
+<p><code>error</code>: when the event doesn’t even get to create a HTTP attempt, the reason will be in this field. (e.g. when sampled or dropped because of a queue overflow).</p>
+</li>
+</ul>
+<p>You don’t have to process responses if you’re not interested in them—simply ignoring them
+is perfectly safe. Unread responses will be dropped.</p>
+<h2 id="examples" class="section-header"><a href="#examples">Examples</a></h2>
+<p>Honeycomb can calculate all sorts of statistics, so send the data you care about and let
+us crunch the averages, percentiles, lower/upper bounds, cardinality—whatever you want—for
+you.</p>
+<h3 id="simple-send-an-event" class="section-header"><a href="#simple-send-an-event">Simple: send an event</a></h3>
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+
+<span class="kw">use</span> <span class="ident">libhoney</span>::<span class="ident">FieldHolder</span>; <span class="comment">// Add trait to allow for adding fields</span>
+<span class="comment">// Call init to get a client</span>
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">client</span> <span class="op">=</span> <span class="ident">init</span>(<span class="ident">libhoney</span>::<span class="ident">Config</span> {
+  <span class="ident">options</span>: <span class="ident">options</span>,
+  <span class="ident">transmission_options</span>: <span class="ident">libhoney</span>::<span class="ident">transmission</span>::<span class="ident">Options</span>::<span class="ident">default</span>(),
+});
+
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Value</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashMap</span>::<span class="ident">new</span>();
+<span class="ident">data</span>.<span class="ident">insert</span>(<span class="string">&quot;duration_ms&quot;</span>.<span class="ident">to_string</span>(), <span class="macro">json</span><span class="macro">!</span>(<span class="number">153.12</span>));
+<span class="ident">data</span>.<span class="ident">insert</span>(<span class="string">&quot;method&quot;</span>.<span class="ident">to_string</span>(), <span class="ident">Value</span>::<span class="ident">String</span>(<span class="string">&quot;get&quot;</span>.<span class="ident">to_string</span>()));
+<span class="ident">data</span>.<span class="ident">insert</span>(<span class="string">&quot;hostname&quot;</span>.<span class="ident">to_string</span>(), <span class="ident">Value</span>::<span class="ident">String</span>(<span class="string">&quot;appserver15&quot;</span>.<span class="ident">to_string</span>()));
+<span class="ident">data</span>.<span class="ident">insert</span>(<span class="string">&quot;payload_length&quot;</span>.<span class="ident">to_string</span>(), <span class="macro">json</span><span class="macro">!</span>(<span class="number">27</span>));
+
+<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ev</span> <span class="op">=</span> <span class="ident">client</span>.<span class="ident">new_event</span>();
+<span class="ident">ev</span>.<span class="ident">add</span>(<span class="ident">data</span>);
+ <span class="comment">// In production code, please check return of `.send()`</span>
+<span class="ident">ev</span>.<span class="ident">send</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">client</span>).<span class="ident">err</span>();</pre></div>
+</div><h2 id='reexports' class='section-header'><a href="#reexports">Re-exports</a></h2>
+<table><tr><td><code>pub use client::<a class="struct" href="../libhoney/client/struct.Client.html" title="struct libhoney::client::Client">Client</a>;</code></td></tr></table><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table><tr class='module-item'><td><a class="mod" href="client/index.html" title='libhoney::client mod'>client</a></td><td class='docblock-short'><p>Client is the interface to create new builders, events and send the latter somewhere using <code>Transmission</code>.</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="mock/index.html" title='libhoney::mock mod'>mock</a></td><td class='docblock-short'><p>Mock module to ease testing</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="test/index.html" title='libhoney::test mod'>test</a></td><td class='docblock-short'><p>Auxiliary test module</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="transmission/index.html" title='libhoney::transmission mod'>transmission</a></td><td class='docblock-short'><p>Transmission handles the transmission of events to Honeycomb</p>
+</td></tr></table><h2 id='macros' class='section-header'><a href="#macros">Macros</a></h2>
+<table><tr class='module-item'><td><a class="macro" href="macro.json.html" title='libhoney::json macro'>json</a></td><td class='docblock-short'><p>Construct a <code>serde_json::Value</code> from a JSON literal.</p>
+</td></tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table><tr class='module-item'><td><a class="struct" href="struct.Builder.html" title='libhoney::Builder struct'>Builder</a></td><td class='docblock-short'><p>Builder is used to create templates for new events, specifying default fields and
+override settings.</p>
+</td></tr><tr class='module-item'><td><a class="struct" href="struct.Config.html" title='libhoney::Config struct'>Config</a></td><td class='docblock-short'><p>Config allows the user to customise the initialisation of the library (effectively the
+Client)</p>
+</td></tr><tr class='module-item'><td><a class="struct" href="struct.Error.html" title='libhoney::Error struct'>Error</a></td><td class='docblock-short'><p>Error</p>
+</td></tr><tr class='module-item'><td><a class="struct" href="struct.Event.html" title='libhoney::Event struct'>Event</a></td><td class='docblock-short'><p><code>Event</code> is used to hold data that can be sent to Honeycomb. It can also specify
+overrides of the config settings (<code>client::Options</code>).</p>
+</td></tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table><tr class='module-item'><td><a class="enum" href="enum.ErrorKind.html" title='libhoney::ErrorKind enum'>ErrorKind</a></td><td class='docblock-short'><p>Type of error, exposed through <code>Error</code> member <code>kind</code></p>
+</td></tr><tr class='module-item'><td><a class="enum" href="enum.Value.html" title='libhoney::Value enum'>Value</a></td><td class='docblock-short'><p>Represents any valid JSON value.</p>
+</td></tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table><tr class='module-item'><td><a class="trait" href="trait.FieldHolder.html" title='libhoney::FieldHolder trait'>FieldHolder</a></td><td class='docblock-short'><p><code>FieldHolder</code> implements common functions that operate on the <code>fields</code> component of a
+struct (usually Event or Builder). This avoids some duplication of code.</p>
+</td></tr><tr class='module-item'><td><a class="trait" href="trait.Sender.html" title='libhoney::Sender trait'>Sender</a></td><td class='docblock-short'><p><code>Sender</code> is responsible for handling events after Send() is called.  Implementations
+of <code>send()</code> must be safe for concurrent calls.</p>
+</td></tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table><tr class='module-item'><td><a class="fn" href="fn.init.html" title='libhoney::init fn'>init</a></td><td class='docblock-short'><p>init is called on app initialisation and passed a <code>Config</code>. A <code>Config</code> has two sets of
+options (<code>client::Options</code> and <code>transmission::Options</code>).</p>
+</td></tr></table><h2 id='types' class='section-header'><a href="#types">Type Definitions</a></h2>
+<table><tr class='module-item'><td><a class="type" href="type.DynamicFieldFunc.html" title='libhoney::DynamicFieldFunc type'>DynamicFieldFunc</a></td><td class='docblock-short'><p>Shorthand type for the function to be passed to the <code>add_dynamic_field</code> calls</p>
+</td></tr><tr class='module-item'><td><a class="type" href="type.Metadata.html" title='libhoney::Metadata type'>Metadata</a></td><td class='docblock-short'><p><code>Metadata</code> is a type alias for an optional json serialisable value</p>
+</td></tr><tr class='module-item'><td><a class="type" href="type.Result.html" title='libhoney::Result type'>Result</a></td><td class='docblock-short'><p>Result shorthand for a <code>std::result::Result</code> wrapping our own <code>Error</code></p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g., <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g., <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g., <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../";window.currentCrate = "libhoney";</script><script src="../aliases.js"></script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>

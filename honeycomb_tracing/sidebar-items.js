@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["TelemetrySubscriber","Tracing Subscriber that uses a 'libhoney-rust' Honeycomb client to publish spans"],["TraceId","A Honeycomb Trace ID. Uniquely identifies a single distributed (potentially multi-process) trace."]]});

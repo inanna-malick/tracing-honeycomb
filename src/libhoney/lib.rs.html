@@ -1,0 +1,435 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/libhoney-rust-0.1.3/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../libhoney/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<span id="2">  2</span>
+<span id="3">  3</span>
+<span id="4">  4</span>
+<span id="5">  5</span>
+<span id="6">  6</span>
+<span id="7">  7</span>
+<span id="8">  8</span>
+<span id="9">  9</span>
+<span id="10"> 10</span>
+<span id="11"> 11</span>
+<span id="12"> 12</span>
+<span id="13"> 13</span>
+<span id="14"> 14</span>
+<span id="15"> 15</span>
+<span id="16"> 16</span>
+<span id="17"> 17</span>
+<span id="18"> 18</span>
+<span id="19"> 19</span>
+<span id="20"> 20</span>
+<span id="21"> 21</span>
+<span id="22"> 22</span>
+<span id="23"> 23</span>
+<span id="24"> 24</span>
+<span id="25"> 25</span>
+<span id="26"> 26</span>
+<span id="27"> 27</span>
+<span id="28"> 28</span>
+<span id="29"> 29</span>
+<span id="30"> 30</span>
+<span id="31"> 31</span>
+<span id="32"> 32</span>
+<span id="33"> 33</span>
+<span id="34"> 34</span>
+<span id="35"> 35</span>
+<span id="36"> 36</span>
+<span id="37"> 37</span>
+<span id="38"> 38</span>
+<span id="39"> 39</span>
+<span id="40"> 40</span>
+<span id="41"> 41</span>
+<span id="42"> 42</span>
+<span id="43"> 43</span>
+<span id="44"> 44</span>
+<span id="45"> 45</span>
+<span id="46"> 46</span>
+<span id="47"> 47</span>
+<span id="48"> 48</span>
+<span id="49"> 49</span>
+<span id="50"> 50</span>
+<span id="51"> 51</span>
+<span id="52"> 52</span>
+<span id="53"> 53</span>
+<span id="54"> 54</span>
+<span id="55"> 55</span>
+<span id="56"> 56</span>
+<span id="57"> 57</span>
+<span id="58"> 58</span>
+<span id="59"> 59</span>
+<span id="60"> 60</span>
+<span id="61"> 61</span>
+<span id="62"> 62</span>
+<span id="63"> 63</span>
+<span id="64"> 64</span>
+<span id="65"> 65</span>
+<span id="66"> 66</span>
+<span id="67"> 67</span>
+<span id="68"> 68</span>
+<span id="69"> 69</span>
+<span id="70"> 70</span>
+<span id="71"> 71</span>
+<span id="72"> 72</span>
+<span id="73"> 73</span>
+<span id="74"> 74</span>
+<span id="75"> 75</span>
+<span id="76"> 76</span>
+<span id="77"> 77</span>
+<span id="78"> 78</span>
+<span id="79"> 79</span>
+<span id="80"> 80</span>
+<span id="81"> 81</span>
+<span id="82"> 82</span>
+<span id="83"> 83</span>
+<span id="84"> 84</span>
+<span id="85"> 85</span>
+<span id="86"> 86</span>
+<span id="87"> 87</span>
+<span id="88"> 88</span>
+<span id="89"> 89</span>
+<span id="90"> 90</span>
+<span id="91"> 91</span>
+<span id="92"> 92</span>
+<span id="93"> 93</span>
+<span id="94"> 94</span>
+<span id="95"> 95</span>
+<span id="96"> 96</span>
+<span id="97"> 97</span>
+<span id="98"> 98</span>
+<span id="99"> 99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+</pre><div class="example-wrap"><pre class="rust ">
+<span class="doccomment">/*! Rust library for sending data to Honeycomb.
+
+I&#39;d be forever greatful if you can try it out and provide feedback. There are a few
+reasons why I think this may not yet be ready for production use:
+
+- Honeycomb uses the singleton pattern for the libraries but I decided not to use it here (mostly due to: harder to get right, it feels to me like a rust anti-pattern). If you think I should have, please let me know.
+
+- I&#39;m not convinced of the threading code. Although &quot;it works&quot; it probably isn&#39;t great - any feedback would be greatly appreciated.
+
+For these reasons, you&#39;re probably better waiting for a 1.0.0 release (I&#39;ll follow
+[semantic versioning][semantic versioning]). Having said that, if you still want to use
+this, thank you for being brave, and make sure to open bugs against it!
+
+# libhoney
+
+Rust library for sending events to Honeycomb, a service for debugging your software in
+production.
+
+- [Usage and Examples](#usage-and-examples)
+- [API Reference][API reference]
+
+# Usage and Examples
+
+## Initialization
+
+Initialize the library by passing in your Team API key and the default dataset name to
+which it should send events. When you call the library’s initialization routine, it spins
+up background threads to handle sending all the events. Calling .close() on the client
+will terminate all background threads.
+
+```rust
+let client = libhoney::init(libhoney::Config{
+  options: libhoney::client::Options {
+    api_key: &quot;YOUR_API_KEY&quot;.to_string(),
+    dataset: &quot;honeycomb-rust-example&quot;.to_string(),
+    ..libhoney::client::Options::default()
+  },
+  transmission_options: libhoney::transmission::Options::default(),
+});
+
+client.close();
+```
+
+Further configuration options can be found in the [API reference][API reference].
+
+## Building and Sending Events
+
+Once initialized, the libhoney client is ready to send events. Events go through three
+phases:
+
+- Creation `event := builder.new_event()`
+- Adding fields `event.add_field(&quot;key&quot;, Value::String(&quot;val&quot;.to_string()))`, `event.add(data)`
+- Transmission `event.send(&amp;mut client)`
+
+Upon calling .send(), the event is dispatched to be sent to Honeycomb. All libraries set
+defaults that will allow your application to function as smoothly as possible during error
+conditions.
+
+In its simplest form, you can add a single attribute to an event with the `.add_field(k,
+v)` method. If you add the same key multiple times, only the last value added will be
+kept.
+
+More complex structures (maps and structs—things that can be serialized into a JSON
+object) can be added to an event with the .add(data) method.
+
+Events can have metadata associated with them that is not sent to Honeycomb. This metadata
+is used to identify the event when processing the response. More detail about metadata is
+below in the Response section.
+
+## Handling responses
+
+Sending an event is an asynchronous action and will avoid blocking by default. .send()
+will enqueue the event to be sent as soon as possible (thus, the return value doesn’t
+indicate that the event was successfully sent). Use the Vec returned by .responses() to
+check whether events were successfully received by Honeycomb’s servers.
+
+Before sending an event, you have the option to attach metadata to that event. This
+metadata is not sent to Honeycomb; instead, it’s used to help you match up individual
+responses with sent events. When sending an event, libhoney will take the metadata from
+the event and attach it to the response object for you to consume. Add metadata by
+populating the .metadata attribute directly on an event.
+
+Responses have a number of fields describing the result of an attempted event send:
+
+- `metadata`: the metadata you attached to the event to which this response corresponds
+
+- `status_code`: the HTTP status code returned by Honeycomb when trying to send the event. 2xx indicates success.
+
+- `duration`: the time.Duration it took to send the event.
+
+- `body`: the body of the HTTP response from Honeycomb. On failures, this body contains some more information about the failure.
+
+- `error`: when the event doesn’t even get to create a HTTP attempt, the reason will be in this field. (e.g. when sampled or dropped because of a queue overflow).
+
+You don’t have to process responses if you’re not interested in them—simply ignoring them
+is perfectly safe. Unread responses will be dropped.
+
+## Examples
+
+Honeycomb can calculate all sorts of statistics, so send the data you care about and let
+us crunch the averages, percentiles, lower/upper bounds, cardinality—whatever you want—for
+you.
+
+### Simple: send an event
+```rust
+# use std::collections::HashMap;
+# use serde_json::{json, Value};
+# use libhoney::{init, Config};
+# let api_host = &amp;mockito::server_url();
+# let _m = mockito::mock(
+#    &quot;POST&quot;,
+#     mockito::Matcher::Regex(r&quot;/1/batch/(.*)$&quot;.to_string()),
+# )
+# .with_status(200)
+# .with_header(&quot;content-type&quot;, &quot;application/json&quot;)
+# .with_body(&quot;finished batch to honeycomb&quot;)
+# .create();
+
+# let options = libhoney::client::Options{api_host: api_host.to_string(), api_key: &quot;some key&quot;.to_string(), ..libhoney::client::Options::default()};
+use libhoney::FieldHolder; // Add trait to allow for adding fields
+// Call init to get a client
+let mut client = init(libhoney::Config {
+  options: options,
+  transmission_options: libhoney::transmission::Options::default(),
+});
+
+let mut data: HashMap&lt;String, Value&gt; = HashMap::new();
+data.insert(&quot;duration_ms&quot;.to_string(), json!(153.12));
+data.insert(&quot;method&quot;.to_string(), Value::String(&quot;get&quot;.to_string()));
+data.insert(&quot;hostname&quot;.to_string(), Value::String(&quot;appserver15&quot;.to_string()));
+data.insert(&quot;payload_length&quot;.to_string(), json!(27));
+
+let mut ev = client.new_event();
+ev.add(data);
+ // In production code, please check return of `.send()`
+ev.send(&amp;mut client).err();
+```
+
+[API reference]: https://docs.rs/libhoney-rust
+[semantic versioning]: https://semver.org
+
+ */</span>
+<span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_docs</span>)]</span>
+
+<span class="kw">mod</span> <span class="ident">builder</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">client</span>;
+<span class="kw">mod</span> <span class="ident">errors</span>;
+<span class="kw">mod</span> <span class="ident">event</span>;
+<span class="kw">mod</span> <span class="ident">eventdata</span>;
+<span class="kw">mod</span> <span class="ident">events</span>;
+<span class="kw">mod</span> <span class="ident">fields</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">mock</span>;
+<span class="kw">mod</span> <span class="ident">response</span>;
+<span class="kw">mod</span> <span class="ident">sender</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">transmission</span>;
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">builder</span>::{<span class="ident">Builder</span>, <span class="ident">DynamicFieldFunc</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">client</span>::<span class="ident">Client</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">errors</span>::{<span class="ident">Error</span>, <span class="ident">ErrorKind</span>, <span class="prelude-ty">Result</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">event</span>::{<span class="ident">Event</span>, <span class="ident">Metadata</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">fields</span>::<span class="ident">FieldHolder</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sender</span>::<span class="ident">Sender</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">serde_json</span>::{<span class="ident">json</span>, <span class="ident">Value</span>};
+<span class="kw">use</span> <span class="ident">transmission</span>::<span class="ident">Transmission</span>;
+
+<span class="doccomment">/// Config allows the user to customise the initialisation of the library (effectively the</span>
+<span class="doccomment">/// Client)</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">must_use</span> <span class="op">=</span> <span class="string">&quot;must be set up for client to be properly initialised&quot;</span>]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Config</span> {
+    <span class="doccomment">/// options is a subset of the global libhoney config that focuses on the</span>
+    <span class="doccomment">/// configuration of the client itself. The other config options are specific to a</span>
+    <span class="doccomment">/// given transmission Sender and should be specified there if the defaults need to be</span>
+    <span class="doccomment">/// overridden.</span>
+    <span class="kw">pub</span> <span class="ident">options</span>: <span class="ident">client</span>::<span class="ident">Options</span>,
+
+    <span class="doccomment">/// Configuration for the underlying sender. It is safe (and recommended) to leave</span>
+    <span class="doccomment">/// these values at their defaults. You cannot change these values after calling</span>
+    <span class="doccomment">/// init()</span>
+    <span class="kw">pub</span> <span class="ident">transmission_options</span>: <span class="ident">transmission</span>::<span class="ident">Options</span>,
+}
+
+<span class="doccomment">/// init is called on app initialisation and passed a `Config`. A `Config` has two sets of</span>
+<span class="doccomment">/// options (`client::Options` and `transmission::Options`).</span>
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">init</span>(<span class="ident">config</span>: <span class="ident">Config</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Client</span><span class="op">&lt;</span><span class="ident">Transmission</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">transmission</span> <span class="op">=</span>
+        <span class="ident">Transmission</span>::<span class="ident">new</span>(<span class="ident">config</span>.<span class="ident">transmission_options</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to instantiate transmission&quot;</span>);
+    <span class="ident">Client</span>::<span class="ident">new</span>(<span class="ident">config</span>.<span class="ident">options</span>, <span class="ident">transmission</span>)
+}
+
+<span class="doccomment">/// Auxiliary test module</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">test</span> {
+    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">mock</span>;
+    <span class="doccomment">/// `init` is purely used for testing purposes</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">init</span>(<span class="ident">config</span>: <span class="kw">super</span>::<span class="ident">Config</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">super</span>::<span class="ident">Client</span><span class="op">&lt;</span><span class="ident">mock</span>::<span class="ident">TransmissionMock</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">transmission</span> <span class="op">=</span> <span class="ident">mock</span>::<span class="ident">TransmissionMock</span>::<span class="ident">new</span>(<span class="ident">config</span>.<span class="ident">transmission_options</span>)
+            .<span class="ident">expect</span>(<span class="string">&quot;failed to instantiate transmission&quot;</span>);
+        <span class="kw">super</span>::<span class="ident">Client</span>::<span class="ident">new</span>(<span class="ident">config</span>.<span class="ident">options</span>, <span class="ident">transmission</span>)
+    }
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">mod</span> <span class="ident">tests</span> {
+    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_init</span>() {
+        <span class="kw">let</span> <span class="ident">client</span> <span class="op">=</span> <span class="ident">init</span>(<span class="ident">Config</span> {
+            <span class="ident">options</span>: <span class="ident">client</span>::<span class="ident">Options</span>::<span class="ident">default</span>(),
+            <span class="ident">transmission_options</span>: <span class="ident">transmission</span>::<span class="ident">Options</span>::<span class="ident">default</span>(),
+        });
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">client</span>.<span class="ident">options</span>.<span class="ident">dataset</span>, <span class="string">&quot;librust-dataset&quot;</span>);
+        <span class="ident">client</span>.<span class="ident">close</span>().<span class="ident">unwrap</span>();
+    }
+}
+</pre></div>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g., <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g., <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g., <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../";window.currentCrate = "libhoney";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
