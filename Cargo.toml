@@ -4,10 +4,9 @@ version = "0.0.1"
 authors = ["pk <pkinsky@gmail.com>"]
 edition = "2018"
 description = "provides a tracing subscriber that publishes spans and events to honeycomb.io"
-# documentation = "TODO"
-homepage = "https://github.com/pkinsky/honeycomb-tracing"
+documentation = "https://pkinsky.github.io/honeycomb-tracing/honeycomb_tracing/"
 repository = "https://github.com/pkinsky/honeycomb-tracing"
-keywords = ["tracing", "honeycomb"]
+keywords = ["tracing", "honeycomb", "instrumentation"]
 license = "MIT"
 readme = "README.md"
 
