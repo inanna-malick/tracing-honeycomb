@@ -413,10 +413,10 @@ mod tests {
 
             #[instrument]
             fn g(_s: String) {
-                let use_of_reserved_word = "timestamp-value";
+                let use_of_reserved_word = "duration-value";
                 tracing::event!(
                     tracing::Level::INFO,
-                    timestamp = use_of_reserved_word,
+                    duration_ms = use_of_reserved_word,
                     foo = "bar"
                 );
             }
@@ -442,10 +442,10 @@ mod tests {
             async fn g(s: String) {
                 // delay to force multiple span entry (because it isn't immediately ready)
                 tokio::timer::delay_for(Duration::from_millis(100)).await;
-                let use_of_reserved_word = "timestamp-value";
+                let use_of_reserved_word = "duration-value";
                 tracing::event!(
                     tracing::Level::INFO,
-                    timestamp = use_of_reserved_word,
+                    duration_ms = use_of_reserved_word,
                     foo = "bar"
                 );
             }
@@ -498,11 +498,11 @@ mod tests {
             assert_eq!(span.trace_id, expected_trace_id);
             assert_eq!(event.trace_id, expected_trace_id);
 
-            // test that reserved word field names are modified
-            // (field names like "trace.span_id", "timestamp", etc are ok)
+            // test that reserved word field names are modified w/ tracing. prefix
+            // (field names like "trace.span_id", "duration_ms", etc are ok)
             assert_eq!(
-                event.values["tracing.timestamp"],
-                libhoney::json!("timestamp-value")
+                event.values["tracing.duration_ms"],
+                libhoney::json!("duration-value")
             )
         }
     }

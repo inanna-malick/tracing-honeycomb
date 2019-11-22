@@ -15,7 +15,7 @@ static RESERVED_WORDS: [&str; 9] = [
     "trace.parent_id",
     "service_name",
     "level",
-    "timestamp",
+    "Timestamp",
     "name",
     "target",
     "duration_ms",

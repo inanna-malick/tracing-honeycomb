@@ -155,7 +155,7 @@ impl<'a> Span<'a> {
         values.insert("level".to_string(), json!(format!("{}", self.level)));
 
         values.insert(
-            "timestamp".to_string(),
+            "Timestamp".to_string(),
             json!(self.initialized_at.to_rfc3339()),
         );
 
@@ -224,7 +224,7 @@ impl<'a> Event<'a> {
         values.insert("level".to_string(), json!(format!("{}", self.level)));
 
         values.insert(
-            "timestamp".to_string(),
+            "Timestamp".to_string(),
             json!(self.initialized_at.to_rfc3339()),
         );
 
