@@ -66,7 +66,10 @@ impl TelemetrySubscriber {
         let mut id = target_id.clone();
 
         let trace_id: TraceId = loop {
-            let guard = self.spans.get(id_to_idx(&id)).expect("unable to traverse link to parent span");
+            let guard = self
+                .spans
+                .get(id_to_idx(&id))
+                .expect("unable to traverse link to parent span");
             let span = guard.inner.read().unwrap();
             if let Some(tid) = &span.lazy_trace_id {
                 // found already-eval'd trace id
