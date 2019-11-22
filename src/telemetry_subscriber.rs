@@ -16,7 +16,7 @@ thread_local! {
     static CURRENT_SPAN: RefCell<Vec<Id>> = RefCell::new(vec!());
 }
 
-// TODO: debug impl?
+/// Tracing Subscriber that uses a 'libhoney-rust' Honeycomb client to publish spans
 pub struct TelemetrySubscriber {
     telemetry: Box<dyn Telemetry + Send + Sync + 'static>,
     service_name: String,
@@ -26,6 +26,8 @@ pub struct TelemetrySubscriber {
 }
 
 impl TelemetrySubscriber {
+    /// Create a new TelemetrySubscriber that uses the provided service_name and
+    /// a Honeycomb client initialized using the provided 'libhoney::Config'
     pub fn new(service_name: String, config: libhoney::Config) -> Self {
         let telemetry = Box::new(HoneycombTelemetry::new(config));
         Self::new_(service_name, telemetry)
@@ -64,29 +66,25 @@ impl TelemetrySubscriber {
         let mut id = target_id.clone();
 
         let trace_id: TraceId = loop {
-            if let Some(guard) = self.spans.get(id_to_idx(&id)) {
-                let span = guard.inner.read().unwrap();
-                if let Some(tid) = &span.lazy_trace_id {
-                    // found already-eval'd trace id
-                    break tid.clone();
-                } else {
-                    // span has no trace, must be updated as part of this call
-                    if let Some(parent_id) = &span.parent_id {
-                        id = parent_id.clone();
-                        drop(span);
-                        path.push(guard);
-                    } else {
-                        // found root span with no trace id, generate trace_id
-                        let trace_id = TraceId::generate();
-                        drop(span);
-                        path.push(guard);
-                        break trace_id;
-                    };
-                };
+            let guard = self.spans.get(id_to_idx(&id)).expect("unable to traverse link to parent span");
+            let span = guard.inner.read().unwrap();
+            if let Some(tid) = &span.lazy_trace_id {
+                // found already-eval'd trace id
+                break tid.clone();
             } else {
-                // invalid state
-                panic!("BUG[honeycomb-telemetry] unable to traverse link to parent span, span data not found");
-            }
+                // span has no trace, must be updated as part of this call
+                if let Some(parent_id) = &span.parent_id {
+                    id = parent_id.clone();
+                    drop(span);
+                    path.push(guard);
+                } else {
+                    // found root span with no trace id, generate trace_id
+                    let trace_id = TraceId::generate();
+                    drop(span);
+                    path.push(guard);
+                    break trace_id;
+                };
+            };
         };
 
         // get write guards for path

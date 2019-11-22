@@ -8,6 +8,5 @@ mod visitor;
 #[cfg(test)]
 extern crate lazy_static;
 
-pub use crate::telemetry::HoneycombTelemetry;
 pub use crate::telemetry::TraceId;
 pub use crate::telemetry_subscriber::TelemetrySubscriber;

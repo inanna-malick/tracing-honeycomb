@@ -8,7 +8,7 @@ pub(crate) trait Telemetry {
     fn report_event<'a>(&self, event: Event<'a>);
 }
 
-pub struct HoneycombTelemetry {
+pub(crate) struct HoneycombTelemetry {
     honeycomb_client: Mutex<libhoney::Client<libhoney::transmission::Transmission>>,
 }
 
@@ -64,28 +64,32 @@ impl SpanId {
     }
 }
 
+/// A Honeycomb Trace ID. Uniquely identifies a single distributed (potentially multi-process) trace.
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct TraceId(String);
 
 impl TraceId {
+    /// Record a trace ID on the current span. Requires that the currently registered dispatcher
+    /// have a TelemetrySubscriber reachable via 'downcast_ref', otherwise will panic.
     pub fn record_on_current_span(self) {
         let mut id = Some(self);
         tracing::dispatcher::get_default(|d| {
-            if let Some(s) = d.downcast_ref::<crate::telemetry_subscriber::TelemetrySubscriber>() {
-                // required b/c get_default takes FnMut, however we know it will only be invoked once
-                let id = id.take().expect("fn should not be invoked twice");
-                s.record_trace_id(id)
-            } else {
-                // TODO: does this merit a panic? probably yes.
-                panic!("unable to record TraceId, this thread does not have TelemetrySubscriber registered as default")
-            }
+            // panic if currently registered subscriber is not of the expected type (traverses layers via downcast_ref)
+            let s = d.downcast_ref::<crate::telemetry_subscriber::TelemetrySubscriber>().expect("unable to record TraceId, this thread does not have TelemetrySubscriber registered as default");
+
+            // required b/c get_default takes FnMut, however we know it will only be invoked once
+            let id = id.take().expect("fn should not be invoked twice");
+            s.record_trace_id(id)
         })
     }
 
+    /// Create a new trace ID wrapping some provided String
     pub fn new(u: String) -> Self {
         TraceId(u)
     }
-    pub(crate) fn generate() -> Self {
+
+    /// Generate a random trace ID by using a thread-level RNG to generate a u128
+    pub fn generate() -> Self {
         use rand::Rng;
 
         let u: u128 = rand::thread_rng().gen();
