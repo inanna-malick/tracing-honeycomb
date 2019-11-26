@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/openssl-0.10.25/src/cms.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cms.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../openssl/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/openssl-0.10.26/src/cms.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>cms.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../openssl/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -268,6 +268,22 @@
 <span id="268">268</span>
 <span id="269">269</span>
 <span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! SMIME implementation using CMS</span>
 <span class="doccomment">//!</span>
@@ -285,8 +301,8 @@
 <span class="kw">use</span> <span class="ident">libc</span>::<span class="ident">c_uint</span>;
 <span class="kw">use</span> <span class="ident">pkey</span>::{<span class="ident">HasPrivate</span>, <span class="ident">PKeyRef</span>};
 <span class="kw">use</span> <span class="ident">stack</span>::<span class="ident">StackRef</span>;
-<span class="kw">use</span> <span class="ident">x509</span>::{<span class="ident">X509Ref</span>, <span class="ident">X509</span>};
 <span class="kw">use</span> <span class="ident">symm</span>::<span class="ident">Cipher</span>;
+<span class="kw">use</span> <span class="ident">x509</span>::{<span class="ident">X509Ref</span>, <span class="ident">X509</span>};
 <span class="kw">use</span> {<span class="ident">cvt</span>, <span class="ident">cvt_p</span>};
 
 <span class="macro">bitflags</span><span class="macro">!</span> {
@@ -477,8 +493,7 @@
         <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
         <span class="ident">cipher</span>: <span class="ident">Cipher</span>,
         <span class="ident">flags</span>: <span class="ident">CMSOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CmsContentInfo</span>, <span class="ident">ErrorStack</span><span class="op">&gt;</span>
-    {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CmsContentInfo</span>, <span class="ident">ErrorStack</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
             <span class="kw">let</span> <span class="ident">data_bio</span> <span class="op">=</span> <span class="ident">MemBioSlice</span>::<span class="ident">new</span>(<span class="ident">data</span>)<span class="question-mark">?</span>;
 
@@ -497,9 +512,9 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="ident">pkcs12</span>::<span class="ident">Pkcs12</span>;
     <span class="kw">use</span> <span class="ident">stack</span>::<span class="ident">Stack</span>;
     <span class="kw">use</span> <span class="ident">x509</span>::<span class="ident">X509</span>;
-    <span class="kw">use</span> <span class="ident">pkcs12</span>::<span class="ident">Pkcs12</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">cms_encrypt_decrypt</span>() {
@@ -510,31 +525,48 @@
         <span class="comment">// load cert with private key</span>
         <span class="kw">let</span> <span class="ident">priv_cert_bytes</span> <span class="op">=</span> <span class="macro">include_bytes</span><span class="macro">!</span>(<span class="string">&quot;../test/cms.p12&quot;</span>);
         <span class="kw">let</span> <span class="ident">priv_cert</span> <span class="op">=</span> <span class="ident">Pkcs12</span>::<span class="ident">from_der</span>(<span class="ident">priv_cert_bytes</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to load priv cert&quot;</span>);
-        <span class="kw">let</span> <span class="ident">priv_cert</span> <span class="op">=</span> <span class="ident">priv_cert</span>.<span class="ident">parse</span>(<span class="string">&quot;mypass&quot;</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to parse priv cert&quot;</span>);
+        <span class="kw">let</span> <span class="ident">priv_cert</span> <span class="op">=</span> <span class="ident">priv_cert</span>
+            .<span class="ident">parse</span>(<span class="string">&quot;mypass&quot;</span>)
+            .<span class="ident">expect</span>(<span class="string">&quot;failed to parse priv cert&quot;</span>);
 
         <span class="comment">// encrypt cms message using public key cert</span>
         <span class="kw">let</span> <span class="ident">input</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from</span>(<span class="string">&quot;My Message&quot;</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cert_stack</span> <span class="op">=</span> <span class="ident">Stack</span>::<span class="ident">new</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create stack&quot;</span>);
-        <span class="ident">cert_stack</span>.<span class="ident">push</span>(<span class="ident">pub_cert</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to add pub cert to stack&quot;</span>);
+        <span class="ident">cert_stack</span>
+            .<span class="ident">push</span>(<span class="ident">pub_cert</span>)
+            .<span class="ident">expect</span>(<span class="string">&quot;failed to add pub cert to stack&quot;</span>);
 
-        <span class="kw">let</span> <span class="ident">encrypt</span> <span class="op">=</span> <span class="ident">CmsContentInfo</span>::<span class="ident">encrypt</span>(<span class="kw-2">&amp;</span><span class="ident">cert_stack</span>, <span class="kw-2">&amp;</span><span class="ident">input</span>.<span class="ident">as_bytes</span>(), <span class="ident">Cipher</span>::<span class="ident">des_ede3_cbc</span>(), <span class="ident">CMSOptions</span>::<span class="ident">empty</span>())
-            .<span class="ident">expect</span>(<span class="string">&quot;failed create encrypted cms&quot;</span>);
+        <span class="kw">let</span> <span class="ident">encrypt</span> <span class="op">=</span> <span class="ident">CmsContentInfo</span>::<span class="ident">encrypt</span>(
+            <span class="kw-2">&amp;</span><span class="ident">cert_stack</span>,
+            <span class="kw-2">&amp;</span><span class="ident">input</span>.<span class="ident">as_bytes</span>(),
+            <span class="ident">Cipher</span>::<span class="ident">des_ede3_cbc</span>(),
+            <span class="ident">CMSOptions</span>::<span class="ident">empty</span>(),
+        )
+        .<span class="ident">expect</span>(<span class="string">&quot;failed create encrypted cms&quot;</span>);
 
         <span class="comment">// decrypt cms message using private key cert (DER)</span>
         {
             <span class="kw">let</span> <span class="ident">encrypted_der</span> <span class="op">=</span> <span class="ident">encrypt</span>.<span class="ident">to_der</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create der from cms&quot;</span>);
-            <span class="kw">let</span> <span class="ident">decrypt</span> <span class="op">=</span> <span class="ident">CmsContentInfo</span>::<span class="ident">from_der</span>(<span class="kw-2">&amp;</span><span class="ident">encrypted_der</span>).<span class="ident">expect</span>(<span class="string">&quot;failed read cms from der&quot;</span>);
-            <span class="kw">let</span> <span class="ident">decrypt</span> <span class="op">=</span> <span class="ident">decrypt</span>.<span class="ident">decrypt</span>(<span class="kw-2">&amp;</span><span class="ident">priv_cert</span>.<span class="ident">pkey</span>, <span class="kw-2">&amp;</span><span class="ident">priv_cert</span>.<span class="ident">cert</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to decrypt cms&quot;</span>);
-            <span class="kw">let</span> <span class="ident">decrypt</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from_utf8</span>(<span class="ident">decrypt</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to create string from cms content&quot;</span>);
+            <span class="kw">let</span> <span class="ident">decrypt</span> <span class="op">=</span>
+                <span class="ident">CmsContentInfo</span>::<span class="ident">from_der</span>(<span class="kw-2">&amp;</span><span class="ident">encrypted_der</span>).<span class="ident">expect</span>(<span class="string">&quot;failed read cms from der&quot;</span>);
+            <span class="kw">let</span> <span class="ident">decrypt</span> <span class="op">=</span> <span class="ident">decrypt</span>
+                .<span class="ident">decrypt</span>(<span class="kw-2">&amp;</span><span class="ident">priv_cert</span>.<span class="ident">pkey</span>, <span class="kw-2">&amp;</span><span class="ident">priv_cert</span>.<span class="ident">cert</span>)
+                .<span class="ident">expect</span>(<span class="string">&quot;failed to decrypt cms&quot;</span>);
+            <span class="kw">let</span> <span class="ident">decrypt</span> <span class="op">=</span>
+                <span class="ident">String</span>::<span class="ident">from_utf8</span>(<span class="ident">decrypt</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to create string from cms content&quot;</span>);
             <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">input</span>, <span class="ident">decrypt</span>);
         }
 
         <span class="comment">// decrypt cms message using private key cert (PEM)</span>
         {
             <span class="kw">let</span> <span class="ident">encrypted_pem</span> <span class="op">=</span> <span class="ident">encrypt</span>.<span class="ident">to_pem</span>().<span class="ident">expect</span>(<span class="string">&quot;failed to create pem from cms&quot;</span>);
-            <span class="kw">let</span> <span class="ident">decrypt</span> <span class="op">=</span> <span class="ident">CmsContentInfo</span>::<span class="ident">from_pem</span>(<span class="kw-2">&amp;</span><span class="ident">encrypted_pem</span>).<span class="ident">expect</span>(<span class="string">&quot;failed read cms from pem&quot;</span>);
-            <span class="kw">let</span> <span class="ident">decrypt</span> <span class="op">=</span> <span class="ident">decrypt</span>.<span class="ident">decrypt</span>(<span class="kw-2">&amp;</span><span class="ident">priv_cert</span>.<span class="ident">pkey</span>, <span class="kw-2">&amp;</span><span class="ident">priv_cert</span>.<span class="ident">cert</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to decrypt cms&quot;</span>);
-            <span class="kw">let</span> <span class="ident">decrypt</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">from_utf8</span>(<span class="ident">decrypt</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to create string from cms content&quot;</span>);
+            <span class="kw">let</span> <span class="ident">decrypt</span> <span class="op">=</span>
+                <span class="ident">CmsContentInfo</span>::<span class="ident">from_pem</span>(<span class="kw-2">&amp;</span><span class="ident">encrypted_pem</span>).<span class="ident">expect</span>(<span class="string">&quot;failed read cms from pem&quot;</span>);
+            <span class="kw">let</span> <span class="ident">decrypt</span> <span class="op">=</span> <span class="ident">decrypt</span>
+                .<span class="ident">decrypt</span>(<span class="kw-2">&amp;</span><span class="ident">priv_cert</span>.<span class="ident">pkey</span>, <span class="kw-2">&amp;</span><span class="ident">priv_cert</span>.<span class="ident">cert</span>)
+                .<span class="ident">expect</span>(<span class="string">&quot;failed to decrypt cms&quot;</span>);
+            <span class="kw">let</span> <span class="ident">decrypt</span> <span class="op">=</span>
+                <span class="ident">String</span>::<span class="ident">from_utf8</span>(<span class="ident">decrypt</span>).<span class="ident">expect</span>(<span class="string">&quot;failed to create string from cms content&quot;</span>);
             <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">input</span>, <span class="ident">decrypt</span>);
         }
     }
