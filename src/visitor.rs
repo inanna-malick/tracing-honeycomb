@@ -4,7 +4,7 @@ use std::fmt;
 use tracing::field::{Field, Visit};
 
 // visitor that builds honeycomb-compatible values from tracing fields
-pub(crate) struct HoneycombVisitor<'a>(pub &'a mut HashMap<String, Value>);
+pub(crate) struct HoneycombVisitor(pub(crate) HashMap<String, Value>);
 
 // reserved field names (TODO: document)
 static RESERVED_WORDS: [&str; 9] = [
@@ -19,7 +19,7 @@ static RESERVED_WORDS: [&str; 9] = [
     "duration_ms",
 ];
 
-impl<'a> Visit for HoneycombVisitor<'a> {
+impl Visit for HoneycombVisitor {
     fn record_i64(&mut self, field: &Field, value: i64) {
         self.0
             .insert(mk_field_name(field.name().to_string()), json!(value));

@@ -56,6 +56,31 @@ pub struct TraceCtx {
     pub trace_id: TraceId,
 }
 
+impl TraceCtx {
+    /// Record a trace ID on the current span. Requires that the currently registered dispatcher
+    /// have a TelemetrySubscriber reachable via 'downcast_ref', otherwise will panic.
+    pub fn record_on_current_span(self) {
+        let mut ctx = Some(self);
+        tracing::dispatcher::get_default(|d| {
+            // panic if currently registered subscriber is not of the expected type (traverses layers via downcast_ref)
+            let s = d
+                .downcast_ref::<crate::telemetry_layer::TelemetryLayer>()
+                .expect(
+                    "unable to record TraceCtx, TelemetryLayer not registered as tracing layer",
+                );
+
+            // required b/c get_default takes FnMut, however we know it will only be invoked once
+            let ctx = ctx.take().expect("fn should not be invoked twice");
+            let current_span_id = d
+                .current_span()
+                .id()
+                .expect("unable to record TraceCtx, no current span")
+                .clone();
+            s.record_trace_ctx(ctx, current_span_id);
+        })
+    }
+}
+
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct SpanId(tracing::Id, u64);
 
@@ -76,20 +101,6 @@ impl SpanId {
 pub struct TraceId(String);
 
 impl TraceId {
-    /// Record a trace ID on the current span. Requires that the currently registered dispatcher
-    /// have a TelemetrySubscriber reachable via 'downcast_ref', otherwise will panic.
-    pub fn record_on_current_span(self) {
-        let mut id = Some(self);
-        tracing::dispatcher::get_default(|d| {
-            // panic if currently registered subscriber is not of the expected type (traverses layers via downcast_ref)
-            let s = d.downcast_ref::<crate::telemetry_subscriber::TelemetrySubscriber>().expect("unable to record TraceId, this thread does not have TelemetrySubscriber registered as default");
-
-            // required b/c get_default takes FnMut, however we know it will only be invoked once
-            let id = id.take().expect("fn should not be invoked twice");
-            s.record_trace_id(id)
-        })
-    }
-
     /// Create a new trace ID wrapping some provided String
     pub fn new(u: String) -> Self {
         TraceId(u)
