@@ -20,7 +20,6 @@ async fn baz(x: u64) {
     delay_for(Duration::from_millis(50)).await
 }
 
-
 #[tokio::main]
 async fn main() {
     let honeycomb_key = "YOUR-KEY".to_string();
