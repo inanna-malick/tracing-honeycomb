@@ -1,11 +1,11 @@
-use crate::telemetry::{self, HoneycombTelemetry, SpanId, Telemetry, TraceCtx, TraceId};
+use crate::telemetry::{self, HoneycombTelemetry, SpanId, Telemetry, TraceCtx};
 use crate::visitor::HoneycombVisitor;
 use chashmap::CHashMap;
 use chrono::{DateTime, Utc};
 use rand::Rng;
 use std::collections::HashMap;
 use tracing::span::{Attributes, Id, Record};
-use tracing::{Event, Metadata, Subscriber};
+use tracing::{Event, Subscriber};
 use tracing_subscriber::{layer::Context, registry, Layer};
 
 /// Tracing Subscriber that uses a 'libhoney-rust' Honeycomb client to publish spans
@@ -72,23 +72,52 @@ impl TelemetryLayer {
         target_id: &Id,
         ctx: &Context<S>,
     ) -> Option<TraceCtx> {
-        let span_ref: tracing_subscriber::registry::SpanRef<S> = ctx
+        let target_span_ref: tracing_subscriber::registry::SpanRef<S> = ctx
             .span(target_id)
             .expect("span data not found during eval_ctx");
 
-        // let mut write_guards: Vec<tracing_subscriber::registry::ExtensionsMut> = Vec::new();
-        let mut write_guards = Vec::new();
+        let mut path = Vec::new();
 
-        // TODO: dedup following - can't figure out how to build chained iterator
-        let mut write_guard = span_ref.extensions_mut();
-
-        match write_guard.get_mut() {
-            None => match self.span_data.get(&span_ref.id()) {
+        let mut target_write_guard = target_span_ref.extensions_mut();
+        match target_write_guard.get_mut() {
+            None => match self.span_data.get(&target_span_ref.id()) {
                 None => {
-                    write_guards.push((span_ref, write_guard));
+
+                    // iterate over parents
+                    for span_ref in target_span_ref.parents() {
+                        let mut write_guard = span_ref.extensions_mut();
+                        match write_guard.get_mut() {
+                            None => match self.span_data.get(&span_ref.id()) {
+                                None => {
+                                    drop(write_guard);
+                                    path.push(span_ref);
+                                }
+                                Some(local_trace_root) => {
+                                    write_guard.insert(LazyTraceCtx(local_trace_root.clone()));
+                                    for span_ref in path.into_iter() {
+                                        let mut write_guard = span_ref.extensions_mut();
+                                        write_guard.insert(LazyTraceCtx(TraceCtx {
+                                            trace_id: local_trace_root.trace_id.clone(),
+                                            remote_span_parent: None,
+                                        }));
+                                    };
+                                    target_write_guard.insert(LazyTraceCtx(local_trace_root.clone()));
+                                    return Some(local_trace_root.clone());
+                                }
+                            },
+                            Some(LazyTraceCtx(already_evaluated)) => {
+                                for span_ref in path.into_iter() {
+                                    let mut write_guard = span_ref.extensions_mut();
+                                    write_guard.insert(LazyTraceCtx(already_evaluated.clone()));
+                                }
+                                target_write_guard.insert(LazyTraceCtx(already_evaluated.clone()));
+                                return Some(already_evaluated.clone());
+                            }
+                        }
+                    }
                 }
                 Some(local_trace_root) => {
-                    write_guard.insert(LazyTraceCtx(local_trace_root.clone()));
+                    target_write_guard.insert(LazyTraceCtx(local_trace_root.clone()));
                     return Some(local_trace_root.clone());
                 }
             },
@@ -96,36 +125,6 @@ impl TelemetryLayer {
                 return Some(already_evaluated.clone());
             }
         };
-
-        // TODO: build vec of span_ref for those that pass extension-not-set filter, then do second pass (same as TS logic)
-        for span_ref in span_ref.parents() {
-            // TODO: deduplicate, mb
-            let mut write_guard = span_ref.extensions_mut();
-
-            match write_guard.get_mut() {
-                None => match self.span_data.get(&span_ref.id()) {
-                    None => {
-                        write_guards.push((span_ref, write_guard));
-                    }
-                    Some(local_trace_root) => {
-                        write_guard.insert(LazyTraceCtx(local_trace_root.clone()));
-                        for (_, mut write_guard) in write_guards.into_iter() {
-                            write_guard.insert(LazyTraceCtx(TraceCtx {
-                                trace_id: local_trace_root.trace_id.clone(),
-                                remote_span_parent: None,
-                            }));
-                        }
-                        return Some(local_trace_root.clone());
-                    }
-                },
-                Some(LazyTraceCtx(already_evaluated)) => {
-                    for (_, mut write_guard) in write_guards.into_iter() {
-                        write_guard.insert(LazyTraceCtx(already_evaluated.clone()));
-                    }
-                    return Some(already_evaluated.clone());
-                }
-            }
-        }
 
         None
     }
@@ -215,11 +214,21 @@ where
             let now = now.timestamp_millis();
             let elapsed_ms = now - initialized_at.timestamp_millis();
 
+            let parent_id = match trace_ctx.remote_span_parent {
+                None => {
+                    span.parents().next().map( |parent| SpanId::from_id(parent.id(), self.instance_id))
+                }
+                Some(remote_span_parent) => {
+                    Some(remote_span_parent)
+                }
+            };
+
+
             let span = telemetry::Span {
                 id: SpanId::from_id(id, self.instance_id),
                 target: span.metadata().target(),
                 level: span.metadata().level().clone(), // copy on inner type
-                parent_id: unimplemented!("todo"),
+                parent_id,
                 name: span.metadata().name(),
                 initialized_at: initialized_at.clone(),
                 trace_id: trace_ctx.trace_id,
@@ -230,9 +239,6 @@ where
 
             self.telemetry.report_span(span);
         };
-
-        // can use spanref.parents() to get iterator to root span. yay!
-        //     The iterator will first return the span's immediate parent, followed by that span's parent, followed by that span's parent, and so on, until a it reaches a root span.
     }
 
     // FIXME: do I need to do something here?
