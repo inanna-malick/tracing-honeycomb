@@ -1,6 +1,6 @@
-#![deny(warnings)]
+// #![deny(warnings)]
 mod telemetry;
-mod telemetry_subscriber;
+mod telemetry_layer;
 mod visitor;
 
 #[cfg(test)]
@@ -9,4 +9,4 @@ mod visitor;
 extern crate lazy_static;
 
 pub use crate::telemetry::TraceId;
-pub use crate::telemetry_subscriber::TelemetrySubscriber;
+pub use crate::telemetry_layer::TelemetryLayer;

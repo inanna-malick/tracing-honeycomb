@@ -49,6 +49,13 @@ impl Telemetry for HoneycombTelemetry {
     }
 }
 
+// TODO: review pub vs. pub(crate)
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+pub struct TraceCtx {
+    pub remote_span_parent: Option<SpanId>,
+    pub trace_id: TraceId,
+}
+
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct SpanId(tracing::Id, u64);
 

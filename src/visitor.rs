@@ -4,9 +4,7 @@ use std::fmt;
 use tracing::field::{Field, Visit};
 
 // visitor that builds honeycomb-compatible values from tracing fields
-pub(crate) struct HoneycombVisitor<'a> {
-    pub(crate) accumulator: &'a mut HashMap<String, Value>,
-}
+pub(crate) struct HoneycombVisitor<'a>(pub &'a mut HashMap<String, Value>);
 
 // reserved field names (TODO: document)
 static RESERVED_WORDS: [&str; 9] = [
@@ -23,28 +21,28 @@ static RESERVED_WORDS: [&str; 9] = [
 
 impl<'a> Visit for HoneycombVisitor<'a> {
     fn record_i64(&mut self, field: &Field, value: i64) {
-        self.accumulator
+        self.0
             .insert(mk_field_name(field.name().to_string()), json!(value));
     }
 
     fn record_u64(&mut self, field: &Field, value: u64) {
-        self.accumulator
+        self.0
             .insert(mk_field_name(field.name().to_string()), json!(value));
     }
 
     fn record_bool(&mut self, field: &Field, value: bool) {
-        self.accumulator
+        self.0
             .insert(mk_field_name(field.name().to_string()), json!(value));
     }
 
     fn record_str(&mut self, field: &Field, value: &str) {
-        self.accumulator
+        self.0
             .insert(mk_field_name(field.name().to_string()), json!(value));
     }
 
     fn record_debug(&mut self, field: &Field, value: &dyn fmt::Debug) {
         let s = format!("{:?}", value);
-        self.accumulator
+        self.0
             .insert(mk_field_name(field.name().to_string()), json!(s));
     }
 }
