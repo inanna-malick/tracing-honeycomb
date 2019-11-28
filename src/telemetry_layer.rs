@@ -1,9 +1,9 @@
 use crate::telemetry::{self, HoneycombTelemetry, SpanId, Telemetry, TraceCtx};
 use crate::visitor::HoneycombVisitor;
-use chashmap::CHashMap;
 use chrono::{DateTime, Utc};
 use rand::Rng;
 use std::collections::HashMap;
+use std::sync::RwLock;
 use tracing::span::{Attributes, Id, Record};
 use tracing::{Event, Subscriber};
 use tracing_subscriber::{layer::Context, registry, Layer};
@@ -15,18 +15,8 @@ pub struct TelemetryLayer {
     // used to construct span ids to avoid collisions
     instance_id: u64,
     // lazy trace ctx + init time
-    span_data: CHashMap<Id, TraceCtx>,
+    span_data: RwLock<HashMap<Id, TraceCtx>>,
 }
-
-// // NOTE: plan B: (also lets me keep lazy concurrent etc tek, which I like)
-// // NOTE: basic idea is to keep span_id -> (remote parent span, trace id) map here w/ rwlocks (so u can get lock on whole tree to root node when forcing eval)
-// // NOTE: can call register_root_node(id), w/ no trace or parent, to register some location as root (would prevent debug wrapper from being seen as root w/o requiring filtering for rest of stack)
-// fn register_trace_id(trace_id: TraceId, remote_parent_span: Option<u128>) {
-//     // with subscriber, from dispatcher as previously
-//     let target_span_id = dispatcher.current; // available via dispatcher;
-//     let tracing_layer = dispatcher.subscriber.downcast;
-//     tracing_layer.observe_trace_id()
-// }
 
 impl TelemetryLayer {
     /// Create a new TelemetrySubscriber that uses the provided service_name and
@@ -41,90 +31,93 @@ impl TelemetryLayer {
         telemetry: Box<dyn Telemetry + Send + Sync + 'static>,
     ) -> Self {
         let instance_id = rand::thread_rng().gen();
+        let span_data = RwLock::new(HashMap::new());
 
         TelemetryLayer {
             instance_id,
             service_name,
             telemetry,
-            span_data: CHashMap::new(),
+            span_data,
         }
     }
 
     pub(crate) fn record_trace_ctx(&self, trace_ctx: TraceCtx, id: Id) {
-        // TODO: drop lazy trace stuff in extensions - can build vec of ExtensionMut
-        // update span data map with explicit trace ctx
-        self.span_data.upsert(
-            id,
-            move || trace_ctx,
-            |existing_trace_ctx| {
-                // panic? could be (will only happen if bug), but doesn't need to kill entire process. idk <- FIXME
-                eprintln!(
-                    "attempting to register a trace ctx \
-                     on a span which already has a trace ctx registered, no-op {:?}",
-                    &existing_trace_ctx
-                )
-            },
-        )
+        let mut span_data = self.span_data.write().expect("write lock!");
+        span_data.insert(id, trace_ctx); // TODO: handle overwrite?
     }
 
     fn eval_ctx<S: Subscriber + for<'a> registry::LookupSpan<'a>>(
         &self,
-        target_id: &Id,
+        target_id: Id,
         ctx: &Context<S>,
     ) -> Option<TraceCtx> {
-        let target_span_ref: tracing_subscriber::registry::SpanRef<S> = ctx
-            .span(target_id)
-            .expect("span data not found during eval_ctx");
-
         let mut path = Vec::new();
 
-        let mut target_write_guard = target_span_ref.extensions_mut();
-        match target_write_guard.get_mut() {
-            None => match self.span_data.get(&target_span_ref.id()) {
-                None => {
+        let iter = itertools::unfold(Some(target_id), |st| match st {
+            Some(target_id) => {
+                let res = ctx
+                    .span(target_id)
+                    .expect("span data not found during eval_ctx");
+                *st = res.parent().map(|x| x.id());
+                Some(res)
+            }
+            None => None,
+        });
 
-                    // iterate over parents
-                    for span_ref in target_span_ref.parents() {
-                        let mut write_guard = span_ref.extensions_mut();
-                        match write_guard.get_mut() {
-                            None => match self.span_data.get(&span_ref.id()) {
-                                None => {
-                                    drop(write_guard);
-                                    path.push(span_ref);
+        for span_ref in iter {
+            let mut write_guard = span_ref.extensions_mut();
+            match write_guard.get_mut() {
+                None => {
+                    let span_data = self.span_data.read().unwrap();
+                    match span_data.get(&span_ref.id()) {
+                        None => {
+                            drop(write_guard);
+                            path.push(span_ref);
+                        }
+                        Some(local_trace_root) => {
+                            write_guard.insert(LazyTraceCtx(local_trace_root.clone()));
+
+                            let res = if path.is_empty() {
+                                local_trace_root.clone()
+                            } else {
+                                TraceCtx {
+                                    trace_id: local_trace_root.trace_id.clone(),
+                                    remote_span_parent: None,
                                 }
-                                Some(local_trace_root) => {
-                                    write_guard.insert(LazyTraceCtx(local_trace_root.clone()));
-                                    for span_ref in path.into_iter() {
-                                        let mut write_guard = span_ref.extensions_mut();
-                                        write_guard.insert(LazyTraceCtx(TraceCtx {
-                                            trace_id: local_trace_root.trace_id.clone(),
-                                            remote_span_parent: None,
-                                        }));
-                                    };
-                                    target_write_guard.insert(LazyTraceCtx(local_trace_root.clone()));
-                                    return Some(local_trace_root.clone());
-                                }
-                            },
-                            Some(LazyTraceCtx(already_evaluated)) => {
-                                for span_ref in path.into_iter() {
-                                    let mut write_guard = span_ref.extensions_mut();
-                                    write_guard.insert(LazyTraceCtx(already_evaluated.clone()));
-                                }
-                                target_write_guard.insert(LazyTraceCtx(already_evaluated.clone()));
-                                return Some(already_evaluated.clone());
+                            };
+
+                            for span_ref in path.into_iter() {
+                                let mut write_guard = span_ref.extensions_mut();
+                                write_guard.insert(LazyTraceCtx(TraceCtx {
+                                    trace_id: local_trace_root.trace_id.clone(),
+                                    remote_span_parent: None,
+                                }));
                             }
+                            return Some(res);
                         }
                     }
                 }
-                Some(local_trace_root) => {
-                    target_write_guard.insert(LazyTraceCtx(local_trace_root.clone()));
-                    return Some(local_trace_root.clone());
+                Some(LazyTraceCtx(already_evaluated)) => {
+                    let res = if path.is_empty() {
+                        already_evaluated.clone()
+                    } else {
+                        TraceCtx {
+                            trace_id: already_evaluated.trace_id.clone(),
+                            remote_span_parent: None,
+                        }
+                    };
+
+                    for span_ref in path.into_iter() {
+                        let mut write_guard = span_ref.extensions_mut();
+                        write_guard.insert(LazyTraceCtx(TraceCtx {
+                            trace_id: already_evaluated.trace_id.clone(),
+                            remote_span_parent: None,
+                        }));
+                    }
+                    return Some(res);
                 }
-            },
-            Some(LazyTraceCtx(already_evaluated)) => {
-                return Some(already_evaluated.clone());
             }
-        };
+        }
 
         None
     }
@@ -176,10 +169,8 @@ where
                 let mut visitor = HoneycombVisitor(HashMap::new());
                 event.record(&mut visitor);
 
-                // TODO: modify get_or_set to return None if it gets to end of parents iterator w/ no result (instead of generating!)
-
                 // only report event if it's part of a trace
-                if let Some(parent_trace_ctx) = self.eval_ctx(&parent_id, &ctx) {
+                if let Some(parent_trace_ctx) = self.eval_ctx(parent_id.clone(), &ctx) {
                     let event = telemetry::Event {
                         trace_id: parent_trace_ctx.trace_id,
                         parent_id: Some(SpanId::from_id(parent_id.clone(), self.instance_id)),
@@ -201,7 +192,7 @@ where
         let span = ctx.span(&id).expect("span data not found during on_close");
 
         // if span's enclosing ctx has a trace id, eval & use to report telemetry
-        if let Some(trace_ctx) = self.eval_ctx(&id, &ctx) {
+        if let Some(trace_ctx) = self.eval_ctx(id.clone(), &ctx) {
             let mut extensions_mut = span.extensions_mut();
             let visitor: HoneycombVisitor = extensions_mut
                 .remove()
@@ -215,14 +206,12 @@ where
             let elapsed_ms = now - initialized_at.timestamp_millis();
 
             let parent_id = match trace_ctx.remote_span_parent {
-                None => {
-                    span.parents().next().map( |parent| SpanId::from_id(parent.id(), self.instance_id))
-                }
-                Some(remote_span_parent) => {
-                    Some(remote_span_parent)
-                }
+                None => span
+                    .parents()
+                    .next()
+                    .map(|parent| SpanId::from_id(parent.id(), self.instance_id)),
+                Some(remote_span_parent) => Some(remote_span_parent),
             };
-
 
             let span = telemetry::Span {
                 id: SpanId::from_id(id, self.instance_id),
@@ -241,7 +230,7 @@ where
         };
     }
 
-    // FIXME: do I need to do something here?
+    // FIXME: do I need to do something here? I think no (better to require explicit re-marking as root after copy).
     // called when span copied, needed iff span has trace id/etc already? nah,
     // fn on_id_change(&self, _old: &Id, _new: &Id, _ctx: Context<'_, S>) {}
 }
@@ -249,12 +238,155 @@ where
 struct LazyTraceCtx(TraceCtx);
 
 struct SpanInitAt(DateTime<Utc>);
-//  TODO: drop all but root tags in extensions
 
 impl SpanInitAt {
     fn new() -> Self {
         let initialized_at = Utc::now();
 
         Self(initialized_at)
+    }
+}
+
+#[derive(Debug)]
+struct PathToRoot<'a, S> {
+    registry: &'a S,
+    next: Option<Id>,
+}
+
+impl<'a, S> Iterator for PathToRoot<'a, S>
+where
+    S: registry::LookupSpan<'a>,
+{
+    type Item = registry::SpanRef<'a, S>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let id = self.next.take()?;
+        let span = self.registry.span(&id)?;
+        self.next = span.parent().map(|parent| parent.id());
+        Some(span)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::telemetry::TraceId;
+    use std::sync::Arc;
+    use std::sync::Mutex;
+    use std::time::Duration;
+    use tokio::runtime::current_thread::Runtime;
+    use tracing::instrument;
+    use tracing_subscriber::layer::Layer;
+
+    fn explicit_trace_ctx() -> TraceCtx {
+        let trace_id = TraceId::new("test-trace-id".to_string());
+        let span_id = SpanId::from_id(Id::from_u64(1234), 5678);
+        TraceCtx {
+            trace_id,
+            remote_span_parent: Some(span_id),
+        }
+    }
+
+    #[test]
+    fn test_instrument() {
+        with_test_scenario_runner(|| {
+            #[instrument]
+            fn f(ns: Vec<u64>) {
+                explicit_trace_ctx().record_on_current_span();
+                for n in ns {
+                    g(format!("{}", n));
+                }
+            }
+
+            #[instrument]
+            fn g(_s: String) {
+                let use_of_reserved_word = "duration-value";
+                tracing::event!(
+                    tracing::Level::INFO,
+                    duration_ms = use_of_reserved_word,
+                    foo = "bar"
+                );
+            }
+
+            f(vec![1, 2, 3]);
+        });
+    }
+
+    // run async fn (with multiple entry and exit for each span due to delay) with test scenario
+    #[test]
+    fn test_async_instrument() {
+        with_test_scenario_runner(|| {
+            #[instrument]
+            async fn f(ns: Vec<u64>) {
+                explicit_trace_ctx().record_on_current_span();
+                for n in ns {
+                    g(format!("{}", n)).await;
+                }
+            }
+
+            #[instrument]
+            async fn g(s: String) {
+                // delay to force multiple span entry (because it isn't immediately ready)
+                tokio::timer::delay_for(Duration::from_millis(100)).await;
+                let use_of_reserved_word = "duration-value";
+                tracing::event!(
+                    tracing::Level::INFO,
+                    duration_ms = use_of_reserved_word,
+                    foo = "bar"
+                );
+            }
+
+            let mut rt = Runtime::new().unwrap();
+            rt.block_on(f(vec![1, 2, 3]));
+        });
+    }
+
+    fn with_test_scenario_runner<F>(f: F)
+    where
+        F: Fn() -> (),
+    {
+        let spans = Arc::new(Mutex::new(Vec::new()));
+        let events = Arc::new(Mutex::new(Vec::new()));
+        let cap = crate::telemetry::test::TestTelemetry::new(spans.clone(), events.clone());
+        let layer = TelemetryLayer::new_("test_svc_name".to_string(), Box::new(cap));
+
+        let subscriber = layer.with_subscriber(registry::Registry::default());
+        tracing::subscriber::with_default(subscriber, f);
+
+        let spans = spans.lock().unwrap();
+        let events = events.lock().unwrap();
+
+        // root span is exited (and reported) last
+        let root_span = &spans[3];
+        let child_spans = &spans[0..3];
+
+        fn expected(k: String, v: libhoney::Value) -> HashMap<String, libhoney::Value> {
+            let mut h = HashMap::new();
+            h.insert(k, v);
+            h
+        }
+
+        let expected_trace_id = TraceId::new("test-trace-id".to_string());
+
+        assert_eq!(
+            root_span.values,
+            expected("ns".to_string(), libhoney::json!("[1, 2, 3]"))
+        );
+        assert_eq!(root_span.parent_id, explicit_trace_ctx().remote_span_parent);
+        assert_eq!(root_span.trace_id, expected_trace_id);
+
+        for (span, event) in child_spans.iter().zip(events.iter()) {
+            // confirm parent and trace ids are as expected
+            assert_eq!(span.parent_id, Some(root_span.id.clone()));
+            assert_eq!(event.parent_id, Some(span.id.clone()));
+            assert_eq!(span.trace_id, explicit_trace_ctx().trace_id);
+            assert_eq!(event.trace_id, explicit_trace_ctx().trace_id);
+
+            // test that reserved word field names are modified w/ tracing. prefix
+            // (field names like "trace.span_id", "duration_ms", etc are ok)
+            assert_eq!(
+                event.values["tracing.duration_ms"],
+                libhoney::json!("duration-value")
+            )
+        }
     }
 }

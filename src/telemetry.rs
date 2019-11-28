@@ -24,6 +24,7 @@ impl HoneycombTelemetry {
     }
 
     fn report_data(&self, data: HashMap<String, ::libhoney::Value>) {
+        println!("report data");
         // succeed or die. failure is unrecoverable (mutex poisoned)
         let mut client = self.honeycomb_client.lock().unwrap();
         let mut ev = client.new_event();
@@ -77,7 +78,7 @@ impl TraceCtx {
                 .expect("unable to record TraceCtx, no current span")
                 .clone();
             s.record_trace_ctx(ctx, current_span_id);
-        })
+        });
     }
 }
 
@@ -191,8 +192,6 @@ impl<'a> Span<'a> {
         values
     }
 }
-
-// copy strings into lazy static ref in tests
 
 #[derive(Clone, Debug)]
 pub(crate) struct Event<'a> {
