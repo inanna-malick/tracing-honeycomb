@@ -3,9 +3,9 @@ use honeycomb_tracing::{TraceCtx, TraceId};
 use std::time::Duration;
 use tokio::timer::delay_for;
 use tracing::instrument;
-use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::layer::Layer;
 use tracing_subscriber::registry;
+
 
 #[instrument]
 async fn foo() {
@@ -27,6 +27,8 @@ async fn baz(x: u64) {
     tracing::info!("baz iteration: {}", x);
     delay_for(Duration::from_millis(50)).await
 }
+
+
 
 #[tokio::main]
 async fn main() {
@@ -53,6 +55,6 @@ async fn main() {
 
     loop {
         foo().await;
-        delay_for(Duration::from_secs(60)).await
+        delay_for(Duration::from_secs(6000)).await
     }
 }
