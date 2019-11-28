@@ -6,7 +6,6 @@ use tracing::instrument;
 use tracing_subscriber::layer::Layer;
 use tracing_subscriber::registry;
 
-
 #[instrument]
 async fn foo() {
     TraceCtx {
@@ -27,8 +26,6 @@ async fn baz(x: u64) {
     tracing::info!("baz iteration: {}", x);
     delay_for(Duration::from_millis(50)).await
 }
-
-
 
 #[tokio::main]
 async fn main() {
