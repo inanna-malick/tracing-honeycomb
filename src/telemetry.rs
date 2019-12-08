@@ -122,7 +122,7 @@ impl TraceCtx {
 }
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
-pub struct SpanId(tracing::Id, u64);
+pub struct SpanId(pub tracing::Id, pub u64);
 
 impl std::fmt::Display for SpanId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -138,7 +138,7 @@ impl SpanId {
 
 /// A Honeycomb Trace ID. Uniquely identifies a single distributed (potentially multi-process) trace.
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
-pub struct TraceId(String);
+pub struct TraceId(pub String);
 
 impl TraceId {
     /// Create a new trace ID wrapping some provided String
