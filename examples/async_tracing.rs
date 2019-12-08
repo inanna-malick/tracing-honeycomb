@@ -10,7 +10,7 @@ use tracing_subscriber::registry;
 async fn foo() {
     TraceCtx {
         trace_id: TraceId::generate(),
-        remote_span_parent: None,
+        parent_span: None,
     }
     .record_on_current_span();
 

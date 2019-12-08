@@ -46,9 +46,13 @@ impl TelemetryLayer {
         span_data.insert(id, trace_ctx); // TODO: handle overwrite?
     }
 
-    pub fn eval_ctx<'a, X: 'a + registry::LookupSpan<'a>, I: std::iter::Iterator<Item = registry::SpanRef<'a, X> >>(
+    pub fn eval_ctx<
+        'a,
+        X: 'a + registry::LookupSpan<'a>,
+        I: std::iter::Iterator<Item = registry::SpanRef<'a, X>>,
+    >(
         &self,
-        iter: I
+        iter: I,
     ) -> Option<TraceCtx> {
         let mut path = Vec::new();
 
@@ -70,7 +74,7 @@ impl TelemetryLayer {
                             } else {
                                 TraceCtx {
                                     trace_id: local_trace_root.trace_id.clone(),
-                                    remote_span_parent: None,
+                                    parent_span: None,
                                 }
                             };
 
@@ -78,7 +82,7 @@ impl TelemetryLayer {
                                 let mut write_guard = span_ref.extensions_mut();
                                 write_guard.insert(LazyTraceCtx(TraceCtx {
                                     trace_id: local_trace_root.trace_id.clone(),
-                                    remote_span_parent: None,
+                                    parent_span: None,
                                 }));
                             }
                             return Some(res);
@@ -91,7 +95,7 @@ impl TelemetryLayer {
                     } else {
                         TraceCtx {
                             trace_id: already_evaluated.trace_id.clone(),
-                            remote_span_parent: None,
+                            parent_span: None,
                         }
                     };
 
@@ -99,7 +103,7 @@ impl TelemetryLayer {
                         let mut write_guard = span_ref.extensions_mut();
                         write_guard.insert(LazyTraceCtx(TraceCtx {
                             trace_id: already_evaluated.trace_id.clone(),
-                            remote_span_parent: None,
+                            parent_span: None,
                         }));
                     }
                     return Some(res);
@@ -217,12 +221,12 @@ where
             let now = now.timestamp_millis();
             let elapsed_ms = now - initialized_at.timestamp_millis();
 
-            let parent_id = match trace_ctx.remote_span_parent {
+            let parent_id = match trace_ctx.parent_span {
                 None => span
                     .parents()
                     .next()
                     .map(|parent| SpanId::from_id(parent.id(), self.instance_id)),
-                Some(remote_span_parent) => Some(remote_span_parent),
+                Some(parent_span) => Some(parent_span),
             };
 
             let span = telemetry::Span {
@@ -294,7 +298,7 @@ mod tests {
         let span_id = SpanId::from_id(Id::from_u64(1234), 5678);
         TraceCtx {
             trace_id,
-            remote_span_parent: Some(span_id),
+            parent_span: Some(span_id),
         }
     }
 
@@ -318,7 +322,10 @@ mod tests {
                     foo = "bar"
                 );
 
-                assert_eq!(TraceCtx::eval_current_trace_ctx().map( |x| x.trace_id), Some(explicit_trace_ctx().trace_id));
+                assert_eq!(
+                    TraceCtx::eval_current_trace_ctx().map(|x| x.trace_id),
+                    Some(explicit_trace_ctx().trace_id)
+                );
             }
 
             f(vec![1, 2, 3]);
@@ -348,7 +355,10 @@ mod tests {
                     foo = "bar"
                 );
 
-                assert_eq!(TraceCtx::eval_current_trace_ctx().map( |x| x.trace_id), Some(explicit_trace_ctx().trace_id));
+                assert_eq!(
+                    TraceCtx::eval_current_trace_ctx().map(|x| x.trace_id),
+                    Some(explicit_trace_ctx().trace_id)
+                );
             }
 
             let mut rt = Runtime::new().unwrap();
@@ -387,7 +397,7 @@ mod tests {
             root_span.values,
             expected("ns".to_string(), libhoney::json!("[1, 2, 3]"))
         );
-        assert_eq!(root_span.parent_id, explicit_trace_ctx().remote_span_parent);
+        assert_eq!(root_span.parent_id, explicit_trace_ctx().parent_span);
         assert_eq!(root_span.trace_id, expected_trace_id);
 
         for (span, event) in child_spans.iter().zip(events.iter()) {

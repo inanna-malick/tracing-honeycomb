@@ -53,7 +53,7 @@ impl Telemetry for HoneycombTelemetry {
 // TODO: review pub vs. pub(crate)
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct TraceCtx {
-    pub remote_span_parent: Option<SpanId>,
+    pub parent_span: Option<SpanId>,
     pub trace_id: TraceId,
 }
 
@@ -81,16 +81,14 @@ impl TraceCtx {
         });
     }
 
-
     pub fn eval_current_trace_ctx() -> Option<Self> {
         tracing::dispatcher::get_default(|d| {
             // panic if currently registered subscriber is not of the expected type (traverses layers via downcast_ref)
             let telemetry_layer = d
                 .downcast_ref::<crate::telemetry_layer::TelemetryLayer>()
                 .expect(
-                    "unable to eval current trace ctx, TelemetryLayer not registered as tracing layer",
-                );
-
+                "unable to eval current trace ctx, TelemetryLayer not registered as tracing layer",
+            );
 
             let registry = d
                 .downcast_ref::<tracing_subscriber::Registry>()
@@ -115,12 +113,12 @@ impl TraceCtx {
                 None => None,
             });
 
-            telemetry_layer.eval_ctx(iter).map( |x| TraceCtx{
-                remote_span_parent: Some(SpanId(current_span_id, telemetry_layer.instance_id)),
-                trace_id: x.trace_id
-            } )
-        }
-        )}
+            telemetry_layer.eval_ctx(iter).map(|x| TraceCtx {
+                parent_span: Some(SpanId(current_span_id, telemetry_layer.instance_id)),
+                trace_id: x.trace_id,
+            })
+        })
+    }
 }
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
