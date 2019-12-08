@@ -13,7 +13,7 @@ pub struct TelemetryLayer {
     telemetry: Box<dyn Telemetry + Send + Sync + 'static>,
     service_name: String,
     // used to construct span ids to avoid collisions
-    instance_id: u64,
+    pub(crate) instance_id: u64,
     // lazy trace ctx + init time
     span_data: RwLock<HashMap<Id, TraceCtx>>,
 }
@@ -46,23 +46,11 @@ impl TelemetryLayer {
         span_data.insert(id, trace_ctx); // TODO: handle overwrite?
     }
 
-    fn eval_ctx<S: Subscriber + for<'a> registry::LookupSpan<'a>>(
+    pub fn eval_ctx<'a, X: 'a + registry::LookupSpan<'a>, I: std::iter::Iterator<Item = registry::SpanRef<'a, X> >>(
         &self,
-        target_id: Id,
-        ctx: &Context<S>,
+        iter: I
     ) -> Option<TraceCtx> {
         let mut path = Vec::new();
-
-        let iter = itertools::unfold(Some(target_id), |st| match st {
-            Some(target_id) => {
-                let res = ctx
-                    .span(target_id)
-                    .expect("span data not found during eval_ctx");
-                *st = res.parent().map(|x| x.id());
-                Some(res)
-            }
-            None => None,
-        });
 
         for span_ref in iter {
             let mut write_guard = span_ref.extensions_mut();
@@ -169,8 +157,20 @@ where
                 let mut visitor = HoneycombVisitor(HashMap::new());
                 event.record(&mut visitor);
 
+                // TODO: dedup
+                let iter = itertools::unfold(Some(parent_id.clone()), |st| match st {
+                    Some(target_id) => {
+                        let res = ctx
+                            .span(target_id)
+                            .expect("span data not found during eval_ctx");
+                        *st = res.parent().map(|x| x.id());
+                        Some(res)
+                    }
+                    None => None,
+                });
+
                 // only report event if it's part of a trace
-                if let Some(parent_trace_ctx) = self.eval_ctx(parent_id.clone(), &ctx) {
+                if let Some(parent_trace_ctx) = self.eval_ctx(iter) {
                     let event = telemetry::Event {
                         trace_id: parent_trace_ctx.trace_id,
                         parent_id: Some(SpanId::from_id(parent_id.clone(), self.instance_id)),
@@ -191,8 +191,20 @@ where
     fn on_close(&self, id: Id, ctx: Context<'_, S>) {
         let span = ctx.span(&id).expect("span data not found during on_close");
 
+        // TODO: dedup
+        let iter = itertools::unfold(Some(id.clone()), |st| match st {
+            Some(target_id) => {
+                let res = ctx
+                    .span(target_id)
+                    .expect("span data not found during eval_ctx");
+                *st = res.parent().map(|x| x.id());
+                Some(res)
+            }
+            None => None,
+        });
+
         // if span's enclosing ctx has a trace id, eval & use to report telemetry
-        if let Some(trace_ctx) = self.eval_ctx(id.clone(), &ctx) {
+        if let Some(trace_ctx) = self.eval_ctx(iter) {
             let mut extensions_mut = span.extensions_mut();
             let visitor: HoneycombVisitor = extensions_mut
                 .remove()
@@ -305,6 +317,8 @@ mod tests {
                     duration_ms = use_of_reserved_word,
                     foo = "bar"
                 );
+
+                assert_eq!(TraceCtx::eval_current_trace_ctx().map( |x| x.trace_id), Some(explicit_trace_ctx().trace_id));
             }
 
             f(vec![1, 2, 3]);
@@ -333,6 +347,8 @@ mod tests {
                     duration_ms = use_of_reserved_word,
                     foo = "bar"
                 );
+
+                assert_eq!(TraceCtx::eval_current_trace_ctx().map( |x| x.trace_id), Some(explicit_trace_ctx().trace_id));
             }
 
             let mut rt = Runtime::new().unwrap();

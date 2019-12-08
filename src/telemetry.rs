@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use libhoney::{json, FieldHolder};
 use std::collections::HashMap;
 use std::sync::Mutex;
+use tracing_subscriber::registry::LookupSpan;
 
 pub(crate) trait Telemetry {
     fn report_span<'a>(&self, span: Span<'a>);
@@ -79,6 +80,47 @@ impl TraceCtx {
             s.record_trace_ctx(ctx, current_span_id);
         });
     }
+
+
+    pub fn eval_current_trace_ctx() -> Option<Self> {
+        tracing::dispatcher::get_default(|d| {
+            // panic if currently registered subscriber is not of the expected type (traverses layers via downcast_ref)
+            let telemetry_layer = d
+                .downcast_ref::<crate::telemetry_layer::TelemetryLayer>()
+                .expect(
+                    "unable to eval current trace ctx, TelemetryLayer not registered as tracing layer",
+                );
+
+
+            let registry = d
+                .downcast_ref::<tracing_subscriber::Registry>()
+                .expect(
+                    "unable to eval current trace ctx, Registry subscriber not registered as tracing subscriber",
+                );
+
+            let current_span_id = d
+                .current_span()
+                .id()
+                .expect("unable to record TraceCtx, no current span")
+                .clone();
+
+            let iter = itertools::unfold(Some(current_span_id.clone()), |st| match st {
+                Some(target_id) => {
+                    let res = registry
+                        .span(target_id)
+                        .expect("span data not found during eval_ctx for eval_current_trace_ctx");
+                    *st = res.parent().map(|x| x.id());
+                    Some(res)
+                }
+                None => None,
+            });
+
+            telemetry_layer.eval_ctx(iter).map( |x| TraceCtx{
+                remote_span_parent: Some(SpanId(current_span_id, telemetry_layer.instance_id)),
+                trace_id: x.trace_id
+            } )
+        }
+        )}
 }
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
