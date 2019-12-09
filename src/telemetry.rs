@@ -114,7 +114,10 @@ impl TraceCtx {
             });
 
             telemetry_layer.eval_ctx(iter).map(|x| TraceCtx {
-                parent_span: Some(SpanId(current_span_id, telemetry_layer.instance_id)),
+                parent_span: Some(SpanId {
+                    tracing_id: current_span_id,
+                    instance_id: telemetry_layer.instance_id,
+                }),
                 trace_id: x.trace_id,
             })
         })
@@ -122,17 +125,14 @@ impl TraceCtx {
 }
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
-pub struct SpanId(pub tracing::Id, pub u64);
+pub struct SpanId {
+    pub tracing_id: tracing::Id,
+    pub instance_id: u64,
+}
 
 impl std::fmt::Display for SpanId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}-{}", self.0.into_u64(), self.1)
-    }
-}
-
-impl SpanId {
-    pub(crate) fn from_id(id: tracing::Id, instance_id: u64) -> Self {
-        SpanId(id, instance_id)
+        write!(f, "{}-{}", self.tracing_id.into_u64(), self.instance_id)
     }
 }
 

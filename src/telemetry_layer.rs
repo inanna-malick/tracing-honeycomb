@@ -113,6 +113,13 @@ impl TelemetryLayer {
 
         None
     }
+
+    fn span_id(&self, tracing_id: Id) -> SpanId {
+        SpanId {
+            tracing_id,
+            instance_id: self.instance_id,
+        }
+    }
 }
 
 impl<S> Layer<S> for TelemetryLayer
@@ -177,7 +184,7 @@ where
                 if let Some(parent_trace_ctx) = self.eval_ctx(iter) {
                     let event = telemetry::Event {
                         trace_id: parent_trace_ctx.trace_id,
-                        parent_id: Some(SpanId::from_id(parent_id.clone(), self.instance_id)),
+                        parent_id: Some(self.span_id(parent_id.clone())),
                         initialized_at,
                         level: event.metadata().level().clone(),
                         name: event.metadata().name(),
@@ -225,12 +232,12 @@ where
                 None => span
                     .parents()
                     .next()
-                    .map(|parent| SpanId::from_id(parent.id(), self.instance_id)),
+                    .map(|parent| self.span_id(parent.id())),
                 Some(parent_span) => Some(parent_span),
             };
 
             let span = telemetry::Span {
-                id: SpanId::from_id(id, self.instance_id),
+                id: self.span_id(id),
                 target: span.metadata().target(),
                 level: span.metadata().level().clone(), // copy on inner type
                 parent_id,
@@ -295,7 +302,11 @@ mod tests {
 
     fn explicit_trace_ctx() -> TraceCtx {
         let trace_id = TraceId::new("test-trace-id".to_string());
-        let span_id = SpanId::from_id(Id::from_u64(1234), 5678);
+        let span_id = SpanId {
+            tracing_id: Id::from_u64(1234),
+            instance_id: 5678,
+        };
+
         TraceCtx {
             trace_id,
             parent_span: Some(span_id),
