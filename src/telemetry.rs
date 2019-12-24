@@ -64,20 +64,20 @@ impl TraceCtx {
         let mut ctx = Some(self);
         tracing::dispatcher::get_default(|d| {
             // panic if currently registered subscriber is not of the expected type (traverses layers via downcast_ref)
-            let s = d
-                .downcast_ref::<crate::telemetry_layer::TelemetryLayer>()
-                .expect(
+            if let Some(s) = d.downcast_ref::<crate::telemetry_layer::TelemetryLayer>() {
+                // required b/c get_default takes FnMut, however we know it will only be invoked once
+                let ctx = ctx.take().expect("fn should not be invoked twice");
+                let current_span_id = d
+                    .current_span()
+                    .id()
+                    .expect("unable to record TraceCtx, no current span")
+                    .clone();
+                s.record_trace_ctx(ctx, current_span_id);
+            } else {
+                eprintln!(
                     "unable to record TraceCtx, TelemetryLayer not registered as tracing layer",
-                );
-
-            // required b/c get_default takes FnMut, however we know it will only be invoked once
-            let ctx = ctx.take().expect("fn should not be invoked twice");
-            let current_span_id = d
-                .current_span()
-                .id()
-                .expect("unable to record TraceCtx, no current span")
-                .clone();
-            s.record_trace_ctx(ctx, current_span_id);
+                )
+            }
         });
     }
 

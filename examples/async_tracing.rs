@@ -3,9 +3,9 @@ use honeycomb_tracing::{TraceCtx, TraceId};
 use std::time::Duration;
 use tokio::timer::delay_for;
 use tracing::instrument;
+use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::layer::Layer;
 use tracing_subscriber::registry;
-use tracing_subscriber::filter::LevelFilter;
 
 #[instrument]
 async fn foo() {
