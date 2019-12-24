@@ -5,6 +5,7 @@ use tokio::timer::delay_for;
 use tracing::instrument;
 use tracing_subscriber::layer::Layer;
 use tracing_subscriber::registry;
+use tracing_subscriber::filter::LevelFilter;
 
 #[instrument]
 async fn foo() {
@@ -44,7 +45,9 @@ async fn main() {
         },
     };
 
-    let layer = TelemetryLayer::new("test_svc_name".to_string(), honeycomb_config);
+    let layer = TelemetryLayer::new("async-tracing-example".to_string(), honeycomb_config)
+        .and_then(tracing_subscriber::fmt::Layer::builder().finish())
+        .and_then(LevelFilter::INFO);
 
     let subscriber = layer.with_subscriber(registry::Registry::default());
 
