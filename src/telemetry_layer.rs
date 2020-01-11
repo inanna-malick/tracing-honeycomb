@@ -27,7 +27,7 @@ impl TelemetryLayer {
     }
 
     // for use in tests, discards spans and events
-    pub fn new_blakchole() -> Self {
+    pub fn new_blackhole() -> Self {
         let telemetry = Box::new(BlackholeTelemetry);
         Self::new_("".to_string(), telemetry)
     }
