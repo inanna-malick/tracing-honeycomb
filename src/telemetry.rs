@@ -68,6 +68,7 @@ pub struct TraceCtx {
 impl TraceCtx {
     /// Record a trace ID on the current span. Requires that the currently registered dispatcher
     /// have a TelemetrySubscriber reachable via 'downcast_ref', otherwise will panic.
+    // TODO: expose error to user here instead of panic (but show panic in example, fail fast still makes sense here)
     pub fn record_on_current_span(self) {
         let mut ctx = Some(self);
         tracing::dispatcher::get_default(|d| {
@@ -82,9 +83,7 @@ impl TraceCtx {
                     .clone();
                 s.record_trace_ctx(ctx, current_span_id);
             } else {
-                eprintln!(
-                    "unable to record TraceCtx, TelemetryLayer not registered as tracing layer",
-                )
+                panic!("unable to record TraceCtx, TelemetryLayer not registered as tracing layer",)
             }
         });
     }
