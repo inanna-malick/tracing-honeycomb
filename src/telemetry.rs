@@ -50,6 +50,14 @@ impl Telemetry for HoneycombTelemetry {
     }
 }
 
+pub(crate) struct BlackholeTelemetry;
+
+impl Telemetry for BlackholeTelemetry {
+    fn report_span(&self, _: Span) {}
+
+    fn report_event(&self, _: Event) {}
+}
+
 // TODO: review pub vs. pub(crate)
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct TraceCtx {

@@ -1,4 +1,4 @@
-use crate::telemetry::{self, HoneycombTelemetry, SpanId, Telemetry, TraceCtx};
+use crate::telemetry::{self, BlackholeTelemetry, HoneycombTelemetry, SpanId, Telemetry, TraceCtx};
 use crate::visitor::HoneycombVisitor;
 use chrono::{DateTime, Utc};
 use rand::Rng;
@@ -24,6 +24,12 @@ impl TelemetryLayer {
     pub fn new(service_name: String, config: libhoney::Config) -> Self {
         let telemetry = Box::new(HoneycombTelemetry::new(config));
         Self::new_(service_name, telemetry)
+    }
+
+    // for use in tests, discards spans and events
+    pub fn new_blakchole() -> Self {
+        let telemetry = Box::new(BlackholeTelemetry);
+        Self::new_("".to_string(), telemetry)
     }
 
     pub(crate) fn new_(
