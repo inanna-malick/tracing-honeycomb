@@ -4,17 +4,17 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 use tracing_subscriber::registry::LookupSpan;
 
-pub(crate) trait Telemetry {
+pub trait Telemetry {
     fn report_span<'a>(&self, span: Span<'a>);
     fn report_event<'a>(&self, event: Event<'a>);
 }
 
-pub(crate) struct HoneycombTelemetry {
+pub struct HoneycombTelemetry {
     honeycomb_client: Mutex<libhoney::Client<libhoney::transmission::Transmission>>,
 }
 
 impl HoneycombTelemetry {
-    pub(crate) fn new(cfg: libhoney::Config) -> Self {
+    pub fn new(cfg: libhoney::Config) -> Self {
         let honeycomb_client = libhoney::init(cfg);
 
         // publishing requires &mut so just mutex-wrap it
@@ -50,7 +50,7 @@ impl Telemetry for HoneycombTelemetry {
     }
 }
 
-pub(crate) struct BlackholeTelemetry;
+pub struct BlackholeTelemetry;
 
 impl Telemetry for BlackholeTelemetry {
     fn report_span(&self, _: Span) {}
@@ -65,52 +65,60 @@ pub struct TraceCtx {
     pub trace_id: TraceId,
 }
 
+// todo extend error and etc
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+pub enum TraceCtxError {
+    TelemetryLayerNotRegistered,
+    RegistrySubscriberNotRegistered,
+    NoEnabledSpan,
+    NoParentNodeHasTraceCtx, // no parent node has explicitly registered trace ctx
+}
+
+// TODO: check in with rain & etc re: names, ideally find better options
 impl TraceCtx {
-    /// Record a trace ID on the current span. Requires that the currently registered dispatcher
-    /// have a TelemetrySubscriber reachable via 'downcast_ref', otherwise will panic.
-    // TODO: expose error to user here instead of panic (but show panic in example, fail fast still makes sense here)
-    pub fn record_on_current_span(self) {
-        let mut ctx = Some(self);
-        tracing::dispatcher::get_default(|d| {
-            // panic if currently registered subscriber is not of the expected type (traverses layers via downcast_ref)
-            if let Some(s) = d.downcast_ref::<crate::telemetry_layer::TelemetryLayer>() {
-                // required b/c get_default takes FnMut, however we know it will only be invoked once
-                let ctx = ctx.take().expect("fn should not be invoked twice");
-                let current_span_id = d
-                    .current_span()
-                    .id()
-                    .expect("unable to record TraceCtx, no current span")
-                    .clone();
-                s.record_trace_ctx(ctx, current_span_id);
-            } else {
-                panic!("unable to record TraceCtx, TelemetryLayer not registered as tracing layer",)
-            }
-        });
+    /// Generate a new 'TraceCtx' with a random trace id and no parent span
+    pub fn new() -> Self {
+        TraceCtx {
+            trace_id: TraceId::generate(),
+            parent_span: None,
+        }
     }
 
-    pub fn eval_current_trace_ctx() -> Option<Self> {
-        tracing::dispatcher::get_default(|d| {
-            // panic if currently registered subscriber is not of the expected type (traverses layers via downcast_ref)
-            let telemetry_layer = d
+    /// Record a trace ID on the current span. Requires that the currently registered dispatcher
+    /// have a TelemetrySubscriber reachable via 'downcast_ref', otherwise will panic.
+    pub fn record_on_current_span(self) -> Result<(), TraceCtxError> {
+        let span = tracing::Span::current();
+        let res = span
+            .with_subscriber(|(current_span_id, dispatch)| {
+                if let Some(layer) =
+                    dispatch.downcast_ref::<crate::telemetry_layer::TelemetryLayer>()
+                {
+                    layer.record_trace_ctx(self, current_span_id.clone());
+                    Ok(())
+                } else {
+                    Err(TraceCtxError::TelemetryLayerNotRegistered)
+                }
+            })
+            .ok_or(TraceCtxError::NoEnabledSpan)?;
+        res
+    }
+
+    /// Evaluate the current trace context (as registered on this node or a parent therof via 'record_on_current_span')
+    pub fn eval_current_trace_ctx() -> Result<Self, TraceCtxError> {
+        fn inner(x: (&tracing::Id, &tracing::Dispatch)) -> Result<TraceCtx, TraceCtxError> {
+            let (current_span_id, dispatch) = x;
+            let telemetry_layer = dispatch
                 .downcast_ref::<crate::telemetry_layer::TelemetryLayer>()
-                .expect(
-                "unable to eval current trace ctx, TelemetryLayer not registered as tracing layer",
-            );
+                .ok_or(TraceCtxError::TelemetryLayerNotRegistered)?;
 
-            let registry = d
+            let registry = dispatch
                 .downcast_ref::<tracing_subscriber::Registry>()
-                .expect(
-                    "unable to eval current trace ctx, Registry subscriber not registered as tracing subscriber",
-                );
-
-            let current_span_id = d
-                .current_span()
-                .id()
-                .expect("unable to record TraceCtx, no current span")
-                .clone();
+                .ok_or(TraceCtxError::RegistrySubscriberNotRegistered)?;
 
             let iter = itertools::unfold(Some(current_span_id.clone()), |st| match st {
                 Some(target_id) => {
+                    // TODO: confirm panic is valid here
+                    // failure here indicates a broken parent id span link, panic is valid
                     let res = registry
                         .span(target_id)
                         .expect("span data not found during eval_ctx for eval_current_trace_ctx");
@@ -120,14 +128,23 @@ impl TraceCtx {
                 None => None,
             });
 
-            telemetry_layer.eval_ctx(iter).map(|x| TraceCtx {
-                parent_span: Some(SpanId {
-                    tracing_id: current_span_id,
-                    instance_id: telemetry_layer.instance_id,
-                }),
-                trace_id: x.trace_id,
-            })
-        })
+            telemetry_layer
+                .eval_ctx(iter)
+                .map(|x| TraceCtx {
+                    parent_span: Some(SpanId {
+                        tracing_id: current_span_id.clone(),
+                        instance_id: telemetry_layer.instance_id,
+                    }),
+                    trace_id: x.trace_id,
+                })
+                .ok_or(TraceCtxError::NoParentNodeHasTraceCtx)
+        }
+
+        let span = tracing::Span::current();
+        let res = span
+            .with_subscriber(inner)
+            .ok_or(TraceCtxError::NoEnabledSpan)?;
+        res
     }
 }
 
@@ -163,17 +180,17 @@ impl TraceId {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct Span<'a> {
-    pub(crate) id: SpanId,
-    pub(crate) trace_id: TraceId,
-    pub(crate) parent_id: Option<SpanId>,
-    pub(crate) initialized_at: DateTime<Utc>,
-    pub(crate) elapsed_ms: i64,
-    pub(crate) level: tracing::Level,
-    pub(crate) name: &'a str,
-    pub(crate) target: &'a str,
-    pub(crate) service_name: &'a str,
-    pub(crate) values: HashMap<String, libhoney::Value>, // bag of misc values
+pub struct Span<'a> {
+    pub id: SpanId,
+    pub trace_id: TraceId,
+    pub parent_id: Option<SpanId>,
+    pub initialized_at: DateTime<Utc>,
+    pub elapsed_ms: i64,
+    pub level: tracing::Level,
+    pub name: &'a str,
+    pub target: &'a str,
+    pub service_name: &'a str,
+    pub values: HashMap<String, libhoney::Value>, // bag of misc values
 }
 
 impl<'a> Span<'a> {
@@ -240,15 +257,15 @@ impl<'a> Span<'a> {
 }
 
 #[derive(Clone, Debug)]
-pub(crate) struct Event<'a> {
-    pub(crate) trace_id: TraceId,
-    pub(crate) parent_id: Option<SpanId>,
-    pub(crate) initialized_at: DateTime<Utc>,
-    pub(crate) level: tracing::Level,
-    pub(crate) name: &'a str,
-    pub(crate) target: &'a str,
-    pub(crate) service_name: &'a str,
-    pub(crate) values: HashMap<String, libhoney::Value>, // bag of misc values
+pub struct Event<'a> {
+    pub trace_id: TraceId,
+    pub parent_id: Option<SpanId>,
+    pub initialized_at: DateTime<Utc>,
+    pub level: tracing::Level,
+    pub name: &'a str,
+    pub target: &'a str,
+    pub service_name: &'a str,
+    pub values: HashMap<String, libhoney::Value>, // bag of misc values
 }
 
 impl<'a> Event<'a> {
@@ -319,13 +336,13 @@ pub(crate) mod test {
     }
 
     /// Mock telemetry capability
-    pub(crate) struct TestTelemetry {
+    pub struct TestTelemetry {
         spans: Arc<Mutex<Vec<Span<'static>>>>,
         events: Arc<Mutex<Vec<Event<'static>>>>,
     }
 
     impl TestTelemetry {
-        pub(crate) fn new(
+        pub fn new(
             spans: Arc<Mutex<Vec<Span<'static>>>>,
             events: Arc<Mutex<Vec<Event<'static>>>>,
         ) -> Self {

@@ -1,4 +1,4 @@
-use crate::telemetry::{self, BlackholeTelemetry, HoneycombTelemetry, SpanId, Telemetry, TraceCtx};
+use crate::telemetry::{self, SpanId, Telemetry, TraceCtx};
 use crate::visitor::HoneycombVisitor;
 use chrono::{DateTime, Utc};
 use rand::Rng;
@@ -19,20 +19,7 @@ pub struct TelemetryLayer {
 }
 
 impl TelemetryLayer {
-    /// Create a new TelemetrySubscriber that uses the provided service_name and
-    /// a Honeycomb client initialized using the provided 'libhoney::Config'
-    pub fn new(service_name: String, config: libhoney::Config) -> Self {
-        let telemetry = Box::new(HoneycombTelemetry::new(config));
-        Self::new_(service_name, telemetry)
-    }
-
-    // for use in tests, discards spans and events
-    pub fn new_blackhole() -> Self {
-        let telemetry = Box::new(BlackholeTelemetry);
-        Self::new_("".to_string(), telemetry)
-    }
-
-    pub(crate) fn new_(
+    pub fn new(
         service_name: String,
         telemetry: Box<dyn Telemetry + Send + Sync + 'static>,
     ) -> Self {
@@ -302,7 +289,7 @@ mod tests {
     use std::sync::Arc;
     use std::sync::Mutex;
     use std::time::Duration;
-    use tokio::runtime::current_thread::Runtime;
+    use tokio::runtime::Runtime;
     use tracing::instrument;
     use tracing_subscriber::layer::Layer;
 
@@ -324,7 +311,7 @@ mod tests {
         with_test_scenario_runner(|| {
             #[instrument]
             fn f(ns: Vec<u64>) {
-                explicit_trace_ctx().record_on_current_span();
+                explicit_trace_ctx().record_on_current_span().unwrap();
                 for n in ns {
                     g(format!("{}", n));
                 }
@@ -340,8 +327,10 @@ mod tests {
                 );
 
                 assert_eq!(
-                    TraceCtx::eval_current_trace_ctx().map(|x| x.trace_id),
-                    Some(explicit_trace_ctx().trace_id)
+                    TraceCtx::eval_current_trace_ctx()
+                        .map(|x| x.trace_id)
+                        .unwrap(),
+                    explicit_trace_ctx().trace_id
                 );
             }
 
@@ -355,7 +344,7 @@ mod tests {
         with_test_scenario_runner(|| {
             #[instrument]
             async fn f(ns: Vec<u64>) {
-                explicit_trace_ctx().record_on_current_span();
+                explicit_trace_ctx().record_on_current_span().unwrap();
                 for n in ns {
                     g(format!("{}", n)).await;
                 }
@@ -364,7 +353,7 @@ mod tests {
             #[instrument]
             async fn g(s: String) {
                 // delay to force multiple span entry (because it isn't immediately ready)
-                tokio::timer::delay_for(Duration::from_millis(100)).await;
+                tokio::time::delay_for(Duration::from_millis(100)).await;
                 let use_of_reserved_word = "duration-value";
                 tracing::event!(
                     tracing::Level::INFO,
@@ -373,8 +362,10 @@ mod tests {
                 );
 
                 assert_eq!(
-                    TraceCtx::eval_current_trace_ctx().map(|x| x.trace_id),
-                    Some(explicit_trace_ctx().trace_id)
+                    TraceCtx::eval_current_trace_ctx()
+                        .map(|x| x.trace_id)
+                        .unwrap(),
+                    explicit_trace_ctx().trace_id
                 );
             }
 
@@ -390,7 +381,7 @@ mod tests {
         let spans = Arc::new(Mutex::new(Vec::new()));
         let events = Arc::new(Mutex::new(Vec::new()));
         let cap = crate::telemetry::test::TestTelemetry::new(spans.clone(), events.clone());
-        let layer = TelemetryLayer::new_("test_svc_name".to_string(), Box::new(cap));
+        let layer = TelemetryLayer::new("test_svc_name".to_string(), Box::new(cap));
 
         let subscriber = layer.with_subscriber(registry::Registry::default());
         tracing::subscriber::with_default(subscriber, f);
