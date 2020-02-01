@@ -9,7 +9,7 @@ use tracing::span::{Attributes, Id, Record};
 use tracing::{Event, Subscriber};
 use tracing_subscriber::{layer::Context, registry, Layer};
 
-/// Tracing 'Layer' that uses some client to publish events spans
+/// Tracing 'Layer' that uses some telemetry client 'T' to publish events and spans
 pub struct TelemetryLayer<T> {
     telemetry: T,
     service_name: String,

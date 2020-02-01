@@ -7,19 +7,7 @@ use tracing_subscriber::registry::LookupSpan;
 use crate::trace::{Event, Span};
 
 pub trait Telemetry {
-    // the value of the associated type `V` (from the trait `telemetry::Telemetry`) must be specified
-    // problem: associated type makes dyn awkward? how to handle..?
-
-    // Q: can I make this opaque from the outside? I don't need to know what it is, so this _should_ be fine
-    // specific need: carry around vtable for Telemetry
-    // basically just an interrelated tuple of dyn
     type Visitor: Default + tracing::field::Visit;
-
-
-    // ok, so how do I avoid having the type of V on TelemetryLayer? Needs to be mono b/c type coercion..
-
-    // can't just pass in a function that takes some boxed visitor b/c it needs to _accumulate_ values
-    // over multiple observe-on type whatsits for a single span, so it basically needs to be a K/V hashmap
 
     fn report_span<'a>(&self, span: Span<'a, Self::Visitor>);
     fn report_event<'a>(&self, event: Event<'a, Self::Visitor>);
