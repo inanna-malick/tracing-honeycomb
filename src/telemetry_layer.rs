@@ -1,4 +1,5 @@
-use crate::telemetry::{self, SpanId, Telemetry, TraceCtx};
+use crate::telemetry::{self, Telemetry};
+use crate::trace::{self, SpanId, TraceCtx};
 use crate::visitor::HoneycombVisitor;
 use chrono::{DateTime, Utc};
 use rand::Rng;
@@ -8,9 +9,9 @@ use tracing::span::{Attributes, Id, Record};
 use tracing::{Event, Subscriber};
 use tracing_subscriber::{layer::Context, registry, Layer};
 
-/// Tracing Subscriber that uses a 'libhoney-rust' Honeycomb client to publish spans
-pub struct TelemetryLayer {
-    telemetry: Box<dyn Telemetry + Send + Sync + 'static>,
+/// Tracing 'Layer' that uses some client to publish events spans
+pub struct TelemetryLayer<T> {
+    telemetry: T,
     service_name: String,
     // used to construct span ids to avoid collisions
     pub(crate) instance_id: u64,
@@ -18,10 +19,11 @@ pub struct TelemetryLayer {
     span_data: RwLock<HashMap<Id, TraceCtx>>,
 }
 
-impl TelemetryLayer {
+
+impl<T> TelemetryLayer<T> {
     pub fn new(
         service_name: String,
-        telemetry: Box<dyn Telemetry + Send + Sync + 'static>,
+        telemetry: T,
     ) -> Self {
         let instance_id = rand::thread_rng().gen();
         let span_data = RwLock::new(HashMap::new());
@@ -39,7 +41,7 @@ impl TelemetryLayer {
         span_data.insert(id, trace_ctx); // TODO: handle overwrite?
     }
 
-    pub fn eval_ctx<
+    pub(crate) fn eval_ctx<
         'a,
         X: 'a + registry::LookupSpan<'a>,
         I: std::iter::Iterator<Item = registry::SpanRef<'a, X>>,
@@ -115,7 +117,7 @@ impl TelemetryLayer {
     }
 }
 
-impl<S> Layer<S> for TelemetryLayer
+impl<S, V: tracing::field::Visit + Default + Send + Sync + 'static, T: 'static + Telemetry<Visitor = V>> Layer<S> for TelemetryLayer<T>
 where
     S: Subscriber + for<'a> registry::LookupSpan<'a>,
 {
@@ -158,7 +160,7 @@ where
             Some(parent_id) => {
                 let initialized_at = Utc::now();
 
-                let mut visitor = HoneycombVisitor(HashMap::new());
+                let mut visitor = std::default::Default::default();
                 event.record(&mut visitor);
 
                 // TODO: dedup
@@ -175,7 +177,7 @@ where
 
                 // only report event if it's part of a trace
                 if let Some(parent_trace_ctx) = self.eval_ctx(iter) {
-                    let event = telemetry::Event {
+                    let event = trace::Event {
                         trace_id: parent_trace_ctx.trace_id,
                         parent_id: Some(self.span_id(parent_id.clone())),
                         initialized_at,
@@ -183,7 +185,7 @@ where
                         name: event.metadata().name(),
                         target: event.metadata().target(),
                         service_name: &self.service_name,
-                        values: visitor.0,
+                        values: visitor,
                     };
 
                     self.telemetry.report_event(event);
@@ -210,7 +212,7 @@ where
         // if span's enclosing ctx has a trace id, eval & use to report telemetry
         if let Some(trace_ctx) = self.eval_ctx(iter) {
             let mut extensions_mut = span.extensions_mut();
-            let visitor: HoneycombVisitor = extensions_mut
+            let visitor: V = extensions_mut
                 .remove()
                 .expect("should be present on all spans");
             let SpanInitAt(initialized_at) = extensions_mut
@@ -229,7 +231,7 @@ where
                 Some(parent_span) => Some(parent_span),
             };
 
-            let span = telemetry::Span {
+            let span = trace::Span {
                 id: self.span_id(id),
                 target: span.metadata().target(),
                 level: span.metadata().level().clone(), // copy on inner type
@@ -239,7 +241,7 @@ where
                 trace_id: trace_ctx.trace_id,
                 elapsed_ms,
                 service_name: &self.service_name,
-                values: visitor.0,
+                values: visitor,
             };
 
             self.telemetry.report_span(span);

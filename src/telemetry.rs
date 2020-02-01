@@ -2,11 +2,27 @@ use chrono::{DateTime, Utc};
 use libhoney::{json, FieldHolder};
 use std::collections::HashMap;
 use std::sync::Mutex;
+use crate::visitor::{HoneycombVisitor, span_to_values, event_to_values};
 use tracing_subscriber::registry::LookupSpan;
+use crate::trace::{Event, Span};
 
 pub trait Telemetry {
-    fn report_span<'a>(&self, span: Span<'a>);
-    fn report_event<'a>(&self, event: Event<'a>);
+    // the value of the associated type `V` (from the trait `telemetry::Telemetry`) must be specified
+    // problem: associated type makes dyn awkward? how to handle..?
+
+    // Q: can I make this opaque from the outside? I don't need to know what it is, so this _should_ be fine
+    // specific need: carry around vtable for Telemetry
+    // basically just an interrelated tuple of dyn
+    type Visitor: Default + tracing::field::Visit;
+
+
+    // ok, so how do I avoid having the type of V on TelemetryLayer? Needs to be mono b/c type coercion..
+
+    // can't just pass in a function that takes some boxed visitor b/c it needs to _accumulate_ values
+    // over multiple observe-on type whatsits for a single span, so it basically needs to be a K/V hashmap
+
+    fn report_span<'a>(&self, span: Span<'a, Self::Visitor>);
+    fn report_event<'a>(&self, event: Event<'a, Self::Visitor>);
 }
 
 pub struct HoneycombTelemetry {
@@ -39,13 +55,14 @@ impl HoneycombTelemetry {
 }
 
 impl Telemetry for HoneycombTelemetry {
-    fn report_span(&self, span: Span) {
-        let data = span.into_values();
+    type Visitor = HoneycombVisitor;
+    fn report_span(&self, span: Span<Self::Visitor>) {
+        let data = span_to_values(span);
         self.report_data(data);
     }
 
-    fn report_event(&self, event: Event) {
-        let data = event.into_values();
+    fn report_event(&self, event: Event<Self::Visitor>) {
+        let data = event_to_values(event);
         self.report_data(data);
     }
 }
@@ -53,287 +70,16 @@ impl Telemetry for HoneycombTelemetry {
 pub struct BlackholeTelemetry;
 
 impl Telemetry for BlackholeTelemetry {
-    fn report_span(&self, _: Span) {}
+    type Visitor = HoneycombVisitor;
+    fn report_span(&self, _: Span<Self::Visitor>) {}
 
-    fn report_event(&self, _: Event) {}
-}
-
-// TODO: review pub vs. pub(crate)
-#[derive(PartialEq, Eq, Hash, Clone, Debug)]
-pub struct TraceCtx {
-    pub parent_span: Option<SpanId>,
-    pub trace_id: TraceId,
-}
-
-// todo extend error and etc
-#[derive(PartialEq, Eq, Hash, Clone, Debug)]
-pub enum TraceCtxError {
-    TelemetryLayerNotRegistered,
-    RegistrySubscriberNotRegistered,
-    NoEnabledSpan,
-    NoParentNodeHasTraceCtx, // no parent node has explicitly registered trace ctx
-}
-
-// TODO: check in with rain & etc re: names, ideally find better options
-impl TraceCtx {
-    /// Generate a new 'TraceCtx' with a random trace id and no parent span
-    pub fn new() -> Self {
-        TraceCtx {
-            trace_id: TraceId::generate(),
-            parent_span: None,
-        }
-    }
-
-    /// Record a trace ID on the current span. Requires that the currently registered dispatcher
-    /// have a TelemetrySubscriber reachable via 'downcast_ref', otherwise will panic.
-    pub fn record_on_current_span(self) -> Result<(), TraceCtxError> {
-        let span = tracing::Span::current();
-        let res = span
-            .with_subscriber(|(current_span_id, dispatch)| {
-                if let Some(layer) =
-                    dispatch.downcast_ref::<crate::telemetry_layer::TelemetryLayer>()
-                {
-                    layer.record_trace_ctx(self, current_span_id.clone());
-                    Ok(())
-                } else {
-                    Err(TraceCtxError::TelemetryLayerNotRegistered)
-                }
-            })
-            .ok_or(TraceCtxError::NoEnabledSpan)?;
-        res
-    }
-
-    /// Evaluate the current trace context (as registered on this node or a parent therof via 'record_on_current_span')
-    pub fn eval_current_trace_ctx() -> Result<Self, TraceCtxError> {
-        fn inner(x: (&tracing::Id, &tracing::Dispatch)) -> Result<TraceCtx, TraceCtxError> {
-            let (current_span_id, dispatch) = x;
-            let telemetry_layer = dispatch
-                .downcast_ref::<crate::telemetry_layer::TelemetryLayer>()
-                .ok_or(TraceCtxError::TelemetryLayerNotRegistered)?;
-
-            let registry = dispatch
-                .downcast_ref::<tracing_subscriber::Registry>()
-                .ok_or(TraceCtxError::RegistrySubscriberNotRegistered)?;
-
-            let iter = itertools::unfold(Some(current_span_id.clone()), |st| match st {
-                Some(target_id) => {
-                    // TODO: confirm panic is valid here
-                    // failure here indicates a broken parent id span link, panic is valid
-                    let res = registry
-                        .span(target_id)
-                        .expect("span data not found during eval_ctx for eval_current_trace_ctx");
-                    *st = res.parent().map(|x| x.id());
-                    Some(res)
-                }
-                None => None,
-            });
-
-            telemetry_layer
-                .eval_ctx(iter)
-                .map(|x| TraceCtx {
-                    parent_span: Some(SpanId {
-                        tracing_id: current_span_id.clone(),
-                        instance_id: telemetry_layer.instance_id,
-                    }),
-                    trace_id: x.trace_id,
-                })
-                .ok_or(TraceCtxError::NoParentNodeHasTraceCtx)
-        }
-
-        let span = tracing::Span::current();
-        let res = span
-            .with_subscriber(inner)
-            .ok_or(TraceCtxError::NoEnabledSpan)?;
-        res
-    }
-}
-
-#[derive(PartialEq, Eq, Hash, Clone, Debug)]
-pub struct SpanId {
-    pub tracing_id: tracing::Id,
-    pub instance_id: u64,
-}
-
-impl std::fmt::Display for SpanId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}-{}", self.tracing_id.into_u64(), self.instance_id)
-    }
-}
-
-/// A Honeycomb Trace ID. Uniquely identifies a single distributed (potentially multi-process) trace.
-#[derive(PartialEq, Eq, Hash, Clone, Debug)]
-pub struct TraceId(pub String);
-
-impl TraceId {
-    /// Create a new trace ID wrapping some provided String
-    pub fn new(u: String) -> Self {
-        TraceId(u)
-    }
-
-    /// Generate a random trace ID by using a thread-level RNG to generate a u128
-    pub fn generate() -> Self {
-        use rand::Rng;
-
-        let u: u128 = rand::thread_rng().gen();
-        TraceId(format!("trace-{}", u))
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct Span<'a> {
-    pub id: SpanId,
-    pub trace_id: TraceId,
-    pub parent_id: Option<SpanId>,
-    pub initialized_at: DateTime<Utc>,
-    pub elapsed_ms: i64,
-    pub level: tracing::Level,
-    pub name: &'a str,
-    pub target: &'a str,
-    pub service_name: &'a str,
-    pub values: HashMap<String, libhoney::Value>, // bag of misc values
-}
-
-impl<'a> Span<'a> {
-    #[cfg(test)]
-    pub(crate) fn into_static(self) -> Span<'static> {
-        let e: Span<'static> = Span {
-            name: test::lift_to_static(self.name),
-            target: test::lift_to_static(self.target),
-            service_name: test::lift_to_static(self.service_name),
-            id: self.id,
-            trace_id: self.trace_id,
-            parent_id: self.parent_id,
-            initialized_at: self.initialized_at,
-            elapsed_ms: self.elapsed_ms,
-            level: self.level,
-            values: self.values,
-        };
-        e
-    }
-
-    pub(crate) fn into_values(self) -> HashMap<String, libhoney::Value> {
-        let mut values = self.values;
-
-        values.insert(
-            // magic honeycomb string (trace.span_id)
-            "trace.span_id".to_string(),
-            json!(format!("span-{}", self.id.to_string())),
-        );
-
-        values.insert(
-            // magic honeycomb string (trace.trace_id)
-            "trace.trace_id".to_string(),
-            // using explicit trace id passed in from ctx (req'd for lazy eval)
-            json!(self.trace_id.0),
-        );
-
-        values.insert(
-            // magic honeycomb string (trace.parent_id)
-            "trace.parent_id".to_string(),
-            self.parent_id
-                .map(|pid| json!(format!("span-{}", pid.to_string())))
-                .unwrap_or(json!(null)),
-        );
-
-        // magic honeycomb string (service_name)
-        values.insert("service_name".to_string(), json!(self.service_name));
-
-        values.insert("level".to_string(), json!(format!("{}", self.level)));
-
-        values.insert(
-            "Timestamp".to_string(),
-            json!(self.initialized_at.to_rfc3339()),
-        );
-
-        // not honeycomb-special but tracing-provided
-        values.insert("name".to_string(), json!(self.name));
-        values.insert("target".to_string(), json!(self.target));
-
-        // honeycomb-special (I think, todo: get full list of known values)
-        values.insert("duration_ms".to_string(), json!(self.elapsed_ms));
-
-        values
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct Event<'a> {
-    pub trace_id: TraceId,
-    pub parent_id: Option<SpanId>,
-    pub initialized_at: DateTime<Utc>,
-    pub level: tracing::Level,
-    pub name: &'a str,
-    pub target: &'a str,
-    pub service_name: &'a str,
-    pub values: HashMap<String, libhoney::Value>, // bag of misc values
-}
-
-impl<'a> Event<'a> {
-    #[cfg(test)]
-    pub(crate) fn into_static(self) -> Event<'static> {
-        let e: Event<'static> = Event {
-            name: test::lift_to_static(self.name),
-            target: test::lift_to_static(self.target),
-            service_name: test::lift_to_static(self.service_name),
-            trace_id: self.trace_id,
-            parent_id: self.parent_id,
-            initialized_at: self.initialized_at,
-            level: self.level,
-            values: self.values,
-        };
-        e
-    }
-
-    pub(crate) fn into_values(self) -> HashMap<String, libhoney::Value> {
-        let mut values = self.values;
-
-        values.insert(
-            // magic honeycomb string (trace.trace_id)
-            "trace.trace_id".to_string(),
-            // using explicit trace id passed in from ctx (req'd for lazy eval)
-            json!(self.trace_id.0),
-        );
-
-        values.insert(
-            // magic honeycomb string (trace.parent_id)
-            "trace.parent_id".to_string(),
-            self.parent_id
-                .map(|pid| json!(format!("span-{}", pid.to_string())))
-                .unwrap_or(json!(null)),
-        );
-
-        // magic honeycomb string (service_name)
-        values.insert("service_name".to_string(), json!(self.service_name));
-
-        values.insert("level".to_string(), json!(format!("{}", self.level)));
-
-        values.insert(
-            "Timestamp".to_string(),
-            json!(self.initialized_at.to_rfc3339()),
-        );
-
-        // not honeycomb-special but tracing-provided
-        values.insert("name".to_string(), json!(self.name));
-        values.insert("target".to_string(), json!(self.target));
-
-        values
-    }
+    fn report_event(&self, _: Event<Self::Visitor>) {}
 }
 
 #[cfg(test)]
 pub(crate) mod test {
     use super::*;
     use std::sync::Arc;
-
-    pub(super) fn lift_to_static(s: &'_ str) -> &'static str {
-        use aovec::Aovec;
-        lazy_static! {
-            static ref STATIC_STRING_STORAGE: Aovec<String> = Aovec::new(256);
-        }
-
-        let idx = STATIC_STRING_STORAGE.push(s.to_string());
-        STATIC_STRING_STORAGE.get(idx).unwrap()
-    }
 
     /// Mock telemetry capability
     pub struct TestTelemetry {
