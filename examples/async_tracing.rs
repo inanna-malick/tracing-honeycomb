@@ -47,7 +47,7 @@ async fn main() {
 
     let telemetry_layer = TelemetryLayer::new(
         "async-tracing-example".to_string(),
-        Box::new(HoneycombTelemetry::new(honeycomb_config)),
+        HoneycombTelemetry::new(honeycomb_config),
     );
 
     let subscriber = telemetry_layer // publish to tracing

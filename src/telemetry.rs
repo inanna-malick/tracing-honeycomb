@@ -1,9 +1,7 @@
-use chrono::{DateTime, Utc};
-use libhoney::{json, FieldHolder};
+use libhoney::FieldHolder;
 use std::collections::HashMap;
 use std::sync::Mutex;
 use crate::visitor::{HoneycombVisitor, span_to_values, event_to_values};
-use tracing_subscriber::registry::LookupSpan;
 use crate::trace::{Event, Span};
 
 pub trait Telemetry {
@@ -55,10 +53,19 @@ impl Telemetry for HoneycombTelemetry {
     }
 }
 
+
+#[derive(Default)]
+pub struct BlackholeVisitor;
+
+impl tracing::field::Visit for BlackholeVisitor {
+    fn record_debug(&mut self, _: &tracing::field::Field, _: &dyn std::fmt::Debug) {
+    }
+}
+
 pub struct BlackholeTelemetry;
 
 impl Telemetry for BlackholeTelemetry {
-    type Visitor = HoneycombVisitor;
+    type Visitor = BlackholeVisitor;
     fn report_span(&self, _: Span<Self::Visitor>) {}
 
     fn report_event(&self, _: Event<Self::Visitor>) {}
@@ -70,28 +77,30 @@ pub(crate) mod test {
     use std::sync::Arc;
 
     /// Mock telemetry capability
-    pub struct TestTelemetry {
-        spans: Arc<Mutex<Vec<Span<'static>>>>,
-        events: Arc<Mutex<Vec<Event<'static>>>>,
+    pub struct TestTelemetry<V> {
+        spans: Arc<Mutex<Vec<Span<'static, V>>>>,
+        events: Arc<Mutex<Vec<Event<'static, V>>>>,
     }
 
-    impl TestTelemetry {
+    impl<V> TestTelemetry<V> {
         pub fn new(
-            spans: Arc<Mutex<Vec<Span<'static>>>>,
-            events: Arc<Mutex<Vec<Event<'static>>>>,
+            spans: Arc<Mutex<Vec<Span<'static, V>>>>,
+            events: Arc<Mutex<Vec<Event<'static, V>>>>,
         ) -> Self {
             TestTelemetry { spans, events }
         }
     }
 
-    impl Telemetry for TestTelemetry {
-        fn report_span(&self, span: Span) {
+    impl<V: tracing::field::Visit + Default> Telemetry for TestTelemetry<V> {
+        type Visitor = V;
+
+        fn report_span(&self, span: Span<V>) {
             // succeed or die. failure is unrecoverable (mutex poisoned)
             let mut spans = self.spans.lock().unwrap();
             spans.push(span.into_static());
         }
 
-        fn report_event(&self, event: Event) {
+        fn report_event(&self, event: Event<V>) {
             // succeed or die. failure is unrecoverable (mutex poisoned)
             let mut events = self.events.lock().unwrap();
             events.push(event.into_static());

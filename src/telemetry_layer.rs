@@ -1,6 +1,5 @@
-use crate::telemetry::{self, Telemetry};
+use crate::telemetry::Telemetry;
 use crate::trace::{self, SpanId, TraceCtx};
-use crate::visitor::HoneycombVisitor;
 use chrono::{DateTime, Utc};
 use rand::Rng;
 use std::collections::HashMap;
@@ -8,36 +7,26 @@ use std::sync::RwLock;
 use tracing::span::{Attributes, Id, Record};
 use tracing::{Event, Subscriber};
 use tracing_subscriber::{layer::Context, registry, Layer};
+use std::any::TypeId;
+use std::default::Default;
 
 /// Tracing 'Layer' that uses some telemetry client 'T' to publish events and spans
 pub struct TelemetryLayer<T> {
     telemetry: T,
     service_name: String,
     // used to construct span ids to avoid collisions
-    pub(crate) instance_id: u64,
-    // lazy trace ctx + init time
-    span_data: RwLock<HashMap<Id, TraceCtx>>,
+    span_data: TraceCtxRegistry,
 }
 
+// resolvable via downcast_ref, to avoid propagating 'T' parameter of TelemetryLayer where not req'd
+pub(crate) struct TraceCtxRegistry{
+    registry: RwLock<HashMap<Id, TraceCtx>>,
+    pub(crate) instance_id: u64,
+}
 
-impl<T> TelemetryLayer<T> {
-    pub fn new(
-        service_name: String,
-        telemetry: T,
-    ) -> Self {
-        let instance_id = rand::thread_rng().gen();
-        let span_data = RwLock::new(HashMap::new());
-
-        TelemetryLayer {
-            instance_id,
-            service_name,
-            telemetry,
-            span_data,
-        }
-    }
-
+impl TraceCtxRegistry {
     pub(crate) fn record_trace_ctx(&self, trace_ctx: TraceCtx, id: Id) {
-        let mut span_data = self.span_data.write().expect("write lock!");
+        let mut span_data = self.registry.write().expect("write lock!");
         span_data.insert(id, trace_ctx); // TODO: handle overwrite?
     }
 
@@ -55,7 +44,7 @@ impl<T> TelemetryLayer<T> {
             let mut write_guard = span_ref.extensions_mut();
             match write_guard.get_mut() {
                 None => {
-                    let span_data = self.span_data.read().unwrap();
+                    let span_data = self.registry.read().unwrap();
                     match span_data.get(&span_ref.id()) {
                         None => {
                             drop(write_guard);
@@ -109,10 +98,35 @@ impl<T> TelemetryLayer<T> {
         None
     }
 
-    fn span_id(&self, tracing_id: Id) -> SpanId {
+    pub(crate) fn span_id(&self, tracing_id: Id) -> SpanId {
         SpanId {
             tracing_id,
             instance_id: self.instance_id,
+        }
+    }
+
+    pub fn new() -> Self {
+        let instance_id = rand::thread_rng().gen();
+        let registry = RwLock::new(HashMap::new());
+
+        TraceCtxRegistry {
+            instance_id,
+            registry,
+        }
+    }
+}
+
+impl<T> TelemetryLayer<T> {
+    pub fn new(
+        service_name: String,
+        telemetry: T,
+    ) -> Self {
+        let span_data = TraceCtxRegistry::new();
+
+        TelemetryLayer {
+            service_name,
+            telemetry,
+            span_data,
         }
     }
 }
@@ -126,15 +140,15 @@ where
         let mut extensions_mut = span.extensions_mut();
         extensions_mut.insert(SpanInitAt::new());
 
-        let mut visitor: HoneycombVisitor = HoneycombVisitor(HashMap::new());
+        let mut visitor: V = Default::default();
         attrs.record(&mut visitor);
-        extensions_mut.insert::<HoneycombVisitor>(visitor);
+        extensions_mut.insert::<V>(visitor);
     }
 
     fn on_record(&self, id: &Id, values: &Record, ctx: Context<S>) {
         let span = ctx.span(id).expect("span data not found during on_record");
         let mut extensions_mut = span.extensions_mut();
-        let visitor: &mut HoneycombVisitor = extensions_mut
+        let visitor: &mut V = extensions_mut
             .get_mut()
             .expect("fields extension not found during on_record");
         values.record(visitor);
@@ -160,7 +174,7 @@ where
             Some(parent_id) => {
                 let initialized_at = Utc::now();
 
-                let mut visitor = std::default::Default::default();
+                let mut visitor = Default::default();
                 event.record(&mut visitor);
 
                 // TODO: dedup
@@ -176,10 +190,10 @@ where
                 });
 
                 // only report event if it's part of a trace
-                if let Some(parent_trace_ctx) = self.eval_ctx(iter) {
+                if let Some(parent_trace_ctx) = self.span_data.eval_ctx(iter) {
                     let event = trace::Event {
                         trace_id: parent_trace_ctx.trace_id,
-                        parent_id: Some(self.span_id(parent_id.clone())),
+                        parent_id: Some(self.span_data.span_id(parent_id.clone())),
                         initialized_at,
                         level: event.metadata().level().clone(),
                         name: event.metadata().name(),
@@ -210,7 +224,7 @@ where
         });
 
         // if span's enclosing ctx has a trace id, eval & use to report telemetry
-        if let Some(trace_ctx) = self.eval_ctx(iter) {
+        if let Some(trace_ctx) = self.span_data.eval_ctx(iter) {
             let mut extensions_mut = span.extensions_mut();
             let visitor: V = extensions_mut
                 .remove()
@@ -227,12 +241,12 @@ where
                 None => span
                     .parents()
                     .next()
-                    .map(|parent| self.span_id(parent.id())),
+                    .map(|parent| self.span_data.span_id(parent.id())),
                 Some(parent_span) => Some(parent_span),
             };
 
             let span = trace::Span {
-                id: self.span_id(id),
+                id: self.span_data.span_id(id),
                 target: span.metadata().target(),
                 level: span.metadata().level().clone(), // copy on inner type
                 parent_id,
@@ -251,6 +265,22 @@ where
     // FIXME: do I need to do something here? I think no (better to require explicit re-marking as root after copy).
     // called when span copied, needed iff span has trace id/etc already? nah,
     // fn on_id_change(&self, _old: &Id, _new: &Id, _ctx: Context<'_, S>) {}
+
+    unsafe fn downcast_raw(&self, id: TypeId) -> Option<*const ()> {
+        println!("begin downcast raw");
+        // This `downcast_raw` impl allows downcasting this layer to any of
+        // its components (currently just trace ctx registry)
+        // as well as to the layer's type itself.
+        let res = match () {
+            _ if id == TypeId::of::<Self>() => Some(self as *const Self as *const ()),
+            _ if id == TypeId::of::<TraceCtxRegistry>() => Some(&self.span_data as *const TraceCtxRegistry as *const ()),
+            _ => None,
+        };
+
+        println!("end downcast raw");
+
+        res
+    }
 }
 
 struct LazyTraceCtx(TraceCtx);
@@ -287,13 +317,14 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::telemetry::TraceId;
+    use crate::trace::TraceId;
     use std::sync::Arc;
     use std::sync::Mutex;
     use std::time::Duration;
     use tokio::runtime::Runtime;
     use tracing::instrument;
     use tracing_subscriber::layer::Layer;
+    use crate::telemetry::test::TestTelemetry;
 
     fn explicit_trace_ctx() -> TraceCtx {
         let trace_id = TraceId::new("test-trace-id".to_string());
@@ -382,8 +413,8 @@ mod tests {
     {
         let spans = Arc::new(Mutex::new(Vec::new()));
         let events = Arc::new(Mutex::new(Vec::new()));
-        let cap = crate::telemetry::test::TestTelemetry::new(spans.clone(), events.clone());
-        let layer = TelemetryLayer::new("test_svc_name".to_string(), Box::new(cap));
+        let cap: TestTelemetry<crate::telemetry::BlackholeVisitor> = TestTelemetry::new(spans.clone(), events.clone());
+        let layer = TelemetryLayer::new("test_svc_name".to_string(), cap);
 
         let subscriber = layer.with_subscriber(registry::Registry::default());
         tracing::subscriber::with_default(subscriber, f);
@@ -395,18 +426,8 @@ mod tests {
         let root_span = &spans[3];
         let child_spans = &spans[0..3];
 
-        fn expected(k: String, v: libhoney::Value) -> HashMap<String, libhoney::Value> {
-            let mut h = HashMap::new();
-            h.insert(k, v);
-            h
-        }
-
         let expected_trace_id = TraceId::new("test-trace-id".to_string());
 
-        assert_eq!(
-            root_span.values,
-            expected("ns".to_string(), libhoney::json!("[1, 2, 3]"))
-        );
         assert_eq!(root_span.parent_id, explicit_trace_ctx().parent_span);
         assert_eq!(root_span.trace_id, expected_trace_id);
 
@@ -417,12 +438,13 @@ mod tests {
             assert_eq!(span.trace_id, explicit_trace_ctx().trace_id);
             assert_eq!(event.trace_id, explicit_trace_ctx().trace_id);
 
+            // this is a honeycomb visitor specific test
             // test that reserved word field names are modified w/ tracing. prefix
             // (field names like "trace.span_id", "duration_ms", etc are ok)
-            assert_eq!(
-                event.values["tracing.duration_ms"],
-                libhoney::json!("duration-value")
-            )
+            // assert_eq!(
+            //     event.values["tracing.duration_ms"],
+            //     libhoney::json!("duration-value")
+            // )
         }
     }
 }

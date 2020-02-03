@@ -6,7 +6,7 @@ use crate::trace;
 
 // visitor that builds honeycomb-compatible values from tracing fields
 #[derive(Default)]
-pub(crate) struct HoneycombVisitor(pub(crate) HashMap<String, Value>);
+pub struct HoneycombVisitor(pub(crate) HashMap<String, Value>);
 
 // reserved field names (TODO: document)
 static RESERVED_WORDS: [&str; 9] = [
