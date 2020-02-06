@@ -58,7 +58,7 @@ jobs:
           name: Install and configure gh-pages
           command: |
             npm install -g --silent gh-pages@2.0.1
-            git config user.email "inanna+ci-build@recursion.wtf
+            git config user.email "inanna+ci-build@recursion.wtf"
             git config user.name "ci-build"
       - add_ssh_keys:
           fingerprints:

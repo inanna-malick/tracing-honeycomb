@@ -6,7 +6,7 @@ edition = "2018"
 
  # FIXME
 description = "provides a tracing subscriber that publishes spans and events to honeycomb.io"
-documentation = "https://pkinsky.github.io/honeycomb-tracing/honeycomb_tracing/"
+documentation = "https://inanna-malick.github.io/honeycomb-tracing/honeycomb_tracing/"
 repository = "https://github.com/inanna-malick/honeycomb-tracing"
 keywords = ["tracing", "instrumentation"]
 license = "MIT"
