@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-attributes-0.1.5/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing_attributes/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-attributes-0.1.6/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing_attributes/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -370,11 +370,44 @@
 <span id="370">370</span>
 <span id="371">371</span>
 <span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/tracing-attributes/0.1.5&quot;</span>)]</span>
-<span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_debug_implementations</span>, <span class="ident">unreachable_pub</span>)]</span>
-<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">test</span>, <span class="ident">deny</span>(<span class="ident">warnings</span>))]</span>
-
 <span class="doccomment">//! A procedural macro attribute for instrumenting functions with [`tracing`].</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [`tracing`] is a framework for instrumenting Rust programs to collect</span>
@@ -392,6 +425,8 @@
 <span class="doccomment">//! tracing-attributes = &quot;0.1.0&quot;</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
+<span class="doccomment">//! *Compiler support: requires rustc 1.39+*</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//! The [`#[instrument]`][instrument] attribute can now be added to a function</span>
 <span class="doccomment">//! to automatically create and enter `tracing` [span] when that function is</span>
 <span class="doccomment">//! called. For example:</span>
@@ -408,8 +443,34 @@
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [`tracing`]: https://crates.io/crates/tracing</span>
-<span class="doccomment">//! [span]: https://docs.rs/tracing/0.1.5/tracing/span/index.html</span>
+<span class="doccomment">//! [span]: https://docs.rs/tracing/0.1.6/tracing/span/index.html</span>
 <span class="doccomment">//! [instrument]: attr.instrument.html</span>
+<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/tracing-attributes/0.1.6&quot;</span>)]</span>
+<span class="attribute">#![<span class="ident">warn</span>(
+    <span class="ident">missing_debug_implementations</span>,
+    <span class="ident">missing_docs</span>,
+    <span class="ident">rust_2018_idioms</span>,
+    <span class="ident">unreachable_pub</span>,
+    <span class="ident">bad_style</span>,
+    <span class="ident">const_err</span>,
+    <span class="ident">dead_code</span>,
+    <span class="ident">improper_ctypes</span>,
+    <span class="ident">legacy_directory_ownership</span>,
+    <span class="ident">non_shorthand_field_patterns</span>,
+    <span class="ident">no_mangle_generic_items</span>,
+    <span class="ident">overflowing_literals</span>,
+    <span class="ident">path_statements</span>,
+    <span class="ident">patterns_in_fns_without_body</span>,
+    <span class="ident">plugin_as_library</span>,
+    <span class="ident">private_in_public</span>,
+    <span class="ident">safe_extern_statics</span>,
+    <span class="ident">unconditional_recursion</span>,
+    <span class="ident">unused</span>,
+    <span class="ident">unused_allocation</span>,
+    <span class="ident">unused_comparisons</span>,
+    <span class="ident">unused_parens</span>,
+    <span class="ident">while_true</span>
+)]</span>
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">proc_macro</span>;
 
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">HashSet</span>;
@@ -426,8 +487,15 @@
 <span class="doccomment">/// Instruments a function to create and enter a `tracing` [span] every time</span>
 <span class="doccomment">/// the function is called.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// The generated span&#39;s name will be the name of the function, and any</span>
-<span class="doccomment">/// arguments to that function will be recorded as fields using `fmt::Debug`.</span>
+<span class="doccomment">/// The generated span&#39;s name will be the name of the function. Any arguments</span>
+<span class="doccomment">/// to that function will be recorded as fields using [`fmt::Debug`]. To skip</span>
+<span class="doccomment">/// recording a function&#39;s or method&#39;s argument, pass the argument&#39;s name</span>
+<span class="doccomment">/// to the `skip` argument on the `#[instrument]` macro. For example,</span>
+<span class="doccomment">/// `skip` can be used when an argument to an instrumented function does</span>
+<span class="doccomment">/// not implement [`fmt::Debug`], or to exclude an argument with a verbose</span>
+<span class="doccomment">/// or costly Debug implementation. Note that:</span>
+<span class="doccomment">/// - multiple argument names can be passed to `skip`.</span>
+<span class="doccomment">/// - arguments passed to `skip` do _not_ need to implement `fmt::Debug`.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">/// Instrumenting a function:</span>
@@ -461,14 +529,24 @@
 <span class="doccomment">/// # fn main() {}</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// When the `async-await` feature flag is enabled, `async fn`s may also be</span>
-<span class="doccomment">/// instrumented:</span>
+<span class="doccomment">/// To skip recording an argument, pass the argument&#39;s name to the `skip`:</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// ```compile_fail</span>
-<span class="doccomment">/// // this currently only compiles on nightly.</span>
-<span class="doccomment">/// #![feature(async-await)]</span>
+<span class="doccomment">/// ```</span>
 <span class="doccomment">/// # use tracing_attributes::instrument;</span>
+<span class="doccomment">/// struct NonDebug;</span>
 <span class="doccomment">///</span>
+<span class="doccomment">/// #[instrument(skip(non_debug))]</span>
+<span class="doccomment">/// fn my_function(arg: usize, non_debug: NonDebug) {</span>
+<span class="doccomment">///     // ...</span>
+<span class="doccomment">/// }</span>
+<span class="doccomment">/// # fn main() {}</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// If `tracing_futures` is specified as a dependency in `Cargo.toml`,</span>
+<span class="doccomment">/// `async fn`s may also be instrumented:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">/// # use tracing_attributes::instrument;</span>
 <span class="doccomment">/// #[instrument]</span>
 <span class="doccomment">/// pub async fn my_function() -&gt; Result&lt;(), ()&gt; {</span>
 <span class="doccomment">///     // ...</span>
@@ -477,13 +555,9 @@
 <span class="doccomment">/// # fn main() {}</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// # Notes</span>
-<span class="doccomment">/// - All argument types must implement `fmt::Debug`</span>
-<span class="doccomment">/// - When using `#[instrument]` on an `async fn`, the `tracing_futures` must</span>
-<span class="doccomment">///   also be specified as a dependency in `Cargo.toml`.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// [span]: https://docs.rs/tracing/0.1.5/tracing/span/index.html</span>
+<span class="doccomment">/// [span]: https://docs.rs/tracing/0.1.6/tracing/span/index.html</span>
 <span class="doccomment">/// [`tracing`]: https://github.com/tokio-rs/tracing</span>
+<span class="doccomment">/// [`fmt::Debug`]: https://doc.rust-lang.org/std/fmt/trait.Debug.html</span>
 <span class="attribute">#[<span class="ident">proc_macro_attribute</span>]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">instrument</span>(<span class="ident">args</span>: <span class="ident">TokenStream</span>, <span class="ident">item</span>: <span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
     <span class="kw">let</span> <span class="ident">input</span>: <span class="ident">ItemFn</span> <span class="op">=</span> <span class="ident">syn</span>::<span class="macro">parse_macro_input</span><span class="macro">!</span>(<span class="ident">item</span> <span class="kw">as</span> <span class="ident">ItemFn</span>);
@@ -744,4 +818,4 @@
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g., <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g., <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g., <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../";window.currentCrate = "tracing_attributes";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "tracing_attributes";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

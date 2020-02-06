@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-subscriber-0.1.6/src/filter/env/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script src="../../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../../tracing_subscriber/index.html'><div class='logo-container'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-subscriber-0.2.0/src/filter/env/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script src="../../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../../tracing_subscriber/index.html'><div class='logo-container'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -512,11 +512,58 @@
 <span id="512">512</span>
 <span id="513">513</span>
 <span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! A `Layer` that enables or disables spans and events based on a set of</span>
 <span class="doccomment">//! filtering directives.</span>
 
-<span class="comment">// these are publically re-exported, but the compiler doesn&#39;t realize</span>
+<span class="comment">// these are publicly re-exported, but the compiler doesn&#39;t realize</span>
 <span class="comment">// that for some reason.</span>
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unreachable_pub</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::{
@@ -541,16 +588,73 @@
     <span class="ident">Metadata</span>,
 };
 
-<span class="doccomment">/// A `Layer` which filters spans and events based on a set of filter</span>
+<span class="doccomment">/// A [`Layer`] which filters spans and events based on a set of filter</span>
 <span class="doccomment">/// directives.</span>
-<span class="comment">// TODO(eliza): document filter directive syntax?</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(
-    <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;filter&quot;</span>,
-    <span class="ident">deprecated</span>(
-        <span class="ident">since</span> <span class="op">=</span> <span class="string">&quot;0.1.2&quot;</span>,
-        <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;the `filter` feature flag was renamed to `env-filter` and will be removed in 0.2&quot;</span>,
-    )
-)]</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Directives</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// A filter consists of one or more directives which match on [`Span`]s and [`Event`]s.</span>
+<span class="doccomment">/// Each directive may have a corresponding maximum verbosity [`level`] which</span>
+<span class="doccomment">/// enables (e.g., _selects for_) spans and events that match. Like `log`,</span>
+<span class="doccomment">/// `tracing` considers less exclusive levels (like `trace` or `info`) to be more</span>
+<span class="doccomment">/// verbose than more exclusive levels (like `error` or `warn`).</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// The directive syntax is similar to that of [`env_logger`]&#39;s. At a high level, the syntax for directives</span>
+<span class="doccomment">/// consists of several parts:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```text</span>
+<span class="doccomment">/// target[span{field=value}]=level</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Each component (`target`, `span`, `field`, `value`, and `level`) will be covered in turn.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// - `target` matches the event or span&#39;s target. In general, this is the module path and/or crate name.</span>
+<span class="doccomment">///    Examples of targets `h2`, `tokio::net`, or `tide::server`. For more information on targets,</span>
+<span class="doccomment">///    please refer to [`Metadata`]&#39;s documentation.</span>
+<span class="doccomment">/// - `span` matches on the span&#39;s name. If a `span` directive is provided alongside a `target`,</span>
+<span class="doccomment">///    the `span` directive will match on spans _within_ the `target`.</span>
+<span class="doccomment">/// - `field` matches on [fields] within spans. Field names can also be supplied without a `value`</span>
+<span class="doccomment">///    and will match on any [`Span`] or [`Event`] that has a field with that name.</span>
+<span class="doccomment">///    For example: `[span{field=\&quot;value\&quot;}]=debug`, `[{field}]=trace`.</span>
+<span class="doccomment">/// - `value` matches on the value of a span&#39;s field. If a value is a numeric literal or a bool,</span>
+<span class="doccomment">///    it will match _only_ on that value. Otherwise, this filter acts as a regex on</span>
+<span class="doccomment">///    the `std::fmt::Debug` output from the value.</span>
+<span class="doccomment">/// - `level` sets a maximum verbosity level accepted by this directive.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ## Usage Notes</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// - The portion of the directive which is included within the square brackets is `tracing`-specific.</span>
+<span class="doccomment">/// - Any portion of the directive can be omitted.</span>
+<span class="doccomment">///     - The sole exception are the `field` and `value` directives. If a `value` is provided,</span>
+<span class="doccomment">///       a `field` must _also_ be provided. However, the converse does not hold, as fields can</span>
+<span class="doccomment">///       be matched without a value.</span>
+<span class="doccomment">/// - If only a level is provided, it will set the maximum level for all `Span`s and `Event`s</span>
+<span class="doccomment">///   that are not enabled by other filters.</span>
+<span class="doccomment">/// - A directive without a level will enable anything that it matches. This is equivalent to `=trace`.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ## Examples</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// - `tokio::net=info` will enable all spans or events that:</span>
+<span class="doccomment">///    - have the `tokio::net` target,</span>
+<span class="doccomment">///    - at the level `info` or above.</span>
+<span class="doccomment">/// - `my_crate[span_a]=trace` will enable all spans and events that:</span>
+<span class="doccomment">///    - are within the `span_a` span or named `span_a` _if_ `span_a` has the target `my_crate`,</span>
+<span class="doccomment">///    - at the level `trace` or above.</span>
+<span class="doccomment">/// - `[span_b{name=\&quot;bob\&quot;}]` will enable all spans or event that:</span>
+<span class="doccomment">///    - have _any_ target,</span>
+<span class="doccomment">///    - are inside a span named `span_b`,</span>
+<span class="doccomment">///    - which has a field named `name` with value `bob`,</span>
+<span class="doccomment">///    - at _any_ level.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [`Layer`]: ../layer/trait.Layer.html</span>
+<span class="doccomment">/// [`env_logger`]: https://docs.rs/env_logger/0.7.1/env_logger/#enabling-logging</span>
+<span class="doccomment">/// [`Span`]: ../../tracing_core/span/index.html</span>
+<span class="doccomment">/// [fields]: ../../tracing_core/struct.Field.html</span>
+<span class="doccomment">/// [`Event`]: ../../tracing_core/struct.Event.html</span>
+<span class="doccomment">/// [`level`]: ../../tracing_core/struct.Level.html</span>
+<span class="doccomment">/// [`Metadata`]: ../../tracing_core/struct.Metadata.html</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;env-filter&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;env-filter&quot;</span>)))]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">EnvFilter</span> {
     <span class="comment">// TODO: eventually, this should be exposed by the registry.</span>
@@ -660,10 +764,8 @@
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// use tracing_subscriber::filter::{EnvFilter, LevelFilter};</span>
-    <span class="doccomment">/// # fn main() {</span>
     <span class="doccomment">/// let mut filter = EnvFilter::from_default_env()</span>
     <span class="doccomment">///     .add_directive(LevelFilter::INFO.into());</span>
-    <span class="doccomment">/// # }</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// use tracing_subscriber::filter::{EnvFilter, Directive};</span>
@@ -674,7 +776,6 @@
     <span class="doccomment">///     .add_directive(&quot;my_crate::my_other_module::something=info&quot;.parse()?);</span>
     <span class="doccomment">/// # Ok(())</span>
     <span class="doccomment">/// # }</span>
-    <span class="doccomment">/// # fn main() {}</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_directive</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">directive</span>: <span class="ident">Directive</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">stat</span>) <span class="op">=</span> <span class="ident">directive</span>.<span class="ident">to_static</span>() {
@@ -874,13 +975,6 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Error</span> <span class="kw">for</span> <span class="ident">FromEnvError</span> {
-    <span class="kw">fn</span> <span class="ident">description</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">str</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">kind</span> {
-            <span class="ident">ErrorKind</span>::<span class="ident">Parse</span>(<span class="kw-2">ref</span> <span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span>.<span class="ident">description</span>(),
-            <span class="ident">ErrorKind</span>::<span class="ident">Env</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">e</span>.<span class="ident">description</span>(),
-        }
-    }
-
     <span class="kw">fn</span> <span class="ident">source</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>(<span class="kw">dyn</span> <span class="ident">Error</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>)<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">kind</span> {
             <span class="ident">ErrorKind</span>::<span class="ident">Parse</span>(<span class="kw-2">ref</span> <span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">p</span>),
@@ -927,7 +1021,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">callsite_enabled_no_span_directive</span>() {
         <span class="kw">let</span> <span class="ident">filter</span> <span class="op">=</span> <span class="ident">EnvFilter</span>::<span class="ident">new</span>(<span class="string">&quot;app=debug&quot;</span>).<span class="ident">with_subscriber</span>(<span class="ident">NoSubscriber</span>);
-        <span class="kw">static</span> <span class="ident">META</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Metadata</span>::<span class="ident">new</span>(
+        <span class="kw">static</span> <span class="ident">META</span>: <span class="kw-2">&amp;</span><span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Metadata</span>::<span class="ident">new</span>(
             <span class="string">&quot;mySpan&quot;</span>,
             <span class="string">&quot;app&quot;</span>,
             <span class="ident">Level</span>::<span class="ident">TRACE</span>,
@@ -945,7 +1039,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">callsite_off</span>() {
         <span class="kw">let</span> <span class="ident">filter</span> <span class="op">=</span> <span class="ident">EnvFilter</span>::<span class="ident">new</span>(<span class="string">&quot;app=off&quot;</span>).<span class="ident">with_subscriber</span>(<span class="ident">NoSubscriber</span>);
-        <span class="kw">static</span> <span class="ident">META</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Metadata</span>::<span class="ident">new</span>(
+        <span class="kw">static</span> <span class="ident">META</span>: <span class="kw-2">&amp;</span><span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Metadata</span>::<span class="ident">new</span>(
             <span class="string">&quot;mySpan&quot;</span>,
             <span class="string">&quot;app&quot;</span>,
             <span class="ident">Level</span>::<span class="ident">ERROR</span>,
@@ -963,7 +1057,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">callsite_enabled_includes_span_directive</span>() {
         <span class="kw">let</span> <span class="ident">filter</span> <span class="op">=</span> <span class="ident">EnvFilter</span>::<span class="ident">new</span>(<span class="string">&quot;app[mySpan]=debug&quot;</span>).<span class="ident">with_subscriber</span>(<span class="ident">NoSubscriber</span>);
-        <span class="kw">static</span> <span class="ident">META</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Metadata</span>::<span class="ident">new</span>(
+        <span class="kw">static</span> <span class="ident">META</span>: <span class="kw-2">&amp;</span><span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Metadata</span>::<span class="ident">new</span>(
             <span class="string">&quot;mySpan&quot;</span>,
             <span class="string">&quot;app&quot;</span>,
             <span class="ident">Level</span>::<span class="ident">TRACE</span>,
@@ -982,7 +1076,7 @@
     <span class="kw">fn</span> <span class="ident">callsite_enabled_includes_span_directive_field</span>() {
         <span class="kw">let</span> <span class="ident">filter</span> <span class="op">=</span>
             <span class="ident">EnvFilter</span>::<span class="ident">new</span>(<span class="string">&quot;app[mySpan{field=\&quot;value\&quot;}]=debug&quot;</span>).<span class="ident">with_subscriber</span>(<span class="ident">NoSubscriber</span>);
-        <span class="kw">static</span> <span class="ident">META</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Metadata</span>::<span class="ident">new</span>(
+        <span class="kw">static</span> <span class="ident">META</span>: <span class="kw-2">&amp;</span><span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Metadata</span>::<span class="ident">new</span>(
             <span class="string">&quot;mySpan&quot;</span>,
             <span class="string">&quot;app&quot;</span>,
             <span class="ident">Level</span>::<span class="ident">TRACE</span>,
@@ -1001,7 +1095,7 @@
     <span class="kw">fn</span> <span class="ident">callsite_enabled_includes_span_directive_multiple_fields</span>() {
         <span class="kw">let</span> <span class="ident">filter</span> <span class="op">=</span> <span class="ident">EnvFilter</span>::<span class="ident">new</span>(<span class="string">&quot;app[mySpan{field=\&quot;value\&quot;,field2=2}]=debug&quot;</span>)
             .<span class="ident">with_subscriber</span>(<span class="ident">NoSubscriber</span>);
-        <span class="kw">static</span> <span class="ident">META</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Metadata</span>::<span class="ident">new</span>(
+        <span class="kw">static</span> <span class="ident">META</span>: <span class="kw-2">&amp;</span><span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Metadata</span>::<span class="ident">new</span>(
             <span class="string">&quot;mySpan&quot;</span>,
             <span class="string">&quot;app&quot;</span>,
             <span class="ident">Level</span>::<span class="ident">TRACE</span>,
@@ -1028,4 +1122,4 @@
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g., <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g., <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g., <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../../../";window.currentCrate = "tracing_subscriber";</script><script src="../../../../aliases.js"></script><script src="../../../../main.js"></script><script src="../../../../source-script.js"></script><script src="../../../../source-files.js"></script><script defer src="../../../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../../";window.currentCrate = "tracing_subscriber";</script><script src="../../../../aliases.js"></script><script src="../../../../main.js"></script><script src="../../../../source-script.js"></script><script src="../../../../source-files.js"></script><script defer src="../../../../search-index.js"></script></body></html>
