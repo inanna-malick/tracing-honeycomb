@@ -1,12 +1,12 @@
 use honeycomb_tracing::{HoneycombTelemetry, TelemetryLayer, TraceCtx};
 use std::env;
 use std::time::Duration;
+use tokio::process::Command;
 use tokio::time::delay_for;
 use tracing::instrument;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::layer::Layer;
 use tracing_subscriber::registry;
-use tokio::process::Command;
 
 #[instrument]
 async fn spawn_children(n: u32, process_name: String) {

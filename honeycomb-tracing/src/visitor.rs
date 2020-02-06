@@ -1,5 +1,5 @@
-use dist_tracing::{Event, Span};
 use ::libhoney::{json, Value};
+use dist_tracing::{Event, Span};
 use std::collections::HashMap;
 use std::fmt;
 use tracing::field::{Field, Visit};
@@ -58,9 +58,7 @@ fn mk_field_name(s: String) -> String {
     }
 }
 
-pub(crate) fn event_to_values(
-    event: Event<HoneycombVisitor>,
-) -> HashMap<String, libhoney::Value> {
+pub(crate) fn event_to_values(event: Event<HoneycombVisitor>) -> HashMap<String, libhoney::Value> {
     let mut values = event.values.0;
 
     values.insert(
@@ -96,9 +94,7 @@ pub(crate) fn event_to_values(
     values
 }
 
-pub(crate) fn span_to_values(
-    span: Span<HoneycombVisitor>,
-) -> HashMap<String, libhoney::Value> {
+pub(crate) fn span_to_values(span: Span<HoneycombVisitor>) -> HashMap<String, libhoney::Value> {
     let mut values = span.values.0;
 
     values.insert(

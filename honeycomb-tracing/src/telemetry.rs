@@ -1,5 +1,5 @@
-use dist_tracing::{Event, Span, Telemetry};
 use crate::visitor::{event_to_values, span_to_values, HoneycombVisitor};
+use dist_tracing::{Event, Span, Telemetry};
 use libhoney::FieldHolder;
 use std::collections::HashMap;
 use std::sync::Mutex;

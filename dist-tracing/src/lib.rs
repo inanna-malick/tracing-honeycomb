@@ -10,4 +10,4 @@ extern crate lazy_static;
 
 pub use crate::telemetry::{BlackholeTelemetry, Telemetry};
 pub use crate::telemetry_layer::TelemetryLayer;
-pub use crate::trace::{Span, Event, SpanId, TraceCtx, TraceId};
+pub use crate::trace::{Event, Span, SpanId, TraceCtx, TraceId};

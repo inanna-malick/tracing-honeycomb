@@ -26,8 +26,8 @@ impl Telemetry for BlackholeTelemetry {
 #[cfg(test)]
 pub(crate) mod test {
     use super::*;
-    use std::sync::Mutex;
     use std::sync::Arc;
+    use std::sync::Mutex;
 
     /// Mock telemetry capability
     pub struct TestTelemetry<V> {
