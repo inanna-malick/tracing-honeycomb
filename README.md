@@ -1,4 +1,4 @@
-[![Documentation (master)](https://img.shields.io/badge/docs-master-brightgreen)](https://pkinsky.github.io/honeycomb-tracing/honeycomb_tracing/) [![Build Status](https://circleci.com/gh/pkinsky/honeycomb-tracing/tree/master.svg?style=shield)](https://circleci.com/gh/pkinsky/honeycomb-tracing/tree/master) [![License](https://img.shields.io/badge/license-MIT-green.svg)](../LICENSE-MIT)
+[![Documentation (master)](https://img.shields.io/badge/docs-master-brightgreen)](https://pkinsky.github.io/honeycomb-tracing/honeycomb_tracing/) [![Build Status](https://circleci.com/gh/inanna-malick/honeycomb-tracing/tree/master.svg?style=shield)](https://circleci.com/gh/inanna-malick/honeycomb-tracing/tree/master) [![License](https://img.shields.io/badge/license-MIT-green.svg)](../LICENSE-MIT)
 
 Provides `TelemetryLayer`, a composable `tracing` layer that publishes spans and events to honeycomb.io. Supports local and distributed traces over async and sync functions.
 

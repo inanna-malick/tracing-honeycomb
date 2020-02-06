@@ -271,18 +271,14 @@ where
         println!("begin downcast raw");
         // This `downcast_raw` impl allows downcasting this layer to any of
         // its components (currently just trace ctx registry)
-        // as well as to the layer's type itself.
-        let res = match () {
+        // as well as to the layer's type itself (technique borrowed from formatting subscriber)
+        match () {
             _ if id == TypeId::of::<Self>() => Some(self as *const Self as *const ()),
             _ if id == TypeId::of::<TraceCtxRegistry>() => {
                 Some(&self.span_data as *const TraceCtxRegistry as *const ())
             }
             _ => None,
-        };
-
-        println!("end downcast raw");
-
-        res
+        }
     }
 }
 

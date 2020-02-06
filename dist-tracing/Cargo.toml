@@ -1,0 +1,29 @@
+[package]
+name = "dist-tracing"
+version = "0.1.0"
+authors = ["Inanna Malick <inanna@recursion.wtf>"]
+edition = "2018"
+
+ # FIXME
+description = "provides a tracing subscriber that publishes spans and events to honeycomb.io"
+documentation = "https://pkinsky.github.io/honeycomb-tracing/honeycomb_tracing/"
+repository = "https://github.com/inanna-malick/honeycomb-tracing"
+keywords = ["tracing", "instrumentation"]
+license = "MIT"
+readme = "README.md"
+
+[dependencies]
+tracing = "0.1.12"
+tracing-core = "0.1.9"
+tracing-subscriber = "0.2.0"
+chrono = "0.4.9"
+rand = "0.7" # for generating random tracing ids if none are provided
+itertools = "0.8.1"
+
+[dev-dependencies]
+tracing-attributes = "0.1.5"
+futures-preview = { version = "0.3.0-alpha.19", features = ["compat"] }
+tokio = { version = "0.2", features = ["full"] }
+tracing-futures = "0.2.1"
+aovec = "1.1.0"
+lazy_static = "1.4.0"

@@ -1,4 +1,4 @@
-use crate::trace;
+use dist_tracing::{Event, Span};
 use ::libhoney::{json, Value};
 use std::collections::HashMap;
 use std::fmt;
@@ -59,7 +59,7 @@ fn mk_field_name(s: String) -> String {
 }
 
 pub(crate) fn event_to_values(
-    event: trace::Event<HoneycombVisitor>,
+    event: Event<HoneycombVisitor>,
 ) -> HashMap<String, libhoney::Value> {
     let mut values = event.values.0;
 
@@ -67,7 +67,7 @@ pub(crate) fn event_to_values(
         // magic honeycomb string (trace.trace_id)
         "trace.trace_id".to_string(),
         // using explicit trace id passed in from ctx (req'd for lazy eval)
-        json!(event.trace_id.0),
+        json!(event.trace_id.to_string()),
     );
 
     values.insert(
@@ -97,7 +97,7 @@ pub(crate) fn event_to_values(
 }
 
 pub(crate) fn span_to_values(
-    span: trace::Span<HoneycombVisitor>,
+    span: Span<HoneycombVisitor>,
 ) -> HashMap<String, libhoney::Value> {
     let mut values = span.values.0;
 
@@ -111,7 +111,7 @@ pub(crate) fn span_to_values(
         // magic honeycomb string (trace.trace_id)
         "trace.trace_id".to_string(),
         // using explicit trace id passed in from ctx (req'd for lazy eval)
-        json!(span.trace_id.0),
+        json!(span.trace_id.to_string()),
     );
 
     values.insert(
