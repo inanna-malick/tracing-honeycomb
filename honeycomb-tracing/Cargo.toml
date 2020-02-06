@@ -3,8 +3,6 @@ name = "honeycomb-tracing"
 version = "0.1.0"
 authors = ["Inanna Malick <inanna@recursion.wtf>"]
 edition = "2018"
-
-# FIXME:
 description = "provides a tracing subscriber that publishes spans and events to honeycomb.io"
 documentation = "https://inanna-malick.github.io/honeycomb-tracing/honeycomb_tracing/"
 repository = "https://github.com/inanna-malick/honeycomb-tracing"
