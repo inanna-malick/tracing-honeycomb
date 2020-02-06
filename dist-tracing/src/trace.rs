@@ -78,7 +78,7 @@ impl TraceCtx {
     }
 
     /// Evaluate the current trace context (as registered on this node or a parent therof via 'record_on_current_span')
-    pub fn eval_current_trace_ctx() -> Result<Self, TraceCtxError> {
+    pub fn current_trace_ctx() -> Result<Self, TraceCtxError> {
         fn inner(x: (&tracing::Id, &tracing::Dispatch)) -> Result<TraceCtx, TraceCtxError> {
             let (current_span_id, dispatch) = x;
             let trace_ctx_registry = dispatch

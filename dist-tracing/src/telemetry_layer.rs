@@ -268,7 +268,6 @@ where
     // fn on_id_change(&self, _old: &Id, _new: &Id, _ctx: Context<'_, S>) {}
 
     unsafe fn downcast_raw(&self, id: TypeId) -> Option<*const ()> {
-        println!("begin downcast raw");
         // This `downcast_raw` impl allows downcasting this layer to any of
         // its components (currently just trace ctx registry)
         // as well as to the layer's type itself (technique borrowed from formatting subscriber)
@@ -359,7 +358,7 @@ mod tests {
                 );
 
                 assert_eq!(
-                    TraceCtx::eval_current_trace_ctx()
+                    TraceCtx::current_trace_ctx()
                         .map(|x| x.trace_id)
                         .unwrap(),
                     explicit_trace_ctx().trace_id
@@ -394,7 +393,7 @@ mod tests {
                 );
 
                 assert_eq!(
-                    TraceCtx::eval_current_trace_ctx()
+                    TraceCtx::current_trace_ctx()
                         .map(|x| x.trace_id)
                         .unwrap(),
                     explicit_trace_ctx().trace_id

@@ -19,7 +19,7 @@ async fn spawn_children(n: u32, process_name: String) {
 
 #[instrument]
 async fn spawn_child(process_name: &str) {
-    let current_trace_ctx = TraceCtx::eval_current_trace_ctx().unwrap();
+    let current_trace_ctx = TraceCtx::current_trace_ctx().unwrap();
     let child = Command::new(process_name)
         .arg(current_trace_ctx.to_string())
         .spawn();
@@ -86,5 +86,5 @@ async fn main() {
     }
 
     // janky, but delay seems to be required to ensure all traces are sent to honeycomb by libhoney
-    delay_for(Duration::from_secs(180)).await
+    delay_for(Duration::from_secs(30)).await
 }
