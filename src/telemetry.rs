@@ -1,8 +1,8 @@
+use crate::trace::{Event, Span};
+use crate::visitor::{event_to_values, span_to_values, HoneycombVisitor};
 use libhoney::FieldHolder;
 use std::collections::HashMap;
 use std::sync::Mutex;
-use crate::visitor::{HoneycombVisitor, span_to_values, event_to_values};
-use crate::trace::{Event, Span};
 
 pub trait Telemetry {
     type Visitor: Default + tracing::field::Visit;
@@ -53,13 +53,11 @@ impl Telemetry for HoneycombTelemetry {
     }
 }
 
-
 #[derive(Default)]
 pub struct BlackholeVisitor;
 
 impl tracing::field::Visit for BlackholeVisitor {
-    fn record_debug(&mut self, _: &tracing::field::Field, _: &dyn std::fmt::Debug) {
-    }
+    fn record_debug(&mut self, _: &tracing::field::Field, _: &dyn std::fmt::Debug) {}
 }
 
 pub struct BlackholeTelemetry;

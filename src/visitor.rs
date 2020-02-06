@@ -1,8 +1,8 @@
+use crate::trace;
 use ::libhoney::{json, Value};
 use std::collections::HashMap;
 use std::fmt;
 use tracing::field::{Field, Visit};
-use crate::trace;
 
 // visitor that builds honeycomb-compatible values from tracing fields
 #[derive(Default)]
@@ -20,7 +20,6 @@ static RESERVED_WORDS: [&str; 9] = [
     "target",
     "duration_ms",
 ];
-
 
 impl Visit for HoneycombVisitor {
     fn record_i64(&mut self, field: &Field, value: i64) {
@@ -59,8 +58,9 @@ fn mk_field_name(s: String) -> String {
     }
 }
 
-
-pub(crate) fn event_to_values(event: trace::Event<HoneycombVisitor>) -> HashMap<String, libhoney::Value> {
+pub(crate) fn event_to_values(
+    event: trace::Event<HoneycombVisitor>,
+) -> HashMap<String, libhoney::Value> {
     let mut values = event.values.0;
 
     values.insert(
@@ -73,7 +73,8 @@ pub(crate) fn event_to_values(event: trace::Event<HoneycombVisitor>) -> HashMap<
     values.insert(
         // magic honeycomb string (trace.parent_id)
         "trace.parent_id".to_string(),
-        event.parent_id
+        event
+            .parent_id
             .map(|pid| json!(format!("span-{}", pid.to_string())))
             .unwrap_or(json!(null)),
     );
@@ -95,7 +96,9 @@ pub(crate) fn event_to_values(event: trace::Event<HoneycombVisitor>) -> HashMap<
     values
 }
 
-pub(crate) fn span_to_values(span: trace::Span<HoneycombVisitor>) -> HashMap<String, libhoney::Value> {
+pub(crate) fn span_to_values(
+    span: trace::Span<HoneycombVisitor>,
+) -> HashMap<String, libhoney::Value> {
     let mut values = span.values.0;
 
     values.insert(
@@ -138,5 +141,3 @@ pub(crate) fn span_to_values(span: trace::Span<HoneycombVisitor>) -> HashMap<Str
 
     values
 }
-
-

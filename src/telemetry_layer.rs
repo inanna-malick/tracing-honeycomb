@@ -2,13 +2,13 @@ use crate::telemetry::Telemetry;
 use crate::trace::{self, SpanId, TraceCtx};
 use chrono::{DateTime, Utc};
 use rand::Rng;
+use std::any::TypeId;
 use std::collections::HashMap;
+use std::default::Default;
 use std::sync::RwLock;
 use tracing::span::{Attributes, Id, Record};
 use tracing::{Event, Subscriber};
 use tracing_subscriber::{layer::Context, registry, Layer};
-use std::any::TypeId;
-use std::default::Default;
 
 /// Tracing 'Layer' that uses some telemetry client 'T' to publish events and spans
 pub struct TelemetryLayer<T> {
@@ -19,7 +19,7 @@ pub struct TelemetryLayer<T> {
 }
 
 // resolvable via downcast_ref, to avoid propagating 'T' parameter of TelemetryLayer where not req'd
-pub(crate) struct TraceCtxRegistry{
+pub(crate) struct TraceCtxRegistry {
     registry: RwLock<HashMap<Id, TraceCtx>>,
     pub(crate) instance_id: u64,
 }
@@ -117,10 +117,7 @@ impl TraceCtxRegistry {
 }
 
 impl<T> TelemetryLayer<T> {
-    pub fn new(
-        service_name: String,
-        telemetry: T,
-    ) -> Self {
+    pub fn new(service_name: String, telemetry: T) -> Self {
         let span_data = TraceCtxRegistry::new();
 
         TelemetryLayer {
@@ -131,7 +128,11 @@ impl<T> TelemetryLayer<T> {
     }
 }
 
-impl<S, V: tracing::field::Visit + Default + Send + Sync + 'static, T: 'static + Telemetry<Visitor = V>> Layer<S> for TelemetryLayer<T>
+impl<
+        S,
+        V: tracing::field::Visit + Default + Send + Sync + 'static,
+        T: 'static + Telemetry<Visitor = V>,
+    > Layer<S> for TelemetryLayer<T>
 where
     S: Subscriber + for<'a> registry::LookupSpan<'a>,
 {
@@ -273,7 +274,9 @@ where
         // as well as to the layer's type itself.
         let res = match () {
             _ if id == TypeId::of::<Self>() => Some(self as *const Self as *const ()),
-            _ if id == TypeId::of::<TraceCtxRegistry>() => Some(&self.span_data as *const TraceCtxRegistry as *const ()),
+            _ if id == TypeId::of::<TraceCtxRegistry>() => {
+                Some(&self.span_data as *const TraceCtxRegistry as *const ())
+            }
             _ => None,
         };
 
@@ -317,6 +320,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::telemetry::test::TestTelemetry;
     use crate::trace::TraceId;
     use std::sync::Arc;
     use std::sync::Mutex;
@@ -324,10 +328,9 @@ mod tests {
     use tokio::runtime::Runtime;
     use tracing::instrument;
     use tracing_subscriber::layer::Layer;
-    use crate::telemetry::test::TestTelemetry;
 
     fn explicit_trace_ctx() -> TraceCtx {
-        let trace_id = TraceId::new("test-trace-id".to_string());
+        let trace_id = TraceId(1337);
         let span_id = SpanId {
             tracing_id: Id::from_u64(1234),
             instance_id: 5678,
@@ -413,7 +416,8 @@ mod tests {
     {
         let spans = Arc::new(Mutex::new(Vec::new()));
         let events = Arc::new(Mutex::new(Vec::new()));
-        let cap: TestTelemetry<crate::telemetry::BlackholeVisitor> = TestTelemetry::new(spans.clone(), events.clone());
+        let cap: TestTelemetry<crate::telemetry::BlackholeVisitor> =
+            TestTelemetry::new(spans.clone(), events.clone());
         let layer = TelemetryLayer::new("test_svc_name".to_string(), cap);
 
         let subscriber = layer.with_subscriber(registry::Registry::default());
@@ -426,7 +430,7 @@ mod tests {
         let root_span = &spans[3];
         let child_spans = &spans[0..3];
 
-        let expected_trace_id = TraceId::new("test-trace-id".to_string());
+        let expected_trace_id = TraceId(1337);
 
         assert_eq!(root_span.parent_id, explicit_trace_ctx().parent_span);
         assert_eq!(root_span.trace_id, expected_trace_id);

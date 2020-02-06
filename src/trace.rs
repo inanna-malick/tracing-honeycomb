@@ -19,8 +19,39 @@ pub enum TraceCtxError {
 
 // TODO: check in with rain & etc re: names, ideally find better options
 impl TraceCtx {
+    /// attempts to parse a TraceCtx from a string
+    pub fn from_string(s: &str) -> Option<Self> {
+        let mut iter = s.split(':');
+        let s1 = iter.next()?;
+        let trace_id = TraceId::from_string(s1)?;
+
+        let s2 = iter.next()?;
+        let parent_span = if s2 == "root" {
+            None
+        } else {
+            let span_id = SpanId::from_string(s2)?;
+            Some(span_id)
+        };
+
+        Some(TraceCtx {
+            parent_span,
+            trace_id,
+        })
+    }
+
+    /// convert a TraceCtx to a string that can be included in headers, RPC framework metadata fields, etc
+    pub fn to_string(&self) -> String {
+        format!(
+            "{}:{}",
+            self.trace_id.to_string(),
+            self.parent_span
+                .as_ref()
+                .map_or_else(|| "root".to_string(), |s| s.to_string())
+        )
+    }
+
     /// Generate a new 'TraceCtx' with a random trace id and no parent span
-    pub fn new() -> Self {
+    pub fn new_root() -> Self {
         TraceCtx {
             trace_id: TraceId::generate(),
             parent_span: None,
@@ -74,7 +105,7 @@ impl TraceCtx {
             trace_ctx_registry
                 .eval_ctx(iter)
                 .map(|x| TraceCtx {
-                    parent_span: Some( trace_ctx_registry.span_id(current_span_id.clone()) ),
+                    parent_span: Some(trace_ctx_registry.span_id(current_span_id.clone())),
                     trace_id: x.trace_id,
                 })
                 .ok_or(TraceCtxError::NoParentNodeHasTraceCtx)
@@ -94,28 +125,57 @@ pub struct SpanId {
     pub instance_id: u64,
 }
 
+// TODO: round trip property test for this
+impl SpanId {
+    /// attempts to parse a SpanId from a string
+    pub fn from_string(s: &str) -> Option<SpanId> {
+        let mut iter = s.split('-');
+        let s1 = iter.next()?;
+        let u1 = u64::from_str_radix(s1, 10).ok()?;
+        let s2 = iter.next()?;
+        let u2 = u64::from_str_radix(s2, 10).ok()?;
+
+        Some(SpanId {
+            tracing_id: tracing::Id::from_u64(u1),
+            instance_id: u2,
+        })
+    }
+
+    /// convert a SpanId to a string that can be included in headers, RPC framework metadata fields, etc
+    pub fn to_string(&self) -> String {
+        format!("{}", self)
+    }
+}
+
 impl std::fmt::Display for SpanId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}-{}", self.tracing_id.into_u64(), self.instance_id)
     }
 }
 
+/// NOTE: why not just have this be a u128? It'd be so much better...
 /// A Honeycomb Trace ID. Uniquely identifies a single distributed (potentially multi-process) trace.
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
-pub struct TraceId(pub String);
+pub struct TraceId(pub(crate) u128);
 
 impl TraceId {
-    /// Create a new trace ID wrapping some provided String
-    pub fn new(u: String) -> Self {
-        TraceId(u)
+    /// attempts to parse a TraceId from a string
+    pub fn from_string(s: &str) -> Option<Self> {
+        let u = u128::from_str_radix(s, 10).ok()?;
+        Some(TraceId(u))
+    }
+
+    /// convert a TraceId to a string that can be included in headers, RPC framework metadata fields, etc
+    pub fn to_string(&self) -> String {
+        format!("{}", self.0)
     }
 
     /// Generate a random trace ID by using a thread-level RNG to generate a u128
     pub fn generate() -> Self {
         use rand::Rng;
-
         let u: u128 = rand::thread_rng().gen();
-        TraceId(format!("trace-{}", u))
+
+        TraceId(u)
     }
 }
 
@@ -150,7 +210,6 @@ impl<'a, V> Span<'a, V> {
         }
     }
 }
-
 
 #[derive(Clone, Debug)]
 pub struct Event<'a, V> {
