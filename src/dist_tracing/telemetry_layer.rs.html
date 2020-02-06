@@ -443,11 +443,6 @@
 <span id="443">443</span>
 <span id="444">444</span>
 <span id="445">445</span>
-<span id="446">446</span>
-<span id="447">447</span>
-<span id="448">448</span>
-<span id="449">449</span>
-<span id="450">450</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">telemetry</span>::<span class="ident">Telemetry</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">trace</span>::{<span class="self">self</span>, <span class="ident">SpanId</span>, <span class="ident">TraceCtx</span>};
@@ -719,7 +714,6 @@
     <span class="comment">// fn on_id_change(&amp;self, _old: &amp;Id, _new: &amp;Id, _ctx: Context&lt;&#39;_, S&gt;) {}</span>
 
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">downcast_raw</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="ident">TypeId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw">const</span> ()<span class="op">&gt;</span> {
-        <span class="macro">println</span><span class="macro">!</span>(<span class="string">&quot;begin downcast raw&quot;</span>);
         <span class="comment">// This `downcast_raw` impl allows downcasting this layer to any of</span>
         <span class="comment">// its components (currently just trace ctx registry)</span>
         <span class="comment">// as well as to the layer&#39;s type itself (technique borrowed from formatting subscriber)</span>
@@ -810,9 +804,7 @@
                 );
 
                 <span class="macro">assert_eq</span><span class="macro">!</span>(
-                    <span class="ident">TraceCtx</span>::<span class="ident">eval_current_trace_ctx</span>()
-                        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">trace_id</span>)
-                        .<span class="ident">unwrap</span>(),
+                    <span class="ident">TraceCtx</span>::<span class="ident">current_trace_ctx</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">trace_id</span>).<span class="ident">unwrap</span>(),
                     <span class="ident">explicit_trace_ctx</span>().<span class="ident">trace_id</span>
                 );
             }
@@ -845,9 +837,7 @@
                 );
 
                 <span class="macro">assert_eq</span><span class="macro">!</span>(
-                    <span class="ident">TraceCtx</span>::<span class="ident">eval_current_trace_ctx</span>()
-                        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">trace_id</span>)
-                        .<span class="ident">unwrap</span>(),
+                    <span class="ident">TraceCtx</span>::<span class="ident">current_trace_ctx</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">trace_id</span>).<span class="ident">unwrap</span>(),
                     <span class="ident">explicit_trace_ctx</span>().<span class="ident">trace_id</span>
                 );
             }

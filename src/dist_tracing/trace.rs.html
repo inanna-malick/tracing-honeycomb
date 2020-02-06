@@ -332,7 +332,7 @@
     }
 
     <span class="doccomment">/// Evaluate the current trace context (as registered on this node or a parent therof via &#39;record_on_current_span&#39;)</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eval_current_trace_ctx</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">TraceCtxError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">current_trace_ctx</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">TraceCtxError</span><span class="op">&gt;</span> {
         <span class="kw">fn</span> <span class="ident">inner</span>(<span class="ident">x</span>: (<span class="kw-2">&amp;</span><span class="ident">tracing</span>::<span class="ident">Id</span>, <span class="kw-2">&amp;</span><span class="ident">tracing</span>::<span class="ident">Dispatch</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TraceCtx</span>, <span class="ident">TraceCtxError</span><span class="op">&gt;</span> {
             <span class="kw">let</span> (<span class="ident">current_span_id</span>, <span class="ident">dispatch</span>) <span class="op">=</span> <span class="ident">x</span>;
             <span class="kw">let</span> <span class="ident">trace_ctx_registry</span> <span class="op">=</span> <span class="ident">dispatch</span>
