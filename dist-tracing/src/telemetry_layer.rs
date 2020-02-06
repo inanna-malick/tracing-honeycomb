@@ -358,9 +358,7 @@ mod tests {
                 );
 
                 assert_eq!(
-                    TraceCtx::current_trace_ctx()
-                        .map(|x| x.trace_id)
-                        .unwrap(),
+                    TraceCtx::current_trace_ctx().map(|x| x.trace_id).unwrap(),
                     explicit_trace_ctx().trace_id
                 );
             }
@@ -393,9 +391,7 @@ mod tests {
                 );
 
                 assert_eq!(
-                    TraceCtx::current_trace_ctx()
-                        .map(|x| x.trace_id)
-                        .unwrap(),
+                    TraceCtx::current_trace_ctx().map(|x| x.trace_id).unwrap(),
                     explicit_trace_ctx().trace_id
                 );
             }
