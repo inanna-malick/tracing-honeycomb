@@ -97,7 +97,7 @@ impl TraceCtx {
                     // failure here indicates a broken parent id span link, panic is valid
                     let res = registry
                         .span(target_id)
-                        .expect("span data not found during eval_ctx for eval_current_trace_ctx");
+                        .expect("span data not found during eval_ctx for current_trace_ctx");
                     *st = res.parent().map(|x| x.id());
                     Some(res)
                 }
