@@ -13,12 +13,12 @@ async fn spawn_children(n: u32, process_name: String) {
     TraceCtx::new_root().record_on_current_span().unwrap();
 
     for _ in 0..n {
-        spawn_child(&process_name).await;
+        spawn_child_process(&process_name).await;
     }
 }
 
 #[instrument]
-async fn spawn_child(process_name: &str) {
+async fn spawn_child_process(process_name: &str) {
     let current_trace_ctx = TraceCtx::current_trace_ctx().unwrap();
     let child = Command::new(process_name)
         .arg(current_trace_ctx.to_string())
@@ -32,7 +32,7 @@ async fn spawn_child(process_name: &str) {
 }
 
 #[instrument]
-async fn run_leaf_fn(trace_ctx: TraceCtx) {
+async fn run_in_child_process(trace_ctx: TraceCtx) {
     trace_ctx.record_on_current_span().unwrap();
 
     tracing::info!("leaf fn");
@@ -81,7 +81,7 @@ async fn main() {
         }
         Some(parent_trace_ctx) => {
             // parent trace ctx present, run leaf fn
-            run_leaf_fn(parent_trace_ctx).await;
+            run_in_child_process(parent_trace_ctx).await;
         }
     }
 
