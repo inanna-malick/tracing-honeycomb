@@ -58,8 +58,8 @@ impl TraceCtx {
         }
     }
 
-    /// Record a trace ID on the current span. Requires that the currently registered dispatcher
-    /// have a TelemetrySubscriber reachable via 'downcast_ref', otherwise will panic.
+    /// Record a trace context on the current span. Requires that the currently registered dispatcher
+    /// have some 'TelemetryLayer' reachable via 'downcast_ref.
     pub fn record_on_current_span(self) -> Result<(), TraceCtxError> {
         let span = tracing::Span::current();
         let res = span
@@ -77,7 +77,9 @@ impl TraceCtx {
         res
     }
 
-    /// Evaluate the current trace context (as registered on this node or a parent therof via 'record_on_current_span')
+    /// get the current trace context (as registered on this node or a parent therof
+    /// via 'record_on_current_span'). Requires that the currently registered dispatcher
+    /// have some 'TelemetryLayer' reachable via 'downcast_ref.
     pub fn current_trace_ctx() -> Result<Self, TraceCtxError> {
         fn inner(x: (&tracing::Id, &tracing::Dispatch)) -> Result<TraceCtx, TraceCtxError> {
             let (current_span_id, dispatch) = x;
