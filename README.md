@@ -72,7 +72,7 @@ async fn run_in_child_process(trace_ctx: TraceCtx) {
 
 ### Testing
 
-Since `current_trace_ctx` and `record_on_current_span` can be expected to return `Ok` as long as some `TelemetryLayer` has been registered as part of the layer/subscriber stack and the current span is active, it's valid to `.expect` them to always succeed & to panic if they do not. This library provides a `BlackholeTelemetry` instance for this case, so you can exercise code that uses trace ctxs in tests without publishing telemetry to any backend. Use as:
+Since `TraceCtx::current_trace_ctx` and `TraceCtx::record_on_current_span` can be expected to return `Ok` as long as some `TelemetryLayer` has been registered as part of the layer/subscriber stack and the current span is active, it's valid to `.expect` them to always succeed & to panic if they do not. This library provides a `BlackholeTelemetry` instance for this case, so you can exercise code that uses trace ctxs in tests without publishing telemetry to any backend. Use as:
 
 ```rust
 let telemetry_layer = TelemetryLayer::new(
