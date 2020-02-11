@@ -48,9 +48,10 @@ async fn spawn_children(n: u32, process_name: String) {
 
 #[instrument]
 async fn spawn_child_process(process_name: &str) {
-    let current_trace_ctx = TraceCtx::current_trace_ctx().unwrap();
+    let (trace_id, span_id) = current_dist_trace_ctx().unwrap();
     let child = Command::new(process_name)
-        .arg(current_trace_ctx.to_string())
+        .arg(span_id.to_string())
+        .arg(trace_id.to_string())
         .spawn();
 
     // Make sure our child succeeded in spawning and process the result

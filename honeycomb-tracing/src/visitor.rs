@@ -1,3 +1,4 @@
+use crate::telemetry::{SpanId, TraceId};
 use ::libhoney::{json, Value};
 use dist_tracing::{Event, Span};
 use std::collections::HashMap;
@@ -58,7 +59,9 @@ fn mk_field_name(s: String) -> String {
     }
 }
 
-pub(crate) fn event_to_values(event: Event<HoneycombVisitor>) -> HashMap<String, libhoney::Value> {
+pub(crate) fn event_to_values(
+    event: Event<HoneycombVisitor, SpanId, TraceId>,
+) -> HashMap<String, libhoney::Value> {
     let mut values = event.values.0;
 
     values.insert(
@@ -80,7 +83,10 @@ pub(crate) fn event_to_values(event: Event<HoneycombVisitor>) -> HashMap<String,
     // magic honeycomb string (service_name)
     values.insert("service_name".to_string(), json!(event.service_name));
 
-    values.insert("level".to_string(), json!(format!("{}", event.level)));
+    values.insert(
+        "level".to_string(),
+        json!(format!("{}", event.meta.level())),
+    );
 
     values.insert(
         "Timestamp".to_string(),
@@ -88,13 +94,15 @@ pub(crate) fn event_to_values(event: Event<HoneycombVisitor>) -> HashMap<String,
     );
 
     // not honeycomb-special but tracing-provided
-    values.insert("name".to_string(), json!(event.name));
-    values.insert("target".to_string(), json!(event.target));
+    values.insert("name".to_string(), json!(event.meta.name()));
+    values.insert("target".to_string(), json!(event.meta.target()));
 
     values
 }
 
-pub(crate) fn span_to_values(span: Span<HoneycombVisitor>) -> HashMap<String, libhoney::Value> {
+pub(crate) fn span_to_values(
+    span: Span<HoneycombVisitor, SpanId, TraceId>,
+) -> HashMap<String, libhoney::Value> {
     let mut values = span.values.0;
 
     values.insert(
@@ -121,7 +129,7 @@ pub(crate) fn span_to_values(span: Span<HoneycombVisitor>) -> HashMap<String, li
     // magic honeycomb string (service_name)
     values.insert("service_name".to_string(), json!(span.service_name));
 
-    values.insert("level".to_string(), json!(format!("{}", span.level)));
+    values.insert("level".to_string(), json!(format!("{}", span.meta.level())));
 
     values.insert(
         "Timestamp".to_string(),
@@ -129,11 +137,14 @@ pub(crate) fn span_to_values(span: Span<HoneycombVisitor>) -> HashMap<String, li
     );
 
     // not honeycomb-special but tracing-provided
-    values.insert("name".to_string(), json!(span.name));
-    values.insert("target".to_string(), json!(span.target));
+    values.insert("name".to_string(), json!(span.meta.name()));
+    values.insert("target".to_string(), json!(span.meta.target()));
 
     // honeycomb-special (I think, todo: get full list of known values)
-    values.insert("duration_ms".to_string(), json!(span.elapsed_ms));
+    values.insert(
+        "duration_ms".to_string(),
+        json!(span.elapsed.num_milliseconds()),
+    );
 
     values
 }

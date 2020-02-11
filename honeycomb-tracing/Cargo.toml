@@ -15,6 +15,7 @@ tracing = "0.1.12"
 tracing-core = "0.1.9"
 dist-tracing =  { path = "../dist-tracing" }
 libhoney-rust = "0.1.3"
+rand = "0.7"
 
 [dev-dependencies]
 tracing-attributes = "0.1.5"

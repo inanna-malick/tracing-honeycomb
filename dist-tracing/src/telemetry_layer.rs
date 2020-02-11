@@ -1,7 +1,6 @@
 use crate::telemetry::Telemetry;
-use crate::trace::{self, SpanId, TraceCtx};
+use crate::trace::{self, TraceCtx};
 use chrono::{DateTime, Utc};
-use rand::Rng;
 use std::any::TypeId;
 use std::collections::HashMap;
 use std::default::Default;
@@ -11,23 +10,31 @@ use tracing::{Event, Subscriber};
 use tracing_subscriber::{layer::Context, registry, Layer};
 
 /// Tracing 'Layer' that uses some telemetry client 'T' to publish events and spans
-pub struct TelemetryLayer<T> {
-    telemetry: T,
-    service_name: String,
+pub struct TelemetryLayer<Telemetry, SpanId, TraceId> {
+    pub(crate) telemetry: Telemetry,
+    service_name: &'static str,
     // used to construct span ids to avoid collisions
-    span_data: TraceCtxRegistry,
+    pub(crate) trace_ctx_registry: TraceCtxRegistry<SpanId, TraceId>,
 }
 
 // resolvable via downcast_ref, to avoid propagating 'T' parameter of TelemetryLayer where not req'd
-pub(crate) struct TraceCtxRegistry {
-    registry: RwLock<HashMap<Id, TraceCtx>>,
-    pub(crate) instance_id: u64,
+pub(crate) struct TraceCtxRegistry<SpanId, TraceId> {
+    registry: RwLock<HashMap<Id, TraceCtx<SpanId, TraceId>>>,
+    promote_span_id: Box<dyn 'static + Send + Sync + Fn(Id) -> SpanId>, // more of a haskell idiom, mb handle via some other means?
 }
 
-impl TraceCtxRegistry {
-    pub(crate) fn record_trace_ctx(&self, trace_ctx: TraceCtx, id: Id) {
-        let mut span_data = self.registry.write().expect("write lock!");
-        span_data.insert(id, trace_ctx); // TODO: handle overwrite?
+impl<SpanId, TraceId> TraceCtxRegistry<SpanId, TraceId>
+where
+    SpanId: 'static + Send + Clone + Sync,
+    TraceId: 'static + Clone + Send + Sync,
+{
+    pub(crate) fn promote_span_id(&self, id: Id) -> SpanId {
+        (self.promote_span_id)(id)
+    }
+
+    pub(crate) fn record_trace_ctx(&self, trace_ctx: TraceCtx<SpanId, TraceId>, id: Id) {
+        let mut trace_ctx_registry = self.registry.write().expect("write lock!");
+        trace_ctx_registry.insert(id, trace_ctx); // TODO: handle overwrite?
     }
 
     pub(crate) fn eval_ctx<
@@ -37,15 +44,15 @@ impl TraceCtxRegistry {
     >(
         &self,
         iter: I,
-    ) -> Option<TraceCtx> {
+    ) -> Option<TraceCtx<SpanId, TraceId>> {
         let mut path = Vec::new();
 
         for span_ref in iter {
             let mut write_guard = span_ref.extensions_mut();
-            match write_guard.get_mut() {
+            match write_guard.get_mut::<LazyTraceCtx<SpanId, TraceId>>() {
                 None => {
-                    let span_data = self.registry.read().unwrap();
-                    match span_data.get(&span_ref.id()) {
+                    let trace_ctx_registry = self.registry.read().unwrap();
+                    match trace_ctx_registry.get(&span_ref.id()) {
                         None => {
                             drop(write_guard);
                             path.push(span_ref);
@@ -64,10 +71,12 @@ impl TraceCtxRegistry {
 
                             for span_ref in path.into_iter() {
                                 let mut write_guard = span_ref.extensions_mut();
-                                write_guard.insert(LazyTraceCtx(TraceCtx {
-                                    trace_id: local_trace_root.trace_id.clone(),
-                                    parent_span: None,
-                                }));
+                                write_guard.insert::<LazyTraceCtx<SpanId, TraceId>>(LazyTraceCtx(
+                                    TraceCtx {
+                                        trace_id: local_trace_root.trace_id.clone(),
+                                        parent_span: None,
+                                    },
+                                ));
                             }
                             return Some(res);
                         }
@@ -85,10 +94,12 @@ impl TraceCtxRegistry {
 
                     for span_ref in path.into_iter() {
                         let mut write_guard = span_ref.extensions_mut();
-                        write_guard.insert(LazyTraceCtx(TraceCtx {
-                            trace_id: already_evaluated.trace_id.clone(),
-                            parent_span: None,
-                        }));
+                        write_guard.insert::<LazyTraceCtx<SpanId, TraceId>>(LazyTraceCtx(
+                            TraceCtx {
+                                trace_id: already_evaluated.trace_id.clone(),
+                                parent_span: None,
+                            },
+                        ));
                     }
                     return Some(res);
                 }
@@ -98,41 +109,44 @@ impl TraceCtxRegistry {
         None
     }
 
-    pub(crate) fn span_id(&self, tracing_id: Id) -> SpanId {
-        SpanId {
-            tracing_id,
-            instance_id: self.instance_id,
-        }
-    }
-
-    pub fn new() -> Self {
-        let instance_id = rand::thread_rng().gen();
+    pub fn new<F: 'static + Send + Sync + Fn(Id) -> SpanId>(f: F) -> Self {
         let registry = RwLock::new(HashMap::new());
+        let promote_span_id = Box::new(f);
 
         TraceCtxRegistry {
-            instance_id,
             registry,
+            promote_span_id,
         }
     }
 }
 
-impl<T> TelemetryLayer<T> {
-    pub fn new(service_name: String, telemetry: T) -> Self {
-        let span_data = TraceCtxRegistry::new();
+impl<T, SpanId, TraceId> TelemetryLayer<T, SpanId, TraceId>
+where
+    SpanId: 'static + Send + Clone + Sync,
+    TraceId: 'static + Clone + Send + Sync,
+{
+    pub fn new<F: 'static + Send + Sync + Fn(Id) -> SpanId>(
+        service_name: &'static str,
+        telemetry: T,
+        promote_span_id: F,
+    ) -> Self {
+        let trace_ctx_registry = TraceCtxRegistry::new(promote_span_id);
 
         TelemetryLayer {
             service_name,
             telemetry,
-            span_data,
+            trace_ctx_registry,
         }
     }
 }
 
 impl<
         S,
+        TraceId: 'static + Clone + Eq + Send + Sync,
+        SpanId: 'static + Clone + Eq + Send + Sync,
         V: tracing::field::Visit + Default + Send + Sync + 'static,
-        T: 'static + Telemetry<Visitor = V>,
-    > Layer<S> for TelemetryLayer<T>
+        T: 'static + Telemetry<Visitor = V, TraceId = TraceId, SpanId = SpanId>,
+    > Layer<S> for TelemetryLayer<T, SpanId, TraceId>
 where
     S: Subscriber + for<'a> registry::LookupSpan<'a>,
 {
@@ -191,14 +205,12 @@ where
                 });
 
                 // only report event if it's part of a trace
-                if let Some(parent_trace_ctx) = self.span_data.eval_ctx(iter) {
+                if let Some(parent_trace_ctx) = self.trace_ctx_registry.eval_ctx(iter) {
                     let event = trace::Event {
                         trace_id: parent_trace_ctx.trace_id,
-                        parent_id: Some(self.span_data.span_id(parent_id.clone())),
+                        parent_id: Some(self.trace_ctx_registry.promote_span_id(parent_id)),
                         initialized_at,
-                        level: event.metadata().level().clone(),
-                        name: event.metadata().name(),
-                        target: event.metadata().target(),
+                        meta: event.metadata(),
                         service_name: &self.service_name,
                         values: visitor,
                     };
@@ -212,7 +224,7 @@ where
     fn on_close(&self, id: Id, ctx: Context<'_, S>) {
         let span = ctx.span(&id).expect("span data not found during on_close");
 
-        // TODO: dedup
+        // TODO: could be span.parents() but also needs span itself
         let iter = itertools::unfold(Some(id.clone()), |st| match st {
             Some(target_id) => {
                 let res = ctx
@@ -225,7 +237,7 @@ where
         });
 
         // if span's enclosing ctx has a trace id, eval & use to report telemetry
-        if let Some(trace_ctx) = self.span_data.eval_ctx(iter) {
+        if let Some(trace_ctx) = self.trace_ctx_registry.eval_ctx(iter) {
             let mut extensions_mut = span.extensions_mut();
             let visitor: V = extensions_mut
                 .remove()
@@ -235,27 +247,23 @@ where
                 .expect("should be present on all spans");
 
             let now = Utc::now();
-            let now = now.timestamp_millis();
-            let elapsed_ms = now - initialized_at.timestamp_millis();
+            let elapsed = now.signed_duration_since(initialized_at);
 
             let parent_id = match trace_ctx.parent_span {
                 None => span
-                    .parents()
-                    .next()
-                    .map(|parent| self.span_data.span_id(parent.id())),
+                    .parent()
+                    .map(|parent_ref| self.trace_ctx_registry.promote_span_id(parent_ref.id())),
                 Some(parent_span) => Some(parent_span),
             };
 
             let span = trace::Span {
-                id: self.span_data.span_id(id),
-                target: span.metadata().target(),
-                level: span.metadata().level().clone(), // copy on inner type
+                id: self.trace_ctx_registry.promote_span_id(id),
+                meta: span.metadata(),
                 parent_id,
-                name: span.metadata().name(),
-                initialized_at: initialized_at.clone(),
+                initialized_at,
                 trace_id: trace_ctx.trace_id,
-                elapsed_ms,
-                service_name: &self.service_name,
+                elapsed,
+                service_name: self.service_name,
                 values: visitor,
             };
 
@@ -273,15 +281,15 @@ where
         // as well as to the layer's type itself (technique borrowed from formatting subscriber)
         match () {
             _ if id == TypeId::of::<Self>() => Some(self as *const Self as *const ()),
-            _ if id == TypeId::of::<TraceCtxRegistry>() => {
-                Some(&self.span_data as *const TraceCtxRegistry as *const ())
-            }
+            _ if id == TypeId::of::<TraceCtxRegistry<SpanId, TraceId>>() => Some(
+                &self.trace_ctx_registry as *const TraceCtxRegistry<SpanId, TraceId> as *const (),
+            ),
             _ => None,
         }
     }
 }
 
-struct LazyTraceCtx(TraceCtx);
+struct LazyTraceCtx<SpanId, TraceId>(TraceCtx<SpanId, TraceId>);
 
 struct SpanInitAt(DateTime<Utc>);
 
@@ -315,8 +323,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::telemetry::test::TestTelemetry;
-    use crate::trace::TraceId;
+    use crate::telemetry::test::{SpanId, TestTelemetry, TraceId};
     use std::sync::Arc;
     use std::sync::Mutex;
     use std::time::Duration;
@@ -324,12 +331,13 @@ mod tests {
     use tracing::instrument;
     use tracing_subscriber::layer::Layer;
 
-    fn explicit_trace_ctx() -> TraceCtx {
-        let trace_id = TraceId(1337);
-        let span_id = SpanId {
-            tracing_id: Id::from_u64(1234),
-            instance_id: 5678,
-        };
+    // // simplified ID types
+    // type TraceId = u64;
+    // type SpanId = Id;
+
+    fn explicit_trace_ctx() -> TraceCtx<SpanId, TraceId> {
+        let trace_id = 135;
+        let span_id = Id::from_u64(246);
 
         TraceCtx {
             trace_id,
@@ -342,7 +350,7 @@ mod tests {
         with_test_scenario_runner(|| {
             #[instrument]
             fn f(ns: Vec<u64>) {
-                explicit_trace_ctx().record_on_current_span().unwrap();
+                explicit_trace_ctx().register_dist_tracing_root().unwrap();
                 for n in ns {
                     g(format!("{}", n));
                 }
@@ -358,7 +366,9 @@ mod tests {
                 );
 
                 assert_eq!(
-                    TraceCtx::current_trace_ctx().map(|x| x.trace_id).unwrap(),
+                    trace::current_dist_trace_ctx::<SpanId, TraceId>()
+                        .map(|x| x.0)
+                        .unwrap(),
                     explicit_trace_ctx().trace_id
                 );
             }
@@ -373,7 +383,7 @@ mod tests {
         with_test_scenario_runner(|| {
             #[instrument]
             async fn f(ns: Vec<u64>) {
-                explicit_trace_ctx().record_on_current_span().unwrap();
+                explicit_trace_ctx().register_dist_tracing_root().unwrap();
                 for n in ns {
                     g(format!("{}", n)).await;
                 }
@@ -391,7 +401,9 @@ mod tests {
                 );
 
                 assert_eq!(
-                    TraceCtx::current_trace_ctx().map(|x| x.trace_id).unwrap(),
+                    trace::current_dist_trace_ctx::<SpanId, TraceId>()
+                        .map(|x| x.0)
+                        .unwrap(),
                     explicit_trace_ctx().trace_id
                 );
             }
@@ -407,9 +419,8 @@ mod tests {
     {
         let spans = Arc::new(Mutex::new(Vec::new()));
         let events = Arc::new(Mutex::new(Vec::new()));
-        let cap: TestTelemetry<crate::telemetry::BlackholeVisitor> =
-            TestTelemetry::new(spans.clone(), events.clone());
-        let layer = TelemetryLayer::new("test_svc_name".to_string(), cap);
+        let cap: TestTelemetry = TestTelemetry::new(spans.clone(), events.clone());
+        let layer = TelemetryLayer::new("test_svc_name", cap, |x| x);
 
         let subscriber = layer.with_subscriber(registry::Registry::default());
         tracing::subscriber::with_default(subscriber, f);
@@ -421,7 +432,7 @@ mod tests {
         let root_span = &spans[3];
         let child_spans = &spans[0..3];
 
-        let expected_trace_id = TraceId(1337);
+        let expected_trace_id = explicit_trace_ctx().trace_id;
 
         assert_eq!(root_span.parent_id, explicit_trace_ctx().parent_span);
         assert_eq!(root_span.trace_id, expected_trace_id);

@@ -1,4 +1,6 @@
-use honeycomb_tracing::{HoneycombTelemetry, TelemetryLayer, TraceCtx};
+use honeycomb_tracing::{
+    current_dist_trace_ctx, mk_honeycomb_tracing_layer, SpanId, TraceCtx, TraceId,
+};
 use std::env;
 use std::time::Duration;
 use tokio::process::Command;
@@ -10,7 +12,12 @@ use tracing_subscriber::registry;
 
 #[instrument]
 async fn spawn_children(n: u32, process_name: String) {
-    TraceCtx::new_root().record_on_current_span().unwrap();
+    TraceCtx {
+        trace_id: TraceId::generate(),
+        parent_span: None,
+    }
+    .register_dist_tracing_root()
+    .unwrap();
 
     for _ in 0..n {
         spawn_child_process(&process_name).await;
@@ -19,9 +26,10 @@ async fn spawn_children(n: u32, process_name: String) {
 
 #[instrument]
 async fn spawn_child_process(process_name: &str) {
-    let current_trace_ctx = TraceCtx::current_trace_ctx().unwrap();
+    let (trace_id, span_id) = current_dist_trace_ctx().unwrap();
     let child = Command::new(process_name)
-        .arg(current_trace_ctx.to_string())
+        .arg(span_id.to_string())
+        .arg(trace_id.to_string())
         .spawn();
 
     // Make sure our child succeeded in spawning and process the result
@@ -33,10 +41,41 @@ async fn spawn_child_process(process_name: &str) {
 
 #[instrument]
 async fn run_in_child_process(trace_ctx: TraceCtx) {
-    trace_ctx.record_on_current_span().unwrap();
+    trace_ctx.register_dist_tracing_root().unwrap();
 
     tracing::info!("leaf fn");
     delay_for(Duration::from_millis(50)).await
+}
+
+#[tokio::main]
+async fn main() {
+    // parse first two args (including 0th arg, to get current process name)
+    let mut iter = env::args();
+    let process_name = iter.next().expect("expected first arg to be process name");
+    let parent_span = iter.next();
+    let trace_id = iter.next();
+
+    register_global_subscriber();
+
+    match (parent_span, trace_id) {
+        (Some(parent_span), Some(trace_id)) => {
+            let parent_span = SpanId::from_string(&parent_span).unwrap();
+            let trace_id = TraceId::from_string(&trace_id).unwrap();
+            // parent trace ctx present, run leaf fn
+            run_in_child_process(TraceCtx {
+                trace_id,
+                parent_span: Some(parent_span),
+            })
+            .await;
+        }
+        _ => {
+            // no parent trace_ctx, spawn child processes
+            spawn_children(5, process_name).await;
+        }
+    }
+
+    // janky, but delay seems to be required to ensure all traces are sent to honeycomb by libhoney
+    delay_for(Duration::from_secs(10)).await
 }
 
 fn register_global_subscriber() {
@@ -52,10 +91,8 @@ fn register_global_subscriber() {
         transmission_options: libhoney::transmission::Options::default(),
     };
 
-    let telemetry_layer = TelemetryLayer::new(
-        "async-tracing-example".to_string(),
-        HoneycombTelemetry::new(honeycomb_config),
-    );
+    // TODO: helper fn for this exported by honeycomb tracing lib
+    let telemetry_layer = mk_honeycomb_tracing_layer("async-tracing_example", honeycomb_config);
 
     let subscriber = telemetry_layer // publish to tracing
         .and_then(tracing_subscriber::fmt::Layer::builder().finish()) // log to stdout
@@ -63,28 +100,4 @@ fn register_global_subscriber() {
         .with_subscriber(registry::Registry::default()); // provide underlying span data store
 
     tracing::subscriber::set_global_default(subscriber).expect("setting global default failed");
-}
-
-#[tokio::main]
-async fn main() {
-    // parse first two args (including 0th arg, to get current process name)
-    let mut iter = env::args();
-    let process_name = iter.next().expect("expected first arg to be process name");
-    let parent_trace_ctx = iter.next().and_then(|x| TraceCtx::from_string(&x));
-
-    register_global_subscriber();
-
-    match parent_trace_ctx {
-        None => {
-            // no parent trace_ctx, spawn child processes
-            spawn_children(5, process_name).await;
-        }
-        Some(parent_trace_ctx) => {
-            // parent trace ctx present, run leaf fn
-            run_in_child_process(parent_trace_ctx).await;
-        }
-    }
-
-    // janky, but delay seems to be required to ensure all traces are sent to honeycomb by libhoney
-    delay_for(Duration::from_secs(30)).await
 }
