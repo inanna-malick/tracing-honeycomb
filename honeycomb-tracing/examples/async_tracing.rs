@@ -1,8 +1,7 @@
 use honeycomb_tracing::{
     current_dist_trace_ctx, mk_honeycomb_tracing_layer, SpanId, TraceCtx, TraceId,
 };
-use std::env;
-use std::time::Duration;
+use std::{env, str::FromStr, time::Duration};
 use tokio::process::Command;
 use tokio::time::delay_for;
 use tracing::instrument;
@@ -59,8 +58,8 @@ async fn main() {
 
     match (parent_span, trace_id) {
         (Some(parent_span), Some(trace_id)) => {
-            let parent_span = SpanId::from_string(&parent_span).unwrap();
-            let trace_id = TraceId::from_string(&trace_id).unwrap();
+            let parent_span = SpanId::from_str(&parent_span).unwrap();
+            let trace_id = TraceId::from_str(&trace_id).unwrap();
             // parent trace ctx present, run leaf fn
             run_in_child_process(TraceCtx {
                 trace_id,
