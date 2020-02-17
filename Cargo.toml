@@ -1,6 +1,6 @@
 [workspace]
 
 members = [
-    "dist-tracing",
-    "honeycomb-tracing",
+    "tracing-distributed",
+    "tracing-honeycomb",
 ]

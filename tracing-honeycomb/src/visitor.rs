@@ -1,6 +1,6 @@
 use crate::telemetry::{SpanId, TraceId};
 use ::libhoney::{json, Value};
-use dist_tracing::{Event, Span};
+use tracing_distributed::{Event, Span};
 use std::collections::HashMap;
 use std::fmt;
 use tracing::field::{Field, Visit};

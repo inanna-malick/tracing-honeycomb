@@ -1,5 +1,5 @@
 [package]
-name = "dist-tracing"
+name = "tracing-distributed"
 version = "0.1.0"
 authors = ["Inanna Malick <inanna@recursion.wtf>"]
 edition = "2018"

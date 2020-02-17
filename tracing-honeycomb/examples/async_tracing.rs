@@ -1,4 +1,4 @@
-use honeycomb_tracing::{
+use tracing_honeycomb::{
     current_dist_trace_ctx, mk_honeycomb_tracing_layer, SpanId, TraceCtx, TraceId,
 };
 use std::{env, str::FromStr, time::Duration};

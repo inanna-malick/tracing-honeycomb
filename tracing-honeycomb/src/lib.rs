@@ -4,22 +4,22 @@ mod visitor;
 
 pub use crate::telemetry::{HoneycombTelemetry, SpanId, TraceId};
 pub use crate::visitor::HoneycombVisitor;
-pub use dist_tracing::{TelemetryLayer, TraceCtxError};
+pub use tracing_distributed::{TelemetryLayer, TraceCtxError};
 
 use rand::{self, Rng};
 
-pub type TraceCtx = dist_tracing::TraceCtx<SpanId, TraceId>;
+pub type TraceCtx = tracing_distributed::TraceCtx<SpanId, TraceId>;
 
 pub fn current_dist_trace_ctx() -> Result<(TraceId, SpanId), TraceCtxError> {
-    dist_tracing::current_dist_trace_ctx()
+    tracing_distributed::current_dist_trace_ctx()
 }
 
 pub fn mk_honeycomb_blackhole_tracing_layer(
-) -> TelemetryLayer<dist_tracing::BlackholeTelemetry<SpanId, TraceId>, SpanId, TraceId> {
+) -> TelemetryLayer<tracing_distributed::BlackholeTelemetry<SpanId, TraceId>, SpanId, TraceId> {
     let instance_id: u64 = 0;
     TelemetryLayer::new(
         "honeycomb_blackhole_tracing_layer",
-        dist_tracing::BlackholeTelemetry::default(),
+        tracing_distributed::BlackholeTelemetry::default(),
         move |tracing_id| SpanId {
             instance_id,
             tracing_id,
