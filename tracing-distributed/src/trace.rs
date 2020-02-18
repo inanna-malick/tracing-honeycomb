@@ -2,7 +2,6 @@ use crate::telemetry_layer::TraceCtxRegistry;
 use chrono::{DateTime, Utc};
 use tracing_subscriber::registry::LookupSpan;
 
-// TODO: review pub vs. pub(crate)
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct TraceCtx<S, T> {
     pub parent_span: Option<S>,
@@ -71,31 +70,15 @@ where
     .ok_or(TraceCtxError::NoEnabledSpan)?
 }
 
-// todo extend error and etc
+
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
+#[non_exhaustive]
 pub enum TraceCtxError {
     TelemetryLayerNotRegistered,
     RegistrySubscriberNotRegistered,
     NoEnabledSpan,
     NoParentNodeHasTraceCtx, // no parent node has explicitly registered trace ctx
 }
-
-// NOTE: removed to/from string, it's a million times better to use 2x metadata fields, 1 for each
-
-// TODO: check in with rain & etc re: names, ideally find better options
-
-// TODO: does this need to be a thing at all? could have, instead...
-// TODO: idk, mb put these on telemetry instance? they are pinned to telemetry type
-// pub fn register_dist_tracing_root(trace_id: T) -> Result<(), TraceCtxError> {
-// }
-
-// pub fn register_dist_tracing_continuation(trace_id: T, remote_parent_id: S) -> Result<(), TraceCtxError> {
-// }
-
-// pub fn get_current_trace_ctx() -> Result<(T, S), TraceCtxError> {
-// }
-
-// impl<S: 'static + Send + Clone + Sync, T: 'static + Clone + Send + Sync> TraceCtx<S, T> {
 
 #[derive(Debug, Clone)]
 pub struct Span<V, S, T> {

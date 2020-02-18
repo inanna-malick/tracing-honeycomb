@@ -1,9 +1,9 @@
 use crate::visitor::{event_to_values, span_to_values, HoneycombVisitor};
-use tracing_distributed::{Event, Span, Telemetry};
 use libhoney::FieldHolder;
 use std::collections::HashMap;
 use std::str::FromStr;
 use std::sync::Mutex;
+use tracing_distributed::{Event, Span, Telemetry};
 
 pub struct HoneycombTelemetry {
     honeycomb_client: Mutex<libhoney::Client<libhoney::transmission::Transmission>>,
@@ -68,7 +68,6 @@ pub enum ParseSpanIdError {
     FormatError,
 }
 
-// TODO: round trip property test for Display + FromString
 impl FromStr for SpanId {
     type Err = ParseSpanIdError;
 

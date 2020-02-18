@@ -1,8 +1,8 @@
 #![deny(warnings)]
-mod telemetry;
+mod honeycomb;
 mod visitor;
 
-pub use crate::telemetry::{HoneycombTelemetry, SpanId, TraceId};
+pub use crate::honeycomb::{HoneycombTelemetry, SpanId, TraceId};
 pub use crate::visitor::HoneycombVisitor;
 pub use tracing_distributed::{TelemetryLayer, TraceCtxError};
 

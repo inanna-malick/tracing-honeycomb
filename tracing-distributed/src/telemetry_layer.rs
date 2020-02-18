@@ -140,15 +140,13 @@ where
     }
 }
 
-impl<
-        S,
-        TraceId: 'static + Clone + Eq + Send + Sync,
-        SpanId: 'static + Clone + Eq + Send + Sync,
-        V: tracing::field::Visit + Default + Send + Sync + 'static,
-        T: 'static + Telemetry<Visitor = V, TraceId = TraceId, SpanId = SpanId>,
-    > Layer<S> for TelemetryLayer<T, SpanId, TraceId>
+impl<S, TraceId, SpanId, V, T> Layer<S> for TelemetryLayer<T, SpanId, TraceId>
 where
     S: Subscriber + for<'a> registry::LookupSpan<'a>,
+    TraceId: 'static + Clone + Eq + Send + Sync,
+    SpanId: 'static + Clone + Eq + Send + Sync,
+    V: tracing::field::Visit + Default + Send + Sync + 'static,
+    T: 'static + Telemetry<Visitor = V, TraceId = TraceId, SpanId = SpanId>,
 {
     fn new_span(&self, attrs: &Attributes, id: &Id, ctx: Context<S>) {
         let span = ctx.span(id).expect("span data not found during new_span");
@@ -331,10 +329,6 @@ mod tests {
     use tracing::instrument;
     use tracing_subscriber::layer::Layer;
 
-    // // simplified ID types
-    // type TraceId = u64;
-    // type SpanId = Id;
-
     fn explicit_trace_ctx() -> TraceCtx<SpanId, TraceId> {
         let trace_id = 135;
         let span_id = Id::from_u64(246);
@@ -443,14 +437,6 @@ mod tests {
             assert_eq!(event.parent_id, Some(span.id.clone()));
             assert_eq!(span.trace_id, explicit_trace_ctx().trace_id);
             assert_eq!(event.trace_id, explicit_trace_ctx().trace_id);
-
-            // this is a honeycomb visitor specific test
-            // test that reserved word field names are modified w/ tracing. prefix
-            // (field names like "trace.span_id", "duration_ms", etc are ok)
-            // assert_eq!(
-            //     event.values["tracing.duration_ms"],
-            //     libhoney::json!("duration-value")
-            // )
         }
     }
 }

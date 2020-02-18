@@ -1,10 +1,10 @@
-use tracing_honeycomb::{
-    current_dist_trace_ctx, mk_honeycomb_tracing_layer, SpanId, TraceCtx, TraceId,
-};
 use std::{env, str::FromStr, time::Duration};
 use tokio::process::Command;
 use tokio::time::delay_for;
 use tracing::instrument;
+use tracing_honeycomb::{
+    current_dist_trace_ctx, mk_honeycomb_tracing_layer, SpanId, TraceCtx, TraceId,
+};
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::layer::Layer;
 use tracing_subscriber::registry;

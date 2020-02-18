@@ -1,9 +1,9 @@
-use crate::telemetry::{SpanId, TraceId};
+use crate::honeycomb::{SpanId, TraceId};
 use ::libhoney::{json, Value};
-use tracing_distributed::{Event, Span};
 use std::collections::HashMap;
 use std::fmt;
 use tracing::field::{Field, Visit};
+use tracing_distributed::{Event, Span};
 
 // visitor that builds honeycomb-compatible values from tracing fields
 #[derive(Default)]
