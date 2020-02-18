@@ -70,7 +70,6 @@ where
     .ok_or(TraceCtxError::NoEnabledSpan)?
 }
 
-
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 #[non_exhaustive]
 pub enum TraceCtxError {
