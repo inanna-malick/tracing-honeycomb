@@ -299,25 +299,6 @@ impl SpanInitAt {
     }
 }
 
-#[derive(Debug)]
-struct PathToRoot<'a, S> {
-    registry: &'a S,
-    next: Option<Id>,
-}
-
-impl<'a, S> Iterator for PathToRoot<'a, S>
-where
-    S: registry::LookupSpan<'a>,
-{
-    type Item = registry::SpanRef<'a, S>;
-    fn next(&mut self) -> Option<Self::Item> {
-        let id = self.next.take()?;
-        let span = self.registry.span(&id)?;
-        self.next = span.parent().map(|parent| parent.id());
-        Some(span)
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -90,12 +90,11 @@ fn register_global_subscriber() {
         transmission_options: libhoney::transmission::Options::default(),
     };
 
-    // TODO: helper fn for this exported by honeycomb tracing lib
     let telemetry_layer = mk_honeycomb_tracing_layer("async-tracing_example", honeycomb_config);
 
     let subscriber = telemetry_layer // publish to tracing
         .and_then(tracing_subscriber::fmt::Layer::builder().finish()) // log to stdout
-        .and_then(LevelFilter::INFO) // omit low-level debug tracing (eg tokio executor)
+        .and_then(LevelFilter::INFO) // filter out low-level debug tracing (eg tokio executor)
         .with_subscriber(registry::Registry::default()); // provide underlying span data store
 
     tracing::subscriber::set_global_default(subscriber).expect("setting global default failed");
