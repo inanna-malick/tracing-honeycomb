@@ -7,7 +7,7 @@
 
 //! This crate provides:
 //! - A tracing layer, `TelemetryLayer`, that can be used to publish trace data to honeycomb.io
-//!     - Utilities for implementing distributed tracing against the honeycomb.io backend
+//! - Utilities for implementing distributed tracing against the honeycomb.io backend
 //!
 //! As a tracing layer, `TelemetryLayer` can be composed with other layers to provide stdout logging, filtering, etc.
 

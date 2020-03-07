@@ -19,12 +19,6 @@ Here's an example of how they might be used together:
 2. A child of that span uses `current_dist_trace_ctx` to fetch the current `TraceId` and `SpanId`. It passes these values along with an RPC request, as metadata.
 3. The RPC service handler uses the `TraceId` and remote parent `SpanId` provided in the request's metadata to register the handler function's span as a local root of the distributed trace initiated in step 1.
 
-```
-
-
-```
-
-
 ### Registering a global Subscriber
 
 The following example shows how to create and register a subscriber created by composing `TelemetryLayer` with other layers and the `Registry` subscriber provided by the `tracing_subscriber` crate.
