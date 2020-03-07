@@ -1,24 +1,31 @@
 use crate::trace::{Event, Span};
 use std::marker::PhantomData;
 
+/// This trait represents the ability to publish events and spans to some arbitrary backend.
 pub trait Telemetry {
+    /// Type used to record tracing fields.
     type Visitor: Default + tracing::field::Visit;
+    /// Globally unique identifier, uniquely identifies a trace.
     type TraceId: Send + Sync + Clone;
+    /// Identifies spans within a trace.
     type SpanId: Send + Sync + Clone;
 
+    /// Report a `Span` to this Telemetry instance's backend.
     fn report_span(&self, span: Span<Self::Visitor, Self::SpanId, Self::TraceId>);
+    /// Report an `Event` to this Telemetry instance's backend.
     fn report_event(&self, event: Event<Self::Visitor, Self::SpanId, Self::TraceId>);
 }
 
-#[derive(Default)]
+/// Visitor that records no information when visiting tracing fields.
+#[derive(Default, Debug)]
 pub struct BlackholeVisitor;
 
 impl tracing::field::Visit for BlackholeVisitor {
     fn record_debug(&mut self, _: &tracing::field::Field, _: &dyn std::fmt::Debug) {}
 }
 
-// NOTE: each crate needs to export one of these now, but whatevs
-
+/// Telemetry implementation that does not publish information to any backend.
+/// For use in tests.
 pub struct BlackholeTelemetry<S, T>(PhantomData<S>, PhantomData<T>);
 
 impl<S, T> Default for BlackholeTelemetry<S, T> {
@@ -29,14 +36,12 @@ impl<S, T> Default for BlackholeTelemetry<S, T> {
 
 impl<SpanId, TraceId> Telemetry for BlackholeTelemetry<SpanId, TraceId>
 where
-    SpanId: 'static + Send + Clone + Sync,
+    SpanId: 'static + Clone + Send + Sync,
     TraceId: 'static + Clone + Send + Sync,
 {
     type Visitor = BlackholeVisitor;
     type TraceId = TraceId;
     type SpanId = SpanId;
-
-    // fn promote_span_id(id: tracing::span::Id) -> Self::SpanId;
 
     fn report_span(&self, _: Span<Self::Visitor, Self::SpanId, Self::TraceId>) {}
 
@@ -50,8 +55,8 @@ pub(crate) mod test {
     use std::sync::Mutex;
 
     // simplified ID types
-    pub type TraceId = u64;
-    pub type SpanId = tracing::Id;
+    pub(crate) type TraceId = u64;
+    pub(crate) type SpanId = tracing::Id;
 
     /// Mock telemetry capability
     pub struct TestTelemetry {

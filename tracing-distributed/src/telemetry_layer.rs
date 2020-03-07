@@ -1,5 +1,5 @@
 use crate::telemetry::Telemetry;
-use crate::trace::{self, TraceCtx};
+use crate::trace;
 use chrono::{DateTime, Utc};
 use std::any::TypeId;
 use std::collections::HashMap;
@@ -9,7 +9,8 @@ use tracing::span::{Attributes, Id, Record};
 use tracing::{Event, Subscriber};
 use tracing_subscriber::{layer::Context, registry, Layer};
 
-/// Tracing 'Layer' that uses some telemetry client 'T' to publish events and spans
+/// A `tracing_subscriber::Layer` that publishes events and spans to some backend
+/// using the provided `Telemetry` capability.
 pub struct TelemetryLayer<Telemetry, SpanId, TraceId> {
     pub(crate) telemetry: Telemetry,
     service_name: &'static str,
@@ -17,22 +18,37 @@ pub struct TelemetryLayer<Telemetry, SpanId, TraceId> {
     pub(crate) trace_ctx_registry: TraceCtxRegistry<SpanId, TraceId>,
 }
 
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+pub(crate) struct TraceCtx<SpanId, TraceId> {
+    pub(crate) parent_span: Option<SpanId>,
+    pub(crate) trace_id: TraceId,
+}
+
 // resolvable via downcast_ref, to avoid propagating 'T' parameter of TelemetryLayer where not req'd
 pub(crate) struct TraceCtxRegistry<SpanId, TraceId> {
     registry: RwLock<HashMap<Id, TraceCtx<SpanId, TraceId>>>,
-    promote_span_id: Box<dyn 'static + Send + Sync + Fn(Id) -> SpanId>, // more of a haskell idiom, mb handle via some other means?
+    promote_span_id: Box<dyn 'static + Send + Sync + Fn(Id) -> SpanId>,
 }
 
 impl<SpanId, TraceId> TraceCtxRegistry<SpanId, TraceId>
 where
-    SpanId: 'static + Send + Clone + Sync,
+    SpanId: 'static + Clone + Send + Sync,
     TraceId: 'static + Clone + Send + Sync,
 {
     pub(crate) fn promote_span_id(&self, id: Id) -> SpanId {
         (self.promote_span_id)(id)
     }
 
-    pub(crate) fn record_trace_ctx(&self, trace_ctx: TraceCtx<SpanId, TraceId>, id: Id) {
+    pub(crate) fn record_trace_ctx(
+        &self,
+        trace_id: TraceId,
+        remote_parent_span: Option<SpanId>,
+        id: Id,
+    ) {
+        let trace_ctx = TraceCtx {
+            trace_id,
+            parent_span: remote_parent_span,
+        };
         let mut trace_ctx_registry = self.registry.write().expect("write lock!");
         trace_ctx_registry.insert(id, trace_ctx); // TODO: handle overwrite?
     }
@@ -109,7 +125,7 @@ where
         None
     }
 
-    pub fn new<F: 'static + Send + Sync + Fn(Id) -> SpanId>(f: F) -> Self {
+    pub(crate) fn new<F: 'static + Send + Sync + Fn(Id) -> SpanId>(f: F) -> Self {
         let registry = RwLock::new(HashMap::new());
         let promote_span_id = Box::new(f);
 
@@ -122,9 +138,12 @@ where
 
 impl<T, SpanId, TraceId> TelemetryLayer<T, SpanId, TraceId>
 where
-    SpanId: 'static + Send + Clone + Sync,
+    SpanId: 'static + Clone + Send + Sync,
     TraceId: 'static + Clone + Send + Sync,
 {
+    /// Construct a new TelemetryLayer using the provided `Telemetry` capability.
+    /// Uses the provided function, `F`, to promote `tracing::span::Id` instances to the
+    /// `SpanId` type associated with the provided `Telemetry` instance.
     pub fn new<F: 'static + Send + Sync + Fn(Id) -> SpanId>(
         service_name: &'static str,
         telemetry: T,
@@ -145,7 +164,7 @@ where
     S: Subscriber + for<'a> registry::LookupSpan<'a>,
     TraceId: 'static + Clone + Eq + Send + Sync,
     SpanId: 'static + Clone + Eq + Send + Sync,
-    V: tracing::field::Visit + Default + Send + Sync + 'static,
+    V: 'static + tracing::field::Visit + Default + Send + Sync,
     T: 'static + Telemetry<Visitor = V, TraceId = TraceId, SpanId = SpanId>,
 {
     fn new_span(&self, attrs: &Attributes, id: &Id, ctx: Context<S>) {
@@ -287,6 +306,7 @@ where
     }
 }
 
+// TODO: delete?
 struct LazyTraceCtx<SpanId, TraceId>(TraceCtx<SpanId, TraceId>);
 
 struct SpanInitAt(DateTime<Utc>);
@@ -310,14 +330,12 @@ mod tests {
     use tracing::instrument;
     use tracing_subscriber::layer::Layer;
 
-    fn explicit_trace_ctx() -> TraceCtx<SpanId, TraceId> {
-        let trace_id = 135;
-        let span_id = Id::from_u64(246);
+    fn explicit_trace_id() -> TraceId {
+        135
+    }
 
-        TraceCtx {
-            trace_id,
-            parent_span: Some(span_id),
-        }
+    fn explicit_parent_span_id() -> SpanId {
+        Id::from_u64(246)
     }
 
     #[test]
@@ -325,7 +343,11 @@ mod tests {
         with_test_scenario_runner(|| {
             #[instrument]
             fn f(ns: Vec<u64>) {
-                explicit_trace_ctx().register_dist_tracing_root().unwrap();
+                trace::register_dist_tracing_root(
+                    explicit_trace_id(),
+                    Some(explicit_parent_span_id()),
+                )
+                .unwrap();
                 for n in ns {
                     g(format!("{}", n));
                 }
@@ -344,7 +366,7 @@ mod tests {
                     trace::current_dist_trace_ctx::<SpanId, TraceId>()
                         .map(|x| x.0)
                         .unwrap(),
-                    explicit_trace_ctx().trace_id
+                    explicit_trace_id(),
                 );
             }
 
@@ -358,7 +380,11 @@ mod tests {
         with_test_scenario_runner(|| {
             #[instrument]
             async fn f(ns: Vec<u64>) {
-                explicit_trace_ctx().register_dist_tracing_root().unwrap();
+                trace::register_dist_tracing_root(
+                    explicit_trace_id(),
+                    Some(explicit_parent_span_id()),
+                )
+                .unwrap();
                 for n in ns {
                     g(format!("{}", n)).await;
                 }
@@ -366,7 +392,7 @@ mod tests {
 
             #[instrument]
             async fn g(s: String) {
-                // delay to force multiple span entry (because it isn't immediately ready)
+                // delay to force multiple span entry
                 tokio::time::delay_for(Duration::from_millis(100)).await;
                 let use_of_reserved_word = "duration-value";
                 tracing::event!(
@@ -379,7 +405,7 @@ mod tests {
                     trace::current_dist_trace_ctx::<SpanId, TraceId>()
                         .map(|x| x.0)
                         .unwrap(),
-                    explicit_trace_ctx().trace_id
+                    explicit_trace_id(),
                 );
             }
 
@@ -407,17 +433,17 @@ mod tests {
         let root_span = &spans[3];
         let child_spans = &spans[0..3];
 
-        let expected_trace_id = explicit_trace_ctx().trace_id;
+        let expected_trace_id = explicit_trace_id();
 
-        assert_eq!(root_span.parent_id, explicit_trace_ctx().parent_span);
+        assert_eq!(root_span.parent_id, Some(explicit_parent_span_id()));
         assert_eq!(root_span.trace_id, expected_trace_id);
 
         for (span, event) in child_spans.iter().zip(events.iter()) {
             // confirm parent and trace ids are as expected
             assert_eq!(span.parent_id, Some(root_span.id.clone()));
             assert_eq!(event.parent_id, Some(span.id.clone()));
-            assert_eq!(span.trace_id, explicit_trace_ctx().trace_id);
-            assert_eq!(event.trace_id, explicit_trace_ctx().trace_id);
+            assert_eq!(span.trace_id, explicit_trace_id());
+            assert_eq!(event.trace_id, explicit_trace_id());
         }
     }
 }

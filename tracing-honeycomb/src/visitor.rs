@@ -5,8 +5,9 @@ use std::fmt;
 use tracing::field::{Field, Visit};
 use tracing_distributed::{Event, Span};
 
-// visitor that builds honeycomb-compatible values from tracing fields
-#[derive(Default)]
+/// Visitor that builds honeycomb-compatible values from tracing fields.
+#[derive(Default, Debug)]
+#[doc(hidden)]
 pub struct HoneycombVisitor(pub(crate) HashMap<String, Value>);
 
 // reserved field names (TODO: document)

@@ -5,12 +5,14 @@ use std::str::FromStr;
 use std::sync::Mutex;
 use tracing_distributed::{Event, Span, Telemetry};
 
+/// Telemetry capability that publishes events and spans to Honeycomb.io.
+#[derive(Debug)]
 pub struct HoneycombTelemetry {
     honeycomb_client: Mutex<libhoney::Client<libhoney::transmission::Transmission>>,
 }
 
 impl HoneycombTelemetry {
-    pub fn new(cfg: libhoney::Config) -> Self {
+    pub(crate) fn new(cfg: libhoney::Config) -> Self {
         let honeycomb_client = libhoney::init(cfg);
 
         // publishing requires &mut so just mutex-wrap it
@@ -50,6 +52,8 @@ impl Telemetry for HoneycombTelemetry {
     }
 }
 
+/// Unique Span identifier. Combines a span's `tracing::Id` with an instance identifier to avoid id collisions in distributed scenarios.
+/// `Display` and `FromStr` are guaranteed to round-trip.
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct SpanId {
     pub(crate) tracing_id: tracing::Id,
@@ -57,6 +61,7 @@ pub struct SpanId {
 }
 
 impl SpanId {
+    /// Metadata field name associated with `SpanId` values.
     pub fn meta_field_name() -> &'static str {
         "span-id"
     }
@@ -91,11 +96,13 @@ impl std::fmt::Display for SpanId {
     }
 }
 
-/// A Honeycomb Trace ID. Uniquely identifies a single distributed (potentially multi-process) trace.
-#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+/// A Honeycomb Trace ID. Uniquely identifies a single distributed trace.
+/// `Display` and `FromStr` are guaranteed to round-trip.
+#[derive(PartialEq, Eq, Hash, Copy, Clone, Debug)]
 pub struct TraceId(pub(crate) u128);
 
 impl TraceId {
+    /// Metadata field name associated with this `TraceId` values.
     pub fn meta_field_name() -> &'static str {
         "trace-id"
     }

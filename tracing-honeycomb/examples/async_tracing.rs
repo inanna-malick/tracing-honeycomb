@@ -3,20 +3,16 @@ use tokio::process::Command;
 use tokio::time::delay_for;
 use tracing::instrument;
 use tracing_honeycomb::{
-    current_dist_trace_ctx, mk_honeycomb_tracing_layer, SpanId, TraceCtx, TraceId,
+    current_dist_trace_ctx, new_honeycomb_telemetry_layer, register_dist_tracing_root, SpanId,
+    TraceId,
 };
 use tracing_subscriber::filter::LevelFilter;
-use tracing_subscriber::layer::Layer;
+use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::registry;
 
 #[instrument]
 async fn spawn_children(n: u32, process_name: String) {
-    TraceCtx {
-        trace_id: TraceId::generate(),
-        parent_span: None,
-    }
-    .register_dist_tracing_root()
-    .unwrap();
+    register_dist_tracing_root(TraceId::generate(), None).unwrap();
 
     for _ in 0..n {
         spawn_child_process(&process_name).await;
@@ -39,8 +35,8 @@ async fn spawn_child_process(process_name: &str) {
 }
 
 #[instrument]
-async fn run_in_child_process(trace_ctx: TraceCtx) {
-    trace_ctx.register_dist_tracing_root().unwrap();
+async fn run_in_child_process(trace_id: TraceId, parent_span: SpanId) {
+    register_dist_tracing_root(trace_id, Some(parent_span)).unwrap();
 
     tracing::info!("leaf fn");
     delay_for(Duration::from_millis(50)).await
@@ -61,11 +57,7 @@ async fn main() {
             let parent_span = SpanId::from_str(&parent_span).unwrap();
             let trace_id = TraceId::from_str(&trace_id).unwrap();
             // parent trace ctx present, run leaf fn
-            run_in_child_process(TraceCtx {
-                trace_id,
-                parent_span: Some(parent_span),
-            })
-            .await;
+            run_in_child_process(trace_id, parent_span).await;
         }
         _ => {
             // no parent trace_ctx, spawn child processes
@@ -90,12 +82,12 @@ fn register_global_subscriber() {
         transmission_options: libhoney::transmission::Options::default(),
     };
 
-    let telemetry_layer = mk_honeycomb_tracing_layer("async-tracing_example", honeycomb_config);
+    let telemetry_layer = new_honeycomb_telemetry_layer("async-tracing_example", honeycomb_config);
 
-    let subscriber = telemetry_layer // publish to tracing
-        .and_then(tracing_subscriber::fmt::Layer::builder().finish()) // log to stdout
-        .and_then(LevelFilter::INFO) // filter out low-level debug tracing (eg tokio executor)
-        .with_subscriber(registry::Registry::default()); // provide underlying span data store
+    let subscriber = registry::Registry::default() // provide underlying span data store
+        .with(LevelFilter::INFO) // filter out low-level debug tracing (eg tokio executor)
+        .with(tracing_subscriber::fmt::Layer::builder().finish()) // log to stdout
+        .with(telemetry_layer); // publish to honeycomb backend
 
     tracing::subscriber::set_global_default(subscriber).expect("setting global default failed");
 }
