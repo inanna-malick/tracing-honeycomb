@@ -1,6 +1,6 @@
 [package]
 name = "tracing-distributed"
-version = "0.1.0-alpha"
+version = "0.1.0-alpha-1"
 authors = ["Inanna Malick <inanna@recursion.wtf>"]
 edition = "2018"
 description = "Tracing layer for multiprocess telemetry"
