@@ -8,6 +8,12 @@ As a tracing layer, `TelemetryLayer` can be composed with other layers to provid
 
 ## Usage
 
+Add the following to your Cargo.toml to get started.
+
+```toml
+tracing-honeycomb = "0.1.0-alpha"
+```
+
 ### Propagating distributed tracing metadata
 
 This crate provides two functions for out of band interaction with the `TelemetryLayer`
@@ -47,9 +53,9 @@ tracing::subscriber::set_global_default(subscriber).expect("setting global defau
 
 ### Testing
 
-Since `TraceCtx::current_trace_ctx` and `TraceCtx::record_on_current_span` can be expected to return `Ok` as long as some `TelemetryLayer` has been registered as part of the layer/subscriber stack and the current span is active, it's valid to `.expect` them to always succeed & to panic if they do not.
+Since `TraceCtx::current_trace_ctx` and `TraceCtx::record_on_current_span` can be expected to return `Ok` as long as some `TelemetryLayer` has been registered as part of the layer/subscriber stack and the current span is active, it's valid to `.expect` them to always succeed & to panic if they do not. However, you probably don't want to publish telemetry while running unit or integration tests.
 
-This library provides a `BlackholeTelemetry` `Telemetry` instance for use in test code, so you can exercise code that uses trace ctxs in tests without publishing telemetry to any backend. Use as:
+This library provides a `BlackholeTelemetry` `Telemetry` instance that discards spans and events without publishing them to any backend. Use as:
 
 ```rust
 let telemetry_layer = mk_honeycomb_blackhole_tracing_layer(); 
