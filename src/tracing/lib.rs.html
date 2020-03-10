@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.12/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.13/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -762,6 +762,31 @@
 <span id="762">762</span>
 <span id="763">763</span>
 <span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! A scoped, structured logging and diagnostics system.</span>
 <span class="doccomment">//!</span>
@@ -910,7 +935,9 @@
 <span class="doccomment">//! fields using `fmt::Debug`.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! For example:</span>
-<span class="doccomment">//! ```</span>
+<span class="doccomment">//! ```ignore</span>
+<span class="doccomment">//! # // this doctest is ignored because we don&#39;t have a way to say</span>
+<span class="doccomment">//! # // that it should only be run with cfg(feature = &quot;attributes&quot;)</span>
 <span class="doccomment">//! use tracing::{Level, event, instrument};</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! #[instrument]</span>
@@ -1092,6 +1119,23 @@
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
+<span class="doccomment">//! Additionally, a span may declare fields with the special value [`Empty`],</span>
+<span class="doccomment">//! which indicates that that the value for that field does not currently exist</span>
+<span class="doccomment">//! but may be recorded later. For example:</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//! use tracing::{trace_span, field};</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! // Create a span with two fields: `greeting`, with the value &quot;hello world&quot;, and</span>
+<span class="doccomment">//! // `parting`, without a value.</span>
+<span class="doccomment">//! let span = trace_span!(&quot;my_span&quot;, greeting = &quot;hello world&quot;, parting = field::Empty);</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! // ...</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! // Now, record a value for parting as well.</span>
+<span class="doccomment">//! span.record(&quot;parting&quot;, &amp;&quot;goodbye world!&quot;);</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//! Note that a span may have up to 32 fields. The following will not compile:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust,compile_fail</span>
@@ -1144,6 +1188,7 @@
 <span class="doccomment">//! [`fmt::Debug`]: https://doc.rust-lang.org/std/fmt/trait.Debug.html</span>
 <span class="doccomment">//! [`fmt::Display`]: https://doc.rust-lang.org/std/fmt/trait.Display.html</span>
 <span class="doccomment">//! [fmt]: https://doc.rust-lang.org/std/fmt/#usage</span>
+<span class="doccomment">//! [`Empty`]: field/struct.Empty.html</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ### Shorthand Macros</span>
 <span class="doccomment">//!</span>
@@ -1401,13 +1446,16 @@
 <span class="doccomment">//!   applications which intend to collect traces and logs separately; if an</span>
 <span class="doccomment">//!   adapter is used to convert `log` records into `tracing` events, this will</span>
 <span class="doccomment">//!   cause duplicate events to occur.</span>
+<span class="doccomment">//! * `attributes`: Includes support for the `#[instrument]` attribute.</span>
+<span class="doccomment">//!   This is on by default, but does bring in the `syn` crate as a dependency,</span>
+<span class="doccomment">//!   which may add to the compile time of crates that do not already use it.</span>
 <span class="doccomment">//! * `std`: Depend on the Rust standard library (enabled by default).</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//!   `no_std` users may disable this feature with `default-features = false`:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//!   ```toml</span>
 <span class="doccomment">//!   [dependencies]</span>
-<span class="doccomment">//!   tracing = { version = &quot;0.1.12&quot;, default-features = false }</span>
+<span class="doccomment">//!   tracing = { version = &quot;0.1.13&quot;, default-features = false }</span>
 <span class="doccomment">//!   ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//!   *Compiler support: requires rustc 1.39+*</span>
@@ -1440,7 +1488,7 @@
 <span class="doccomment">//! [instrument]: https://docs.rs/tracing-attributes/latest/tracing_attributes/attr.instrument.html</span>
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>), <span class="ident">no_std</span>)]</span>
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">feature</span>(<span class="ident">doc_cfg</span>))]</span>
-<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/tracing/0.1.12&quot;</span>)]</span>
+<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/tracing/0.1.13&quot;</span>)]</span>
 <span class="attribute">#![<span class="ident">warn</span>(
     <span class="ident">missing_debug_implementations</span>,
     <span class="ident">missing_docs</span>,
@@ -1500,6 +1548,8 @@
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">span</span>::<span class="ident">Span</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;attributes&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;attributes&quot;</span>)))]</span>
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">tracing_attributes</span>::<span class="ident">instrument</span>;
 

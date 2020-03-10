@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/error-chain-0.12.1/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../error_chain/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/error-chain-0.12.2/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../error_chain/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -806,9 +806,25 @@
 <span id="806">806</span>
 <span id="807">807</span>
 <span id="808">808</span>
+<span id="809">809</span>
+<span id="810">810</span>
+<span id="811">811</span>
+<span id="812">812</span>
+<span id="813">813</span>
+<span id="814">814</span>
+<span id="815">815</span>
+<span id="816">816</span>
+<span id="817">817</span>
+<span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_docs</span>)]</span>
-<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/error-chain/0.12.1&quot;</span>)]</span>
+<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/error-chain/0.12.2&quot;</span>)]</span>
 
 <span class="doccomment">//! A library for consistent and reliable error handling</span>
 <span class="doccomment">//!</span>
@@ -972,6 +988,10 @@
 <span class="doccomment">//!             display(&quot;unknown toolchain version: &#39;{}&#39;&quot;, v), // trailing comma is allowed</span>
 <span class="doccomment">//!         }</span>
 <span class="doccomment">//!     }</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//!     // If this annotation is left off, a variant `Msg(s: String)` will be added, and `From`</span>
+<span class="doccomment">//!     // impls will be provided for `String` and `&amp;str`</span>
+<span class="doccomment">//!     skip_msg_variant</span>
 <span class="doccomment">//! }</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # fn main() {}</span>
@@ -1345,8 +1365,8 @@
 <span class="doccomment">//! [`BacktraceFrame`]: https://docs.rs/backtrace/0.3.2/backtrace/struct.BacktraceFrame.html</span>
 
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">error</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">iter</span>::<span class="ident">Iterator</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">iter</span>::<span class="ident">Iterator</span>;
 
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
 <span class="kw">mod</span> <span class="ident">impl_error_chain_kind</span>;
@@ -1355,24 +1375,27 @@
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
 <span class="kw">mod</span> <span class="ident">quick_main</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">quick_main</span>::<span class="ident">ExitCode</span>;
+<span class="kw">mod</span> <span class="ident">backtrace</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;example_generated&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">example_generated</span>;
-<span class="kw">mod</span> <span class="ident">backtrace</span>;
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">backtrace</span>::<span class="ident">Backtrace</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">backtrace</span>::<span class="ident">InternalBacktrace</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unknown_lints</span>, <span class="ident">bare_trait_objects</span>)]</span>
 <span class="doccomment">/// Iterator over the error chain using the `Error::cause()` method.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Returns a new iterator over the error chain using `Error::cause()`.</span>
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unknown_lints</span>, <span class="ident">bare_trait_objects</span>)]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">err</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="ident">Iter</span>(<span class="ident">err</span>)
     }
 }
 
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unknown_lints</span>, <span class="ident">bare_trait_objects</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">Iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">error</span>::<span class="ident">Error</span>;
 
@@ -1399,13 +1422,16 @@
     <span class="kw">type</span> <span class="ident">ErrorKind</span>;
 
     <span class="doccomment">/// Constructs an error from a kind, and generates a backtrace.</span>
-    <span class="kw">fn</span> <span class="ident">from_kind</span>(<span class="ident">kind</span>: <span class="self">Self</span>::<span class="ident">ErrorKind</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">Sized</span>;
+    <span class="kw">fn</span> <span class="ident">from_kind</span>(<span class="ident">kind</span>: <span class="self">Self</span>::<span class="ident">ErrorKind</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">where</span>
+        <span class="self">Self</span>: <span class="ident">Sized</span>;
 
     <span class="doccomment">/// Constructs a chained error from another error and a kind, and generates a backtrace.</span>
     <span class="kw">fn</span> <span class="ident">with_chain</span><span class="op">&lt;</span><span class="ident">E</span>, <span class="ident">K</span><span class="op">&gt;</span>(<span class="ident">error</span>: <span class="ident">E</span>, <span class="ident">kind</span>: <span class="ident">K</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
-        <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">Sized</span>,
-              <span class="ident">E</span>: ::<span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-              <span class="ident">K</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">ErrorKind</span><span class="op">&gt;</span>;
+    <span class="kw">where</span>
+        <span class="self">Self</span>: <span class="ident">Sized</span>,
+        <span class="ident">E</span>: ::<span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+        <span class="ident">K</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">ErrorKind</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Returns the kind of the error.</span>
     <span class="kw">fn</span> <span class="ident">kind</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="self">Self</span>::<span class="ident">ErrorKind</span>;
@@ -1426,18 +1452,23 @@
 
     <span class="doccomment">/// Extends the error chain with a new entry.</span>
     <span class="kw">fn</span> <span class="ident">chain_err</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">EK</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">error</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
-        <span class="kw">where</span> <span class="ident">F</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">EK</span>,
-              <span class="ident">EK</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">ErrorKind</span><span class="op">&gt;</span>;
+    <span class="kw">where</span>
+        <span class="ident">F</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">EK</span>,
+        <span class="ident">EK</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">ErrorKind</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Creates an error from its parts.</span>
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">kind</span>: <span class="self">Self</span>::<span class="ident">ErrorKind</span>, <span class="ident">state</span>: <span class="ident">State</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">Sized</span>;
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">kind</span>: <span class="self">Self</span>::<span class="ident">ErrorKind</span>, <span class="ident">state</span>: <span class="ident">State</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">where</span>
+        <span class="self">Self</span>: <span class="ident">Sized</span>;
 
     <span class="doccomment">/// Returns the first known backtrace, either from its State or from one</span>
     <span class="doccomment">/// of the errors from `foreign_links`.</span>
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unknown_lints</span>, <span class="ident">bare_trait_objects</span>)]</span>
     <span class="kw">fn</span> <span class="ident">extract_backtrace</span>(<span class="ident">e</span>: <span class="kw-2">&amp;</span>(<span class="ident">error</span>::<span class="ident">Error</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">InternalBacktrace</span><span class="op">&gt;</span>
-        <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">Sized</span>;
+    <span class="kw">where</span>
+        <span class="self">Self</span>: <span class="ident">Sized</span>;
 }
 
 <span class="doccomment">/// A struct which formats an error for output.</span>
@@ -1445,18 +1476,18 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DisplayChain</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="ident">Display</span> <span class="kw">for</span> <span class="ident">DisplayChain</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span>
-    <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">ChainedError</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">ChainedError</span>,
 {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
-        <span class="comment">// Keep `try!` for 1.10 support</span>
-        <span class="macro">try</span><span class="macro">!</span>(<span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">fmt</span>, <span class="string">&quot;Error: {}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>));
+        <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">fmt</span>, <span class="string">&quot;Error: {}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>)<span class="question-mark">?</span>;
 
         <span class="kw">for</span> <span class="ident">e</span> <span class="kw">in</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">iter</span>().<span class="ident">skip</span>(<span class="number">1</span>) {
-            <span class="macro">try</span><span class="macro">!</span>(<span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">fmt</span>, <span class="string">&quot;Caused by: {}&quot;</span>, <span class="ident">e</span>));
+            <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">fmt</span>, <span class="string">&quot;Caused by: {}&quot;</span>, <span class="ident">e</span>)<span class="question-mark">?</span>;
         }
 
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">backtrace</span>) <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">backtrace</span>() {
-            <span class="macro">try</span><span class="macro">!</span>(<span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">fmt</span>, <span class="string">&quot;{:?}&quot;</span>, <span class="ident">backtrace</span>));
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">backtrace</span>) <span class="op">=</span> <span class="ident">ChainedError</span>::<span class="ident">backtrace</span>(<span class="self">self</span>.<span class="number">0</span>) {
+            <span class="macro">writeln</span><span class="macro">!</span>(<span class="ident">fmt</span>, <span class="string">&quot;{:?}&quot;</span>, <span class="ident">backtrace</span>)<span class="question-mark">?</span>;
         }
 
         <span class="prelude-val">Ok</span>(())
@@ -1466,6 +1497,7 @@
 <span class="doccomment">/// Common state between errors.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unknown_lints</span>, <span class="ident">bare_trait_objects</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">State</span> {
     <span class="doccomment">/// Next error in the error chain.</span>
     <span class="kw">pub</span> <span class="ident">next_error</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">error</span>::<span class="ident">Error</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>,
@@ -1484,9 +1516,9 @@
 
 <span class="kw">impl</span> <span class="ident">State</span> {
     <span class="doccomment">/// Creates a new State type</span>
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unknown_lints</span>, <span class="ident">bare_trait_objects</span>)]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">CE</span>: <span class="ident">ChainedError</span><span class="op">&gt;</span>(<span class="ident">e</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">error</span>::<span class="ident">Error</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">State</span> {
-        <span class="kw">let</span> <span class="ident">backtrace</span> <span class="op">=</span> <span class="ident">CE</span>::<span class="ident">extract_backtrace</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">e</span>)
-            .<span class="ident">unwrap_or_else</span>(<span class="ident">InternalBacktrace</span>::<span class="ident">new</span>);
+        <span class="kw">let</span> <span class="ident">backtrace</span> <span class="op">=</span> <span class="ident">CE</span>::<span class="ident">extract_backtrace</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">e</span>).<span class="ident">unwrap_or_else</span>(<span class="ident">InternalBacktrace</span>::<span class="ident">new</span>);
         <span class="ident">State</span> {
             <span class="ident">next_error</span>: <span class="prelude-val">Some</span>(<span class="ident">e</span>),
             <span class="ident">backtrace</span>: <span class="ident">backtrace</span>,
@@ -1613,7 +1645,7 @@
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">mock</span> {
-    <span class="macro">error_chain</span><span class="macro">!</span>{}
+    <span class="macro">error_chain</span><span class="macro">!</span> {}
 }
 </pre></div>
 </section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "error_chain";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
