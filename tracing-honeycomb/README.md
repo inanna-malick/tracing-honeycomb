@@ -1,5 +1,7 @@
 # tracing-honeycomb
 
+[![tracing-honeycomb on crates.io](https://img.shields.io/crates/v/tracing-honeycomb)](https://crates.io/crates/tracing-honeycomb) [![Documentation (latest release)](https://docs.rs/tracing-honeycomb/badge.svg)](https://docs.rs/tracing-honeycomb/) [![Documentation (master)](https://img.shields.io/badge/docs-master-brightgreen)](https://inanna-malick.github.io/honeycomb-tracing/tracing_honeycomb/)[![License](https://img.shields.io/badge/license-MIT-green.svg)](../LICENSE)
+
 This crate provides:
 - A tracing layer, `TelemetryLayer`, that can be used to publish trace data to honeycomb.io
 - Utilities for implementing distributed tracing against the honeycomb.io backend

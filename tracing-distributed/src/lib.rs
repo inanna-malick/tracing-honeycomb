@@ -2,9 +2,9 @@
 
 //! This crate provides:
 //! - `TelemetryLayer`, a generic tracing layer that handles publishing spans and events to arbitrary backends
-//!     - Utilities for implementing distributed tracing for arbitrary backends
+//! - Utilities for implementing distributed tracing for arbitrary backends
 //!
-//!     As a tracing layer, `TelemetryLayer` can be composed with other layers to provide stdout logging, filtering, etc.
+//! As a tracing layer, `TelemetryLayer` can be composed with other layers to provide stdout logging, filtering, etc.
 //!
 //! This crate is primarily intended to be used by people implementing their own backends.
 //! A concrete implementation using honeycomb.io as a backend is available at (TODO: link to tracing-honeycomb).
