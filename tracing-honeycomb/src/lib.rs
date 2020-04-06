@@ -21,6 +21,7 @@ use rand::{self, Rng};
 pub use tracing_distributed::{TelemetryLayer, TraceCtxError};
 
 /// Register the current span as the local root of a distributed trace.
+///
 /// Specialized to the honeycomb.io-specific SpanId and TraceId provided by this crate.
 pub fn register_dist_tracing_root(
     trace_id: TraceId,
@@ -29,15 +30,18 @@ pub fn register_dist_tracing_root(
     tracing_distributed::register_dist_tracing_root(trace_id, remote_parent_span)
 }
 
-/// Retrieve the distributed trace context associated with the current span. Returns the
-/// `TraceId`, if any, that the current span is associated with along with the `SpanId`
-/// belonging to the current span.
+/// Retrieve the distributed trace context associated with the current span.
+///
+/// Returns the `TraceId`, if any, that the current span is associated with along with
+/// the `SpanId` belonging to the current span.
+///
 /// Specialized to the honeycomb.io-specific SpanId and TraceId provided by this crate.
 pub fn current_dist_trace_ctx() -> Result<(TraceId, SpanId), TraceCtxError> {
     tracing_distributed::current_dist_trace_ctx()
 }
 
 /// Construct a TelemetryLayer that does not publish telemetry to any backend.
+///
 /// Specialized to the honeycomb.io-specific SpanId and TraceId provided by this crate.
 pub fn new_blackhole_telemetry_layer(
 ) -> TelemetryLayer<tracing_distributed::BlackholeTelemetry<SpanId, TraceId>, SpanId, TraceId> {
@@ -53,6 +57,7 @@ pub fn new_blackhole_telemetry_layer(
 }
 
 /// Construct a TelemetryLayer that publishes telemetry to honeycomb.io using the provided honeycomb config.
+///
 /// Specialized to the honeycomb.io-specific SpanId and TraceId provided by this crate.
 pub fn new_honeycomb_telemetry_layer(
     service_name: &'static str,

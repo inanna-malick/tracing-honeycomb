@@ -1,19 +1,15 @@
 [![tracing-honeycomb on crates.io](https://img.shields.io/crates/v/tracing-honeycomb)](https://crates.io/crates/tracing-honeycomb) [![Documentation (latest release)](https://docs.rs/tracing-honeycomb/badge.svg)](https://docs.rs/tracing-honeycomb/) [![Documentation (master)](https://img.shields.io/badge/docs-master-brightgreen)](https://inanna-malick.github.io/honeycomb-tracing/tracing_honeycomb/)[![License](https://img.shields.io/badge/license-MIT-green.svg)](../LICENSE)
 
-# tracing-honeycomb
+# {{crate}}
 
-This crate provides:
-- A tracing layer, `TelemetryLayer`, that can be used to publish trace data to honeycomb.io
-- Utilities for implementing distributed tracing against the honeycomb.io backend
-
-As a tracing layer, `TelemetryLayer` can be composed with other layers to provide stdout logging, filtering, etc.
+{{readme}}
 
 ## Usage
 
 Add the following to your Cargo.toml to get started.
 
 ```toml
-tracing-honeycomb = 0.1.0-alpha-1
+tracing-honeycomb = {{version}}
 ```
 
 ### Propagating distributed tracing metadata
@@ -73,7 +69,7 @@ tracing::subscriber::set_global_default(subscriber).expect("setting global defau
 
 ## License
 
-MIT
+{{license}}
 
 <!--
 README.md is generated from README.tpl by cargo readme. To regenerate:

@@ -52,7 +52,10 @@ impl Telemetry for HoneycombTelemetry {
     }
 }
 
-/// Unique Span identifier. Combines a span's `tracing::Id` with an instance identifier to avoid id collisions in distributed scenarios.
+/// Unique Span identifier.
+///
+/// Combines a span's `tracing::Id` with an instance identifier to avoid id collisions in distributed scenarios.
+///
 /// `Display` and `FromStr` are guaranteed to round-trip.
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct SpanId {
@@ -96,7 +99,10 @@ impl std::fmt::Display for SpanId {
     }
 }
 
-/// A Honeycomb Trace ID. Uniquely identifies a single distributed trace.
+/// A Honeycomb Trace ID.
+///
+/// Uniquely identifies a single distributed trace.
+///
 /// `Display` and `FromStr` are guaranteed to round-trip.
 #[derive(PartialEq, Eq, Hash, Copy, Clone, Debug)]
 pub struct TraceId(pub(crate) u128);

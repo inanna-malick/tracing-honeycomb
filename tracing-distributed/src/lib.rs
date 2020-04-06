@@ -7,7 +7,8 @@
 //! As a tracing layer, `TelemetryLayer` can be composed with other layers to provide stdout logging, filtering, etc.
 //!
 //! This crate is primarily intended to be used by people implementing their own backends.
-//! A concrete implementation using honeycomb.io as a backend is available at (TODO: link to tracing-honeycomb).
+//! A concrete implementation using honeycomb.io as a backend is available in the [`tracing-honeycomb` crate](https://crates.io/crates/tracing-honeycomb).
+
 
 mod telemetry;
 mod telemetry_layer;

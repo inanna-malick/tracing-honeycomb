@@ -1,21 +1,14 @@
 [![tracing-distributed on crates.io](https://img.shields.io/crates/v/tracing-distributed)](https://crates.io/crates/tracing-distributed) [![Documentation (latest release)](https://docs.rs/tracing-distributed/badge.svg)](https://docs.rs/tracing-distributed/) [![Documentation (master)](https://img.shields.io/badge/docs-master-brightgreen)](https://inanna-malick.github.io/honeycomb-tracing/tracing_distributed/)[![License](https://img.shields.io/badge/license-MIT-green.svg)](../LICENSE)
 
-# tracing-distributed
+# {{crate}}
 
-Current version: 0.1.0-alpha-1
+Current version: {{version}}
 
-This crate provides:
-- `TelemetryLayer`, a generic tracing layer that handles publishing spans and events to arbitrary backends
-- Utilities for implementing distributed tracing for arbitrary backends
-
-As a tracing layer, `TelemetryLayer` can be composed with other layers to provide stdout logging, filtering, etc.
-
-This crate is primarily intended to be used by people implementing their own backends.
-A concrete implementation using honeycomb.io as a backend is available in the [`tracing-honeycomb` crate](https://crates.io/crates/tracing-honeycomb).
+{{readme}}
 
 ## License
 
-MIT
+{{license}}
 
 <!--
 README.md is generated from README.tpl by cargo readme. To regenerate:

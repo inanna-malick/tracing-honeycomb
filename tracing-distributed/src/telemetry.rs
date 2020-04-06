@@ -1,7 +1,7 @@
 use crate::trace::{Event, Span};
 use std::marker::PhantomData;
 
-/// This trait represents the ability to publish events and spans to some arbitrary backend.
+/// Represents the ability to publish events and spans to some arbitrary backend.
 pub trait Telemetry {
     /// Type used to record tracing fields.
     type Visitor: Default + tracing::field::Visit;
@@ -9,7 +9,6 @@ pub trait Telemetry {
     type TraceId: Send + Sync + Clone;
     /// Identifies spans within a trace.
     type SpanId: Send + Sync + Clone;
-
     /// Report a `Span` to this Telemetry instance's backend.
     fn report_span(&self, span: Span<Self::Visitor, Self::SpanId, Self::TraceId>);
     /// Report an `Event` to this Telemetry instance's backend.
