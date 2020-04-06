@@ -143,6 +143,7 @@ mod test {
     use proptest::prelude::*;
     proptest! {
         #[test]
+        // ua is [1..] and not [0..] because 0 is not a valid tracing::Id (tracing::from_u64 throws on 0)
         fn span_id_round_trip(ua in 1u64.., ub in 1u64..) {
             let span_id = SpanId {
                 tracing_id: tracing::Id::from_u64(ua),

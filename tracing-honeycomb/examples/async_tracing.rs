@@ -86,7 +86,7 @@ fn register_global_subscriber() {
 
     let subscriber = registry::Registry::default() // provide underlying span data store
         .with(LevelFilter::INFO) // filter out low-level debug tracing (eg tokio executor)
-        .with(tracing_subscriber::fmt::Layer::builder().finish()) // log to stdout
+        .with(tracing_subscriber::fmt::Layer::default()) // log to stdout
         .with(telemetry_layer); // publish to honeycomb backend
 
     tracing::subscriber::set_global_default(subscriber).expect("setting global default failed");

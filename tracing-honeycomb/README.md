@@ -1,4 +1,4 @@
-[![tracing-honeycomb on crates.io](https://img.shields.io/crates/v/tracing-honeycomb)](https://crates.io/crates/tracing-honeycomb) [![Documentation (latest release)](https://docs.rs/tracing-honeycomb/badge.svg)](https://docs.rs/tracing-honeycomb/) [![Documentation (master)](https://img.shields.io/badge/docs-master-brightgreen)](https://inanna-malick.github.io/honeycomb-tracing/tracing_honeycomb/)[![License](https://img.shields.io/badge/license-MIT-green.svg)](../LICENSE)
+[![tracing-honeycomb on crates.io](https://img.shields.io/crates/v/tracing-honeycomb)](https://crates.io/crates/tracing-honeycomb) [![Documentation (latest release)](https://docs.rs/tracing-honeycomb/badge.svg)](https://docs.rs/tracing-honeycomb/) [![Documentation (master)](https://img.shields.io/badge/docs-master-brightgreen)](https://inanna-malick.github.io/honeycomb-tracing/tracing_honeycomb/)[![License](https://img.shields.io/badge/license-MIT-green.svg)](../LICENSE)[![CircleCI status](https://circleci.com/gh/inanna-malick/honeycomb-tracing.svg?style=svg)](https://app.circleci.com/pipelines/github/inanna-malick/honeycomb-tracing)
 
 # tracing-honeycomb
 
@@ -13,7 +13,7 @@ As a tracing layer, `TelemetryLayer` can be composed with other layers to provid
 Add the following to your Cargo.toml to get started.
 
 ```toml
-tracing-honeycomb = 0.1.0-alpha-1
+tracing-honeycomb = "0.1.0"
 ```
 
 ### Propagating distributed tracing metadata
@@ -46,7 +46,7 @@ let telemetry_layer = mk_honeycomb_tracing_layer("my-service-name", honeycomb_co
 // NOTE: the underlying subscriber MUST be the Registry subscriber
 let subscriber = registry::Registry::default() // provide underlying span data store
     .with(LevelFilter::INFO) // filter out low-level debug tracing (eg tokio executor)
-    .with(tracing_subscriber::fmt::Layer::builder().finish()) // log to stdout
+    .with(tracing_subscriber::fmt::Layer::default()) // log to stdout
     .with(telemetry_layer); // publish to honeycomb backend
 
 
@@ -55,9 +55,7 @@ tracing::subscriber::set_global_default(subscriber).expect("setting global defau
 
 ### Testing
 
-Since `TraceCtx::current_trace_ctx` and `TraceCtx::record_on_current_span` can be expected to return `Ok` as long as some `TelemetryLayer` has been registered as part of the layer/subscriber stack and the current span is active, it's valid to `.expect` them to always succeed & to panic if they do not. However, you probably don't want to publish telemetry while running unit or integration tests.
-
-This library provides a `BlackholeTelemetry` `Telemetry` instance that discards spans and events without publishing them to any backend. Use as:
+Since `TraceCtx::current_trace_ctx` and `TraceCtx::record_on_current_span` can be expected to return `Ok` as long as some `TelemetryLayer` has been registered as part of the layer/subscriber stack and the current span is active, it's valid to `.expect` them to always succeed & to panic if they do not. As a result, you may find yourself writing code that fails if no distributed tracing context is present. This means that unit and integration tests covering such code must provide a `TelemetryLayer`. However, you probably don't want to publish telemetry while running unit or integration tests. You can fix this problem by registering a `TelemetryLayer` constructed using `BlackholeTelemetry`. `BlackholeTelemetry` discards spans and events without publishing them to any backend.
 
 ```rust
 let telemetry_layer = mk_honeycomb_blackhole_tracing_layer(); 
@@ -65,7 +63,7 @@ let telemetry_layer = mk_honeycomb_blackhole_tracing_layer();
 // NOTE: the underlying subscriber MUST be the Registry subscriber
 let subscriber = registry::Registry::default() // provide underlying span data store
     .with(LevelFilter::INFO) // filter out low-level debug tracing (eg tokio executor)
-    .with(tracing_subscriber::fmt::Layer::builder().finish()) // log to stdout
+    .with(tracing_subscriber::fmt::Layer::default()) // log to stdout
     .with(telemetry_layer); // publish to blackhole backend
 
 tracing::subscriber::set_global_default(subscriber).expect("setting global default failed");

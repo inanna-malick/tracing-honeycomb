@@ -2,5 +2,3 @@
 **/*.rs.bk
 Cargo.lock
 honeycomb.key
-tracing-honeycomb/proptest-regressions/*
-.idea/*

@@ -1,8 +1,8 @@
-[![tracing-distributed on crates.io](https://img.shields.io/crates/v/tracing-distributed)](https://crates.io/crates/tracing-distributed) [![Documentation (latest release)](https://docs.rs/tracing-distributed/badge.svg)](https://docs.rs/tracing-distributed/) [![Documentation (master)](https://img.shields.io/badge/docs-master-brightgreen)](https://inanna-malick.github.io/honeycomb-tracing/tracing_distributed/)[![License](https://img.shields.io/badge/license-MIT-green.svg)](../LICENSE)
+[![tracing-distributed on crates.io](https://img.shields.io/crates/v/tracing-distributed)](https://crates.io/crates/tracing-distributed) [![Documentation (latest release)](https://docs.rs/tracing-distributed/badge.svg)](https://docs.rs/tracing-distributed/) [![Documentation (master)](https://img.shields.io/badge/docs-master-brightgreen)](https://inanna-malick.github.io/honeycomb-tracing/tracing_distributed/)[![License](https://img.shields.io/badge/license-MIT-green.svg)](../LICENSE)[![CircleCI status](https://circleci.com/gh/inanna-malick/honeycomb-tracing.svg?style=svg)](https://app.circleci.com/pipelines/github/inanna-malick/honeycomb-tracing)
 
 # tracing-distributed
 
-Current version: 0.1.0-alpha-1
+Current version: 0.1.0
 
 This crate provides:
 - `TelemetryLayer`, a generic tracing layer that handles publishing spans and events to arbitrary backends
