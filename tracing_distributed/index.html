@@ -5,7 +5,7 @@
 </ul>
 <p>As a tracing layer, <code>TelemetryLayer</code> can be composed with other layers to provide stdout logging, filtering, etc.</p>
 <p>This crate is primarily intended to be used by people implementing their own backends.
-A concrete implementation using honeycomb.io as a backend is available at (TODO: link to tracing-honeycomb).</p>
+A concrete implementation using honeycomb.io as a backend is available in the <a href="https://crates.io/crates/tracing-honeycomb"><code>tracing-honeycomb</code> crate</a>.</p>
 </div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
 <table><tr class='module-item'><td><a class="struct" href="struct.BlackholeTelemetry.html" title='tracing_distributed::BlackholeTelemetry struct'>BlackholeTelemetry</a></td><td class='docblock-short'><p>Telemetry implementation that does not publish information to any backend.
 For use in tests.</p>
@@ -17,7 +17,7 @@ using the provided <code>Telemetry</code> capability.</p>
 <table><tr class='module-item'><td><a class="enum" href="enum.TraceCtxError.html" title='tracing_distributed::TraceCtxError enum'>TraceCtxError</a></td><td class='docblock-short'><p>Errors that can occur while registering the current span as a distributed trace root or
 attempting to retrieve the current trace context.</p>
 </td></tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
-<table><tr class='module-item'><td><a class="trait" href="trait.Telemetry.html" title='tracing_distributed::Telemetry trait'>Telemetry</a></td><td class='docblock-short'><p>This trait represents the ability to publish events and spans to some arbitrary backend.</p>
+<table><tr class='module-item'><td><a class="trait" href="trait.Telemetry.html" title='tracing_distributed::Telemetry trait'>Telemetry</a></td><td class='docblock-short'><p>Represents the ability to publish events and spans to some arbitrary backend.</p>
 </td></tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
 <table><tr class='module-item'><td><a class="fn" href="fn.current_dist_trace_ctx.html" title='tracing_distributed::current_dist_trace_ctx fn'>current_dist_trace_ctx</a></td><td class='docblock-short'><p>Retrieve the distributed trace context associated with the current span. Returns the
 <code>TraceId</code>, if any, that the current span is associated with along with the <code>SpanId</code>

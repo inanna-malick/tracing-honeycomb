@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-subscriber-0.2.3/src/fmt/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../tracing_subscriber/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-subscriber-0.2.4/src/fmt/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../tracing_subscriber/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -847,6 +847,106 @@
 <span id="847">847</span>
 <span id="848">848</span>
 <span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
+<span id="868">868</span>
+<span id="869">869</span>
+<span id="870">870</span>
+<span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
+<span id="878">878</span>
+<span id="879">879</span>
+<span id="880">880</span>
+<span id="881">881</span>
+<span id="882">882</span>
+<span id="883">883</span>
+<span id="884">884</span>
+<span id="885">885</span>
+<span id="886">886</span>
+<span id="887">887</span>
+<span id="888">888</span>
+<span id="889">889</span>
+<span id="890">890</span>
+<span id="891">891</span>
+<span id="892">892</span>
+<span id="893">893</span>
+<span id="894">894</span>
+<span id="895">895</span>
+<span id="896">896</span>
+<span id="897">897</span>
+<span id="898">898</span>
+<span id="899">899</span>
+<span id="900">900</span>
+<span id="901">901</span>
+<span id="902">902</span>
+<span id="903">903</span>
+<span id="904">904</span>
+<span id="905">905</span>
+<span id="906">906</span>
+<span id="907">907</span>
+<span id="908">908</span>
+<span id="909">909</span>
+<span id="910">910</span>
+<span id="911">911</span>
+<span id="912">912</span>
+<span id="913">913</span>
+<span id="914">914</span>
+<span id="915">915</span>
+<span id="916">916</span>
+<span id="917">917</span>
+<span id="918">918</span>
+<span id="919">919</span>
+<span id="920">920</span>
+<span id="921">921</span>
+<span id="922">922</span>
+<span id="923">923</span>
+<span id="924">924</span>
+<span id="925">925</span>
+<span id="926">926</span>
+<span id="927">927</span>
+<span id="928">928</span>
+<span id="929">929</span>
+<span id="930">930</span>
+<span id="931">931</span>
+<span id="932">932</span>
+<span id="933">933</span>
+<span id="934">934</span>
+<span id="935">935</span>
+<span id="936">936</span>
+<span id="937">937</span>
+<span id="938">938</span>
+<span id="939">939</span>
+<span id="940">940</span>
+<span id="941">941</span>
+<span id="942">942</span>
+<span id="943">943</span>
+<span id="944">944</span>
+<span id="945">945</span>
+<span id="946">946</span>
+<span id="947">947</span>
+<span id="948">948</span>
+<span id="949">949</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! A `Subscriber` for formatting and logging `tracing` data.</span>
 <span class="doccomment">//!</span>
@@ -902,14 +1002,12 @@
 <span class="doccomment">//! You can create one by calling:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! use tracing_subscriber::FmtSubscriber;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! let subscriber = FmtSubscriber::builder()</span>
+<span class="doccomment">//! let subscriber = tracing_subscriber::fmt()</span>
 <span class="doccomment">//!     // ... add configuration</span>
 <span class="doccomment">//!     .finish();</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! You can find the configuration methods for [`FmtSubscriber`] in [`fmt::SubscriberBuilder`].</span>
+<span class="doccomment">//! You can find the configuration methods for [`FmtSubscriber`] in [`fmtBuilder`].</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ### Filters</span>
 <span class="doccomment">//!</span>
@@ -950,27 +1048,25 @@
 <span class="doccomment">//! Composing an [`EnvFilter`] `Layer` and a [format `Layer`](../fmt/struct.Layer.html):</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! use tracing_subscriber::{fmt, Layer, registry::Registry, EnvFilter};</span>
+<span class="doccomment">//! use tracing_subscriber::{fmt, EnvFilter};</span>
 <span class="doccomment">//! use tracing_subscriber::prelude::*;</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let fmt_layer = fmt::Layer::builder()</span>
-<span class="doccomment">//!     .with_target(false)</span>
-<span class="doccomment">//!     .finish();</span>
+<span class="doccomment">//! let fmt_layer = fmt::layer()</span>
+<span class="doccomment">//!     .with_target(false);</span>
 <span class="doccomment">//! let filter_layer = EnvFilter::try_from_default_env()</span>
 <span class="doccomment">//!     .or_else(|_| EnvFilter::try_new(&quot;info&quot;))</span>
 <span class="doccomment">//!     .unwrap();</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let subscriber = Registry::default()</span>
+<span class="doccomment">//! tracing_subscriber::registry()</span>
 <span class="doccomment">//!     .with(filter_layer)</span>
-<span class="doccomment">//!     .with(fmt_layer);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! tracing::subscriber::set_global_default(subscriber).unwrap();</span>
+<span class="doccomment">//!     .with(fmt_layer)</span>
+<span class="doccomment">//!     .init();</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [`EnvFilter`]: ../filter/struct.EnvFilter.html</span>
 <span class="doccomment">//! [`env_logger`]: https://docs.rs/env_logger/</span>
 <span class="doccomment">//! [`filter`]: ../filter/index.html</span>
-<span class="doccomment">//! [`fmt::SubscriberBuilder`]: ./struct.SubscriberBuilder.html</span>
+<span class="doccomment">//! [`fmtBuilder`]: ./struct.SubscriberBuilder.html</span>
 <span class="doccomment">//! [`FmtSubscriber`]: ./struct.Subscriber.html</span>
 <span class="doccomment">//! [`Subscriber`]:</span>
 <span class="doccomment">//!     https://docs.rs/tracing/latest/tracing/trait.Subscriber.html</span>
@@ -982,7 +1078,9 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">format</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">time</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">writer</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">fmt_layer</span>::{<span class="ident">FmtContext</span>, <span class="ident">FormattedFields</span>, <span class="ident">Layer</span>, <span class="ident">LayerBuilder</span>};
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">deprecated</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">fmt_layer</span>::<span class="ident">LayerBuilder</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">fmt_layer</span>::{<span class="ident">FmtContext</span>, <span class="ident">FormattedFields</span>, <span class="ident">Layer</span>};
 
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">layer</span>::<span class="ident">Layer</span> <span class="kw">as</span> <span class="kw">_</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{
@@ -993,7 +1091,8 @@
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::{
-    <span class="ident">format</span>::{<span class="ident">FormatEvent</span>, <span class="ident">FormatFields</span>},
+    <span class="ident">format</span>::{<span class="ident">format</span>, <span class="ident">FormatEvent</span>, <span class="ident">FormatFields</span>},
+    <span class="ident">time</span>::<span class="ident">time</span>,
     <span class="ident">writer</span>::<span class="ident">MakeWriter</span>,
 };
 
@@ -1027,7 +1126,87 @@
     <span class="ident">W</span> <span class="op">=</span> <span class="kw">fn</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io</span>::<span class="ident">Stdout</span>,
 <span class="op">&gt;</span> {
     <span class="ident">filter</span>: <span class="ident">F</span>,
-    <span class="ident">inner</span>: <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">Registry</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span>,
+    <span class="ident">inner</span>: <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">Registry</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span>,
+}
+
+<span class="doccomment">/// Returns a new [`SubscriberBuilder`] for configuring a [formatting subscriber].</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This is essentially shorthand for [`SubscriberBuilder::default()]`.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// # Examples</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Using [`init`] to set the default subscriber:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```rust</span>
+<span class="doccomment">/// tracing_subscriber::fmt().init();</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Configuring the output format:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```rust</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// tracing_subscriber::fmt()</span>
+<span class="doccomment">///     // Configure formatting settings.</span>
+<span class="doccomment">///     .with_target(false)</span>
+<span class="doccomment">///     .with_timer(tracing_subscriber::fmt::time::uptime())</span>
+<span class="doccomment">///     .with_level(true)</span>
+<span class="doccomment">///     // Set the subscriber as the default.</span>
+<span class="doccomment">///     .init();</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [`try_init`] returns an error if the default subscriber could not be set:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```rust</span>
+<span class="doccomment">/// use std::error::Error;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// fn init_subscriber() -&gt; Result&lt;(), Box&lt;dyn Error + Send + Sync + &#39;static&gt;&gt; {</span>
+<span class="doccomment">///     tracing_subscriber::fmt()</span>
+<span class="doccomment">///         // Configure the subscriber to emit logs in JSON format.</span>
+<span class="doccomment">///         .json()</span>
+<span class="doccomment">///         // Configure the subscriber to flatten event fields in the output JSON objects.</span>
+<span class="doccomment">///         .flatten_event(true)</span>
+<span class="doccomment">///         // Set the subscriber as the default, returning an error if this fails.</span>
+<span class="doccomment">///         .try_init()?;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">///     Ok(())</span>
+<span class="doccomment">/// }</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Rather than setting the subscriber as the default, [`finish`] _returns_ the</span>
+<span class="doccomment">/// constructed subscriber, which may then be passed to other functions:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```rust</span>
+<span class="doccomment">/// let subscriber = tracing_subscriber::fmt()</span>
+<span class="doccomment">///     .with_max_level(tracing::Level::DEBUG)</span>
+<span class="doccomment">///     .compact()</span>
+<span class="doccomment">///     .finish();</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// tracing::subscriber::with_default(subscriber, || {</span>
+<span class="doccomment">///     // the subscriber will only be set as the default</span>
+<span class="doccomment">///     // inside this closure...</span>
+<span class="doccomment">/// })</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [`SubscriberBuilder`]: struct.SubscriberBuilder.html</span>
+<span class="doccomment">/// [formatting subscriber]: struct.Subscriber.html</span>
+<span class="doccomment">/// [`SubscriberBuilder::default()`]: struct.SubscriberBuilder.html#method.default</span>
+<span class="doccomment">/// [`init`]: struct.SubscriberBuilder.html#method.init</span>
+<span class="doccomment">/// [`try_init`]: struct.SubscriberBuilder.html#method.try_init</span>
+<span class="doccomment">/// [`finish`]: struct.SubscriberBuilder.html#method.finish</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fmt</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubscriberBuilder</span> {
+    <span class="ident">SubscriberBuilder</span>::<span class="ident">default</span>()
+}
+
+<span class="doccomment">/// Returns a new [formatting layer] that can be [composed] with other layers to</span>
+<span class="doccomment">/// construct a [`Subscriber`].</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This is a shorthand for the equivalent [`Layer::default`] function.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// [formatting layer]: struct.Layer.html</span>
+<span class="doccomment">/// [composed]: ../layer/index.html</span>
+<span class="doccomment">/// [`Layer::default`]: struct.Layer.html#method.default</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">layer</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
+    <span class="ident">Layer</span>::<span class="ident">default</span>()
 }
 
 <span class="kw">impl</span> <span class="ident">Subscriber</span> {
@@ -1165,7 +1344,7 @@
 {
     <span class="doccomment">/// Finish the builder, returning a new `FmtSubscriber`.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">finish</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Subscriber</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">F</span>, <span class="ident">W</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">subscriber</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">finish</span>().<span class="ident">with_subscriber</span>(<span class="ident">Registry</span>::<span class="ident">default</span>());
+        <span class="kw">let</span> <span class="ident">subscriber</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">with_subscriber</span>(<span class="ident">Registry</span>::<span class="ident">default</span>());
         <span class="ident">Subscriber</span> {
             <span class="ident">inner</span>: <span class="self">self</span>.<span class="ident">filter</span>.<span class="ident">with_subscriber</span>(<span class="ident">subscriber</span>),
         }
@@ -1202,6 +1381,19 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">init</span>(<span class="self">self</span>) {
         <span class="self">self</span>.<span class="ident">try_init</span>()
             .<span class="ident">expect</span>(<span class="string">&quot;Unable to install global subscriber&quot;</span>)
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">F</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">tracing_core</span>::<span class="ident">Dispatch</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SubscriberBuilder</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">F</span>, <span class="ident">W</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">N</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;writer</span><span class="op">&gt;</span> <span class="ident">FormatFields</span><span class="op">&lt;</span><span class="lifetime">&#39;writer</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">E</span>: <span class="ident">FormatEvent</span><span class="op">&lt;</span><span class="ident">Registry</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">W</span>: <span class="ident">MakeWriter</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">F</span>: <span class="ident">layer</span>::<span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">Formatter</span><span class="op">&lt;</span><span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">fmt_layer</span>::<span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">Registry</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span>: <span class="ident">layer</span>::<span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">Registry</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+{
+    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">tracing_core</span>::<span class="ident">Dispatch</span> {
+        <span class="ident">tracing_core</span>::<span class="ident">Dispatch</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">finish</span>())
     }
 }
 
@@ -1354,7 +1546,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// For example:</span>
     <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// use tracing_subscriber::fmt::{Subscriber, format};</span>
+    <span class="doccomment">/// use tracing_subscriber::fmt::format;</span>
     <span class="doccomment">/// use tracing_subscriber::prelude::*;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let formatter =</span>
@@ -1364,7 +1556,7 @@
     <span class="doccomment">///         // formatter so that a delimiter is added between fields.</span>
     <span class="doccomment">///         .delimited(&quot;, &quot;);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let subscriber = Subscriber::builder()</span>
+    <span class="doccomment">/// let subscriber = tracing_subscriber::fmt()</span>
     <span class="doccomment">///     .fmt_fields(formatter)</span>
     <span class="doccomment">///     .finish();</span>
     <span class="doccomment">/// # drop(subscriber)</span>
@@ -1392,32 +1584,27 @@
     <span class="doccomment">/// Setting a filter based on the value of the `RUST_LOG` environment</span>
     <span class="doccomment">/// variable:</span>
     <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// use tracing_subscriber::{FmtSubscriber, EnvFilter};</span>
+    <span class="doccomment">/// use tracing_subscriber::{fmt, EnvFilter};</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let subscriber = FmtSubscriber::builder()</span>
+    <span class="doccomment">/// fmt()</span>
     <span class="doccomment">///     .with_env_filter(EnvFilter::from_default_env())</span>
-    <span class="doccomment">///     .finish();</span>
+    <span class="doccomment">///     .init();</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Setting a filter based on a pre-set filter directive string:</span>
     <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// use tracing_subscriber::FmtSubscriber;</span>
+    <span class="doccomment">/// use tracing_subscriber::fmt;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// # fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {</span>
-    <span class="doccomment">/// let subscriber = FmtSubscriber::builder()</span>
+    <span class="doccomment">/// fmt()</span>
     <span class="doccomment">///     .with_env_filter(&quot;my_crate=info,my_crate::my_mod=debug,[my_span]=trace&quot;)</span>
-    <span class="doccomment">///     .finish();</span>
-    <span class="doccomment">/// # Ok(()) }</span>
+    <span class="doccomment">///     .init();</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Adding additional directives to a filter constructed from an env var:</span>
     <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// use tracing_subscriber::{</span>
-    <span class="doccomment">///     FmtSubscriber,</span>
-    <span class="doccomment">///     filter::{EnvFilter, LevelFilter},</span>
-    <span class="doccomment">/// };</span>
+    <span class="doccomment">/// use tracing_subscriber::{fmt, filter::{EnvFilter, LevelFilter}};</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// # fn filter() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {</span>
+    <span class="doccomment">/// # fn filter() -&gt; Result&lt;(), Box&lt;dyn std::error::Error + Send + Sync + &#39;static&gt;&gt; {</span>
     <span class="doccomment">/// let filter = EnvFilter::try_from_env(&quot;MY_CUSTOM_FILTER_ENV_VAR&quot;)?</span>
     <span class="doccomment">///     // Set the base level when not matched by other directives to WARN.</span>
     <span class="doccomment">///     .add_directive(LevelFilter::WARN.into())</span>
@@ -1425,9 +1612,9 @@
     <span class="doccomment">///     // any directives parsed from the env variable.</span>
     <span class="doccomment">///     .add_directive(&quot;my_crate::my_mod=debug&quot;.parse()?);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let subscriber = FmtSubscriber::builder()</span>
+    <span class="doccomment">/// fmt()</span>
     <span class="doccomment">///     .with_env_filter(filter)</span>
-    <span class="doccomment">///     .finish();</span>
+    <span class="doccomment">///     .try_init()?;</span>
     <span class="doccomment">/// # Ok(())}</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// [`EnvFilter`]: ../filter/struct.EnvFilter.html</span>
@@ -1459,21 +1646,18 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Enable up to the `DEBUG` verbosity level:</span>
     <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// use tracing_subscriber::FmtSubscriber;</span>
+    <span class="doccomment">/// use tracing_subscriber::fmt;</span>
     <span class="doccomment">/// use tracing::Level;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let subscriber = FmtSubscriber::builder()</span>
+    <span class="doccomment">/// fmt()</span>
     <span class="doccomment">///     .with_max_level(Level::DEBUG)</span>
-    <span class="doccomment">///     .finish();</span>
+    <span class="doccomment">///     .init();</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// This subscriber won&#39;t record any spans or events!</span>
     <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// use tracing_subscriber::{</span>
-    <span class="doccomment">///     FmtSubscriber,</span>
-    <span class="doccomment">///     filter::LevelFilter,</span>
-    <span class="doccomment">/// };</span>
+    <span class="doccomment">/// use tracing_subscriber::{fmt, filter::LevelFilter};</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let subscriber = FmtSubscriber::builder()</span>
+    <span class="doccomment">/// let subscriber = fmt()</span>
     <span class="doccomment">///     .with_max_level(LevelFilter::OFF)</span>
     <span class="doccomment">///     .finish();</span>
     <span class="doccomment">/// ```</span>
@@ -1532,11 +1716,12 @@
     <span class="doccomment">/// Using `stderr` rather than `stdout`:</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```rust</span>
+    <span class="doccomment">/// use tracing_subscriber::fmt;</span>
     <span class="doccomment">/// use std::io;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let subscriber = tracing_subscriber::fmt::Subscriber::builder()</span>
+    <span class="doccomment">/// fmt()</span>
     <span class="doccomment">///     .with_writer(io::stderr)</span>
-    <span class="doccomment">///     .finish();</span>
+    <span class="doccomment">///     .init();</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [`MakeWriter`]: trait.MakeWriter.html</span>
@@ -1558,8 +1743,17 @@
 <span class="doccomment">/// If the `tracing-log` feature is enabled, this will also install</span>
 <span class="doccomment">/// the [`LogTracer`] to convert `log` records into `tracing` `Event`s.</span>
 <span class="doccomment">///</span>
+<span class="doccomment">/// This is shorthand for</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```rust</span>
+<span class="doccomment">/// # fn doc() -&gt; Result&lt;(), Box&lt;dyn std::error::Error + Send + Sync + &#39;static&gt;&gt; {</span>
+<span class="doccomment">/// tracing_subscriber::fmt().try_init()</span>
+<span class="doccomment">/// # }</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Errors</span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// Returns an Error if the initialization was unsuccessful,</span>
 <span class="doccomment">/// likely because a global subscriber was already installed by another</span>
 <span class="doccomment">/// call to `try_init`.</span>
@@ -1582,6 +1776,12 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// If the `tracing-log` feature is enabled, this will also install</span>
 <span class="doccomment">/// the LogTracer to convert `Log` records into `tracing` `Event`s.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This is shorthand for</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```rust</span>
+<span class="doccomment">/// tracing_subscriber::fmt().init()</span>
+<span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Panics</span>
 <span class="doccomment">/// Panics if the initialization was unsuccessful, likely because a</span>

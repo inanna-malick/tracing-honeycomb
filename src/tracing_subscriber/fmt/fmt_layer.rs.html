@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-subscriber-0.2.3/src/fmt/fmt_layer.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>fmt_layer.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../tracing_subscriber/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-subscriber-0.2.4/src/fmt/fmt_layer.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>fmt_layer.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../tracing_subscriber/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -611,20 +611,6 @@
 <span id="611">611</span>
 <span id="612">612</span>
 <span id="613">613</span>
-<span id="614">614</span>
-<span id="615">615</span>
-<span id="616">616</span>
-<span id="617">617</span>
-<span id="618">618</span>
-<span id="619">619</span>
-<span id="620">620</span>
-<span id="621">621</span>
-<span id="622">622</span>
-<span id="623">623</span>
-<span id="624">624</span>
-<span id="625">625</span>
-<span id="626">626</span>
-<span id="627">627</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::{
     <span class="ident">field</span>::<span class="ident">RecordFields</span>,
@@ -642,16 +628,44 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// ## Examples</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Constructing a default fmt subscriber via the Layer API:</span>
+<span class="doccomment">/// Constructing a layer with the default configuration:</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```rust</span>
-<span class="doccomment">/// use tracing_subscriber::{fmt, registry::Registry};</span>
+<span class="doccomment">/// use tracing_subscriber::{fmt, Registry};</span>
 <span class="doccomment">/// use tracing_subscriber::prelude::*;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let subscriber = Registry::default()</span>
 <span class="doccomment">///     .with(fmt::Layer::default());</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// tracing::subscriber::set_global_default(subscriber).unwrap();</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Overriding the layer&#39;s behavior:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```rust</span>
+<span class="doccomment">/// use tracing_subscriber::{fmt, Registry};</span>
+<span class="doccomment">/// use tracing_subscriber::prelude::*;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let fmt_layer = fmt::layer()</span>
+<span class="doccomment">///    .with_target(false) // don&#39;t include event targets when logging</span>
+<span class="doccomment">///    .with_level(false); // don&#39;t include event levels when logging</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let subscriber = Registry::default().with(fmt_layer);</span>
+<span class="doccomment">/// # tracing::subscriber::set_global_default(subscriber).unwrap();</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Setting a custom  event formatter:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```rust</span>
+<span class="doccomment">/// use tracing_subscriber::fmt::{self, format, time};</span>
+<span class="doccomment">/// use tracing_subscriber::prelude::*;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// let fmt = format().with_timer(time::Uptime::default());</span>
+<span class="doccomment">/// let fmt_layer = fmt::layer()</span>
+<span class="doccomment">///     .event_format(fmt)</span>
+<span class="doccomment">///     .with_target(false);</span>
+<span class="doccomment">/// # let subscriber = fmt_layer.with_subscriber(tracing_subscriber::registry::Registry::default());</span>
+<span class="doccomment">/// # tracing::subscriber::set_global_default(subscriber).unwrap();</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`Layer`]: ../layer/trait.Layer.html</span>
@@ -671,70 +685,39 @@
 <span class="doccomment">/// A builder for [`Layer`](struct.Layer.html) that logs formatted representations of `tracing`</span>
 <span class="doccomment">/// events and spans.</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// ## Examples</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Constructing a layer with the default configuration:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```rust</span>
-<span class="doccomment">/// use tracing_subscriber::fmt;</span>
-<span class="doccomment">/// use tracing_subscriber::prelude::*;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let fmt_layer = fmt::Layer::builder().finish();</span>
-<span class="doccomment">/// # let subscriber = fmt_layer.with_subscriber(tracing_subscriber::registry::Registry::default());</span>
-<span class="doccomment">/// # tracing::subscriber::set_global_default(subscriber).unwrap();</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Overriding the layer&#39;s behavior:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```rust</span>
-<span class="doccomment">/// use tracing_subscriber::fmt;</span>
-<span class="doccomment">/// use tracing_subscriber::prelude::*;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let fmt_layer = fmt::Layer::builder()</span>
-<span class="doccomment">///    .with_target(false) // don&#39;t include event targets when logging</span>
-<span class="doccomment">///    .with_level(false) // don&#39;t include event levels when logging</span>
-<span class="doccomment">///    .finish();</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// # let subscriber = fmt_layer.with_subscriber(tracing_subscriber::registry::Registry::default());</span>
-<span class="doccomment">/// # tracing::subscriber::set_global_default(subscriber).unwrap();</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Setting a custom  event formatter:</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```rust</span>
-<span class="doccomment">/// use tracing_subscriber::fmt::{self, format::Format, time};</span>
-<span class="doccomment">/// use tracing_subscriber::prelude::*;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let fmt = Format::default().with_timer(time::Uptime::default());</span>
-<span class="doccomment">/// let fmt_layer = fmt::Layer::builder()</span>
-<span class="doccomment">///     .event_format(fmt)</span>
-<span class="doccomment">///     .with_target(false)</span>
-<span class="doccomment">///     .finish();</span>
-<span class="doccomment">/// # let subscriber = fmt_layer.with_subscriber(tracing_subscriber::registry::Registry::default());</span>
-<span class="doccomment">/// # tracing::subscriber::set_global_default(subscriber).unwrap();</span>
-<span class="doccomment">/// ```</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span>
+<span class="doccomment">/// **Note**: As of `tracing-subscriber` 0.2.4, the separate builder type is now</span>
+<span class="doccomment">/// deprecated, as the `Layer` type itself supports all the builder&#39;s</span>
+<span class="doccomment">/// configuration methods. This is now an alias for `Layer`.</span>
+<span class="attribute">#[<span class="ident">deprecated</span>(
+    <span class="ident">since</span> <span class="op">=</span> <span class="string">&quot;0.2.4&quot;</span>,
+    <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;a separate layer builder type is not necessary, `Layer`s now support configuration&quot;</span>
+)]</span>
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span>
     <span class="ident">S</span>,
     <span class="ident">N</span> <span class="op">=</span> <span class="ident">format</span>::<span class="ident">DefaultFields</span>,
     <span class="ident">E</span> <span class="op">=</span> <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">format</span>::<span class="ident">Full</span><span class="op">&gt;</span>,
     <span class="ident">W</span> <span class="op">=</span> <span class="kw">fn</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io</span>::<span class="ident">Stdout</span>,
-<span class="op">&gt;</span> {
-    <span class="ident">fmt_fields</span>: <span class="ident">N</span>,
-    <span class="ident">fmt_event</span>: <span class="ident">E</span>,
-    <span class="ident">make_writer</span>: <span class="ident">W</span>,
-    <span class="ident">_inner</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
-}
+<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span>;
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Returns a new [`LayerBuilder`](struct.LayerBuilder.html) for configuring a `Layer`.</span>
+    <span class="doccomment">/// Returns a new [`LayerBuilder`](type.LayerBuilder.html) for configuring a `Layer`.</span>
+    <span class="attribute">#[<span class="ident">deprecated</span>(
+        <span class="ident">since</span> <span class="op">=</span> <span class="string">&quot;0.2.4&quot;</span>,
+        <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;a separate layer builder is not necessary, use `Layer::new`/`Layer::default` instead&quot;</span>
+    )]</span>
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">deprecated</span>)]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">builder</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
-        <span class="ident">LayerBuilder</span>::<span class="ident">default</span>()
+        <span class="ident">Layer</span>::<span class="ident">default</span>()
+    }
+
+    <span class="doccomment">/// Returns a new [`Layer`](struct.Layer.html) with the default configuration.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span>::<span class="ident">default</span>()
     }
 }
 
 <span class="comment">// This needs to be a seperate impl block because they place different bounds on the type paramaters.</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">S</span>: <span class="ident">Subscriber</span> <span class="op">+</span> <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">LookupSpan</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
     <span class="ident">N</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;writer</span><span class="op">&gt;</span> <span class="ident">FormatFields</span><span class="op">&lt;</span><span class="lifetime">&#39;writer</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
@@ -753,9 +736,8 @@
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// use tracing_subscriber::fmt::{self, format};</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let layer = fmt::Layer::builder()</span>
-    <span class="doccomment">///     .event_format(format::Format::default().compact())</span>
-    <span class="doccomment">///     .finish();</span>
+    <span class="doccomment">/// let layer = fmt::layer()</span>
+    <span class="doccomment">///     .event_format(format().compact());</span>
     <span class="doccomment">/// # // this is necessary for type inference.</span>
     <span class="doccomment">/// # use tracing_subscriber::Layer as _;</span>
     <span class="doccomment">/// # let _ = layer.with_subscriber(tracing_subscriber::registry::Registry::default());</span>
@@ -763,11 +745,11 @@
     <span class="doccomment">/// [event formatter]: ../format/trait.FormatEvent.html</span>
     <span class="doccomment">/// [`FmtContext`]: ../struct.FmtContext.html</span>
     <span class="doccomment">/// [`Event`]: https://docs.rs/tracing/latest/tracing/struct.Event.html</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_format</span><span class="op">&lt;</span><span class="ident">E2</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">e</span>: <span class="ident">E2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E2</span>, <span class="ident">W</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_format</span><span class="op">&lt;</span><span class="ident">E2</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">e</span>: <span class="ident">E2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E2</span>, <span class="ident">W</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">E2</span>: <span class="ident">FormatEvent</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
     {
-        <span class="ident">LayerBuilder</span> {
+        <span class="ident">Layer</span> {
             <span class="ident">fmt_fields</span>: <span class="self">self</span>.<span class="ident">fmt_fields</span>,
             <span class="ident">fmt_event</span>: <span class="ident">e</span>,
             <span class="ident">make_writer</span>: <span class="self">self</span>.<span class="ident">make_writer</span>,
@@ -777,7 +759,7 @@
 }
 
 <span class="comment">// This needs to be a seperate impl block because they place different bounds on the type paramaters.</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Sets the [`MakeWriter`] that the [`Layer`] being built will use to write events.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Examples</span>
@@ -788,9 +770,8 @@
     <span class="doccomment">/// use std::io;</span>
     <span class="doccomment">/// use tracing_subscriber::fmt;</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// let layer = fmt::Layer::builder()</span>
-    <span class="doccomment">///     .with_writer(io::stderr)</span>
-    <span class="doccomment">///     .finish();</span>
+    <span class="doccomment">/// let layer = fmt::layer()</span>
+    <span class="doccomment">///     .with_writer(io::stderr);</span>
     <span class="doccomment">/// # // this is necessary for type inference.</span>
     <span class="doccomment">/// # use tracing_subscriber::Layer as _;</span>
     <span class="doccomment">/// # let _ = layer.with_subscriber(tracing_subscriber::registry::Registry::default());</span>
@@ -798,11 +779,11 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// [`MakeWriter`]: ../fmt/trait.MakeWriter.html</span>
     <span class="doccomment">/// [`Layer`]: ../layer/trait.Layer.html</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_writer</span><span class="op">&lt;</span><span class="ident">W2</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">make_writer</span>: <span class="ident">W2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W2</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_writer</span><span class="op">&lt;</span><span class="ident">W2</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">make_writer</span>: <span class="ident">W2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W2</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">W2</span>: <span class="ident">MakeWriter</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
     {
-        <span class="ident">LayerBuilder</span> {
+        <span class="ident">Layer</span> {
             <span class="ident">fmt_fields</span>: <span class="self">self</span>.<span class="ident">fmt_fields</span>,
             <span class="ident">fmt_event</span>: <span class="self">self</span>.<span class="ident">fmt_event</span>,
             <span class="ident">make_writer</span>,
@@ -811,7 +792,7 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">L</span>, <span class="ident">T</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">L</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">L</span>, <span class="ident">T</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">L</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">N</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;writer</span><span class="op">&gt;</span> <span class="ident">FormatFields</span><span class="op">&lt;</span><span class="lifetime">&#39;writer</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 {
@@ -826,8 +807,8 @@
     <span class="doccomment">/// [`timer`]: ./time/trait.FormatTime.html</span>
     <span class="doccomment">/// [`ChronoUtc`]: ./time/struct.ChronoUtc.html</span>
     <span class="doccomment">/// [`ChronoLocal`]: ./time/struct.ChronoLocal.html</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_timer</span><span class="op">&lt;</span><span class="ident">T2</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">timer</span>: <span class="ident">T2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">L</span>, <span class="ident">T2</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span> {
-        <span class="ident">LayerBuilder</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_timer</span><span class="op">&lt;</span><span class="ident">T2</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">timer</span>: <span class="ident">T2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">L</span>, <span class="ident">T2</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span> {
+        <span class="ident">Layer</span> {
             <span class="ident">fmt_event</span>: <span class="self">self</span>.<span class="ident">fmt_event</span>.<span class="ident">with_timer</span>(<span class="ident">timer</span>),
             <span class="ident">fmt_fields</span>: <span class="self">self</span>.<span class="ident">fmt_fields</span>,
             <span class="ident">make_writer</span>: <span class="self">self</span>.<span class="ident">make_writer</span>,
@@ -836,8 +817,8 @@
     }
 
     <span class="doccomment">/// Do not emit timestamps with spans and event.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">without_time</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">L</span>, ()<span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span> {
-        <span class="ident">LayerBuilder</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">without_time</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">L</span>, ()<span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span> {
+        <span class="ident">Layer</span> {
             <span class="ident">fmt_event</span>: <span class="self">self</span>.<span class="ident">fmt_event</span>.<span class="ident">without_time</span>(),
             <span class="ident">fmt_fields</span>: <span class="self">self</span>.<span class="ident">fmt_fields</span>,
             <span class="ident">make_writer</span>: <span class="self">self</span>.<span class="ident">make_writer</span>,
@@ -848,8 +829,8 @@
     <span class="doccomment">/// Enable ANSI encoding for formatted events.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;ansi&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;ansi&quot;</span>)))]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_ansi</span>(<span class="self">self</span>, <span class="ident">ansi</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">L</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span> {
-        <span class="ident">LayerBuilder</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_ansi</span>(<span class="self">self</span>, <span class="ident">ansi</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">L</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span> {
+        <span class="ident">Layer</span> {
             <span class="ident">fmt_event</span>: <span class="self">self</span>.<span class="ident">fmt_event</span>.<span class="ident">with_ansi</span>(<span class="ident">ansi</span>),
             <span class="ident">fmt_fields</span>: <span class="self">self</span>.<span class="ident">fmt_fields</span>,
             <span class="ident">make_writer</span>: <span class="self">self</span>.<span class="ident">make_writer</span>,
@@ -858,8 +839,8 @@
     }
 
     <span class="doccomment">/// Sets whether or not an event&#39;s target is displayed.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_target</span>(<span class="self">self</span>, <span class="ident">display_target</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">L</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span> {
-        <span class="ident">LayerBuilder</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_target</span>(<span class="self">self</span>, <span class="ident">display_target</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">L</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span> {
+        <span class="ident">Layer</span> {
             <span class="ident">fmt_event</span>: <span class="self">self</span>.<span class="ident">fmt_event</span>.<span class="ident">with_target</span>(<span class="ident">display_target</span>),
             <span class="ident">fmt_fields</span>: <span class="self">self</span>.<span class="ident">fmt_fields</span>,
             <span class="ident">make_writer</span>: <span class="self">self</span>.<span class="ident">make_writer</span>,
@@ -868,8 +849,8 @@
     }
 
     <span class="doccomment">/// Sets whether or not an event&#39;s level is displayed.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_level</span>(<span class="self">self</span>, <span class="ident">display_level</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">L</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span> {
-        <span class="ident">LayerBuilder</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_level</span>(<span class="self">self</span>, <span class="ident">display_level</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">L</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span> {
+        <span class="ident">Layer</span> {
             <span class="ident">fmt_event</span>: <span class="self">self</span>.<span class="ident">fmt_event</span>.<span class="ident">with_level</span>(<span class="ident">display_level</span>),
             <span class="ident">fmt_fields</span>: <span class="self">self</span>.<span class="ident">fmt_fields</span>,
             <span class="ident">make_writer</span>: <span class="self">self</span>.<span class="ident">make_writer</span>,
@@ -878,11 +859,11 @@
     }
 
     <span class="doccomment">/// Sets the layer being built to use a [less verbose formatter](../fmt/format/struct.Compact.html).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compact</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">format</span>::<span class="ident">Compact</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compact</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">format</span>::<span class="ident">Compact</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">N</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;writer</span><span class="op">&gt;</span> <span class="ident">FormatFields</span><span class="op">&lt;</span><span class="lifetime">&#39;writer</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
     {
-        <span class="ident">LayerBuilder</span> {
+        <span class="ident">Layer</span> {
             <span class="ident">fmt_event</span>: <span class="self">self</span>.<span class="ident">fmt_event</span>.<span class="ident">compact</span>(),
             <span class="ident">fmt_fields</span>: <span class="self">self</span>.<span class="ident">fmt_fields</span>,
             <span class="ident">make_writer</span>: <span class="self">self</span>.<span class="ident">make_writer</span>,
@@ -902,14 +883,14 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Options</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// - [`LayerBuilder::flatten_event`] can be used to enable flattening event fields into the root</span>
+    <span class="doccomment">/// - [`Layer::flatten_event`] can be used to enable flattening event fields into the root</span>
     <span class="doccomment">/// object.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// [`LayerBuilder::flatten_event`]: #method.flatten_event</span>
+    <span class="doccomment">/// [`Layer::flatten_event`]: #method.flatten_event</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;json&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;json&quot;</span>)))]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">json</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">format</span>::<span class="ident">JsonFields</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">format</span>::<span class="ident">Json</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span> {
-        <span class="ident">LayerBuilder</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">json</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">format</span>::<span class="ident">JsonFields</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">format</span>::<span class="ident">Json</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span> {
+        <span class="ident">Layer</span> {
             <span class="ident">fmt_event</span>: <span class="self">self</span>.<span class="ident">fmt_event</span>.<span class="ident">json</span>(),
             <span class="ident">fmt_fields</span>: <span class="ident">format</span>::<span class="ident">JsonFields</span>::<span class="ident">new</span>(),
             <span class="ident">make_writer</span>: <span class="self">self</span>.<span class="ident">make_writer</span>,
@@ -920,15 +901,15 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;json&quot;</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;json&quot;</span>)))]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">format</span>::<span class="ident">JsonFields</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">format</span>::<span class="ident">Json</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">T</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">format</span>::<span class="ident">JsonFields</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">format</span>::<span class="ident">Json</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Sets the JSON layer being built to flatten event metadata.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// See [`format::Json`](../fmt/format/struct.Json.html)</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">flatten_event</span>(
         <span class="self">self</span>,
         <span class="ident">flatten_event</span>: <span class="ident">bool</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">format</span>::<span class="ident">JsonFields</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">format</span>::<span class="ident">Json</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span> {
-        <span class="ident">LayerBuilder</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">format</span>::<span class="ident">JsonFields</span>, <span class="ident">format</span>::<span class="ident">Format</span><span class="op">&lt;</span><span class="ident">format</span>::<span class="ident">Json</span>, <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">W</span><span class="op">&gt;</span> {
+        <span class="ident">Layer</span> {
             <span class="ident">fmt_event</span>: <span class="self">self</span>.<span class="ident">fmt_event</span>.<span class="ident">flatten_event</span>(<span class="ident">flatten_event</span>),
             <span class="ident">fmt_fields</span>: <span class="ident">format</span>::<span class="ident">JsonFields</span>::<span class="ident">new</span>(),
             <span class="ident">make_writer</span>: <span class="self">self</span>.<span class="ident">make_writer</span>,
@@ -937,14 +918,14 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Sets the field formatter that the layer being built will use to record</span>
     <span class="doccomment">/// fields.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fmt_fields</span><span class="op">&lt;</span><span class="ident">N2</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">fmt_fields</span>: <span class="ident">N2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N2</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fmt_fields</span><span class="op">&lt;</span><span class="ident">N2</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">fmt_fields</span>: <span class="ident">N2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N2</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">N2</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;writer</span><span class="op">&gt;</span> <span class="ident">FormatFields</span><span class="op">&lt;</span><span class="lifetime">&#39;writer</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
     {
-        <span class="ident">LayerBuilder</span> {
+        <span class="ident">Layer</span> {
             <span class="ident">fmt_event</span>: <span class="self">self</span>.<span class="ident">fmt_event</span>,
             <span class="ident">fmt_fields</span>,
             <span class="ident">make_writer</span>: <span class="self">self</span>.<span class="ident">make_writer</span>,
@@ -953,6 +934,7 @@
     }
 }
 
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">deprecated</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">S</span>: <span class="ident">Subscriber</span> <span class="op">+</span> <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">LookupSpan</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
@@ -963,28 +945,18 @@
     <span class="doccomment">/// Builds a [`Layer`] with the provided configuration.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [`Layer`]: struct.Layer.html</span>
+    <span class="attribute">#[<span class="ident">deprecated</span>(
+        <span class="ident">since</span> <span class="op">=</span> <span class="string">&quot;0.2.4&quot;</span>,
+        <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;`LayerBuilder` is no longer a separate type; this method is not necessary&quot;</span>
+    )]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">finish</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">N</span>, <span class="ident">E</span>, <span class="ident">W</span><span class="op">&gt;</span> {
+        <span class="self">self</span>
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">Layer</span> {
-            <span class="ident">make_writer</span>: <span class="self">self</span>.<span class="ident">make_writer</span>,
-            <span class="ident">fmt_fields</span>: <span class="self">self</span>.<span class="ident">fmt_fields</span>,
-            <span class="ident">fmt_event</span>: <span class="self">self</span>.<span class="ident">fmt_event</span>,
-            <span class="ident">_inner</span>: <span class="self">self</span>.<span class="ident">_inner</span>,
-        }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">S</span>: <span class="ident">Subscriber</span> <span class="op">+</span> <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">LookupSpan</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-{
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">LayerBuilder</span>::<span class="ident">default</span>().<span class="ident">finish</span>()
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">LayerBuilder</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">LayerBuilder</span> {
             <span class="ident">fmt_fields</span>: <span class="ident">format</span>::<span class="ident">DefaultFields</span>::<span class="ident">default</span>(),
             <span class="ident">fmt_event</span>: <span class="ident">format</span>::<span class="ident">Format</span>::<span class="ident">default</span>(),
             <span class="ident">make_writer</span>: <span class="ident">io</span>::<span class="ident">stdout</span>,
@@ -1068,11 +1040,8 @@
     <span class="kw">fn</span> <span class="ident">new_span</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">attrs</span>: <span class="kw-2">&amp;</span><span class="ident">Attributes</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">Id</span>, <span class="ident">ctx</span>: <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">S</span><span class="op">&gt;</span>) {
         <span class="kw">let</span> <span class="ident">span</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">span</span>(<span class="ident">id</span>).<span class="ident">expect</span>(<span class="string">&quot;Span not found, this is a bug&quot;</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">extensions</span> <span class="op">=</span> <span class="ident">span</span>.<span class="ident">extensions_mut</span>();
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">FormattedFields</span> { <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">fields</span>, .. }) <span class="op">=</span>
-            <span class="ident">extensions</span>.<span class="ident">get_mut</span>::<span class="op">&lt;</span><span class="ident">FormattedFields</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span>()
-        {
-            <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">fmt_fields</span>.<span class="ident">format_fields</span>(<span class="ident">fields</span>, <span class="ident">attrs</span>);
-        } <span class="kw">else</span> {
+
+        <span class="kw">if</span> <span class="ident">extensions</span>.<span class="ident">get_mut</span>::<span class="op">&lt;</span><span class="ident">FormattedFields</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span>().<span class="ident">is_none</span>() {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">new</span>();
             <span class="kw">if</span> <span class="self">self</span>.<span class="ident">fmt_fields</span>.<span class="ident">format_fields</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>, <span class="ident">attrs</span>).<span class="ident">is_ok</span>() {
                 <span class="kw">let</span> <span class="ident">fmt_fields</span> <span class="op">=</span> <span class="ident">FormattedFields</span> {
@@ -1090,6 +1059,9 @@
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">FormattedFields</span> { <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">fields</span>, .. }) <span class="op">=</span>
             <span class="ident">extensions</span>.<span class="ident">get_mut</span>::<span class="op">&lt;</span><span class="ident">FormattedFields</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span>()
         {
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">values</span>.<span class="ident">is_empty</span>() {
+                <span class="ident">fields</span>.<span class="ident">push</span>(<span class="string">&#39; &#39;</span>);
+            }
             <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">fmt_fields</span>.<span class="ident">format_fields</span>(<span class="ident">fields</span>, <span class="ident">values</span>);
         } <span class="kw">else</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">String</span>::<span class="ident">new</span>();
@@ -1210,17 +1182,17 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">impls</span>() {
         <span class="kw">let</span> <span class="ident">f</span> <span class="op">=</span> <span class="ident">Format</span>::<span class="ident">default</span>().<span class="ident">with_timer</span>(<span class="ident">time</span>::<span class="ident">Uptime</span>::<span class="ident">default</span>());
-        <span class="kw">let</span> <span class="ident">fmt</span> <span class="op">=</span> <span class="ident">fmt</span>::<span class="ident">Layer</span>::<span class="ident">builder</span>().<span class="ident">event_format</span>(<span class="ident">f</span>).<span class="ident">finish</span>();
+        <span class="kw">let</span> <span class="ident">fmt</span> <span class="op">=</span> <span class="ident">fmt</span>::<span class="ident">Layer</span>::<span class="ident">default</span>().<span class="ident">event_format</span>(<span class="ident">f</span>);
         <span class="kw">let</span> <span class="ident">subscriber</span> <span class="op">=</span> <span class="ident">fmt</span>.<span class="ident">with_subscriber</span>(<span class="ident">Registry</span>::<span class="ident">default</span>());
         <span class="kw">let</span> <span class="ident">_dispatch</span> <span class="op">=</span> <span class="ident">Dispatch</span>::<span class="ident">new</span>(<span class="ident">subscriber</span>);
 
         <span class="kw">let</span> <span class="ident">f</span> <span class="op">=</span> <span class="ident">format</span>::<span class="ident">Format</span>::<span class="ident">default</span>();
-        <span class="kw">let</span> <span class="ident">fmt</span> <span class="op">=</span> <span class="ident">fmt</span>::<span class="ident">Layer</span>::<span class="ident">builder</span>().<span class="ident">event_format</span>(<span class="ident">f</span>).<span class="ident">finish</span>();
+        <span class="kw">let</span> <span class="ident">fmt</span> <span class="op">=</span> <span class="ident">fmt</span>::<span class="ident">Layer</span>::<span class="ident">default</span>().<span class="ident">event_format</span>(<span class="ident">f</span>);
         <span class="kw">let</span> <span class="ident">subscriber</span> <span class="op">=</span> <span class="ident">fmt</span>.<span class="ident">with_subscriber</span>(<span class="ident">Registry</span>::<span class="ident">default</span>());
         <span class="kw">let</span> <span class="ident">_dispatch</span> <span class="op">=</span> <span class="ident">Dispatch</span>::<span class="ident">new</span>(<span class="ident">subscriber</span>);
 
         <span class="kw">let</span> <span class="ident">f</span> <span class="op">=</span> <span class="ident">format</span>::<span class="ident">Format</span>::<span class="ident">default</span>().<span class="ident">compact</span>();
-        <span class="kw">let</span> <span class="ident">fmt</span> <span class="op">=</span> <span class="ident">fmt</span>::<span class="ident">Layer</span>::<span class="ident">builder</span>().<span class="ident">event_format</span>(<span class="ident">f</span>).<span class="ident">finish</span>();
+        <span class="kw">let</span> <span class="ident">fmt</span> <span class="op">=</span> <span class="ident">fmt</span>::<span class="ident">Layer</span>::<span class="ident">default</span>().<span class="ident">event_format</span>(<span class="ident">f</span>);
         <span class="kw">let</span> <span class="ident">subscriber</span> <span class="op">=</span> <span class="ident">fmt</span>.<span class="ident">with_subscriber</span>(<span class="ident">Registry</span>::<span class="ident">default</span>());
         <span class="kw">let</span> <span class="ident">_dispatch</span> <span class="op">=</span> <span class="ident">Dispatch</span>::<span class="ident">new</span>(<span class="ident">subscriber</span>);
     }
@@ -1228,7 +1200,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">fmt_layer_downcasts</span>() {
         <span class="kw">let</span> <span class="ident">f</span> <span class="op">=</span> <span class="ident">format</span>::<span class="ident">Format</span>::<span class="ident">default</span>();
-        <span class="kw">let</span> <span class="ident">fmt</span> <span class="op">=</span> <span class="ident">fmt</span>::<span class="ident">Layer</span>::<span class="ident">builder</span>().<span class="ident">event_format</span>(<span class="ident">f</span>).<span class="ident">finish</span>();
+        <span class="kw">let</span> <span class="ident">fmt</span> <span class="op">=</span> <span class="ident">fmt</span>::<span class="ident">Layer</span>::<span class="ident">default</span>().<span class="ident">event_format</span>(<span class="ident">f</span>);
         <span class="kw">let</span> <span class="ident">subscriber</span> <span class="op">=</span> <span class="ident">fmt</span>.<span class="ident">with_subscriber</span>(<span class="ident">Registry</span>::<span class="ident">default</span>());
 
         <span class="kw">let</span> <span class="ident">dispatch</span> <span class="op">=</span> <span class="ident">Dispatch</span>::<span class="ident">new</span>(<span class="ident">subscriber</span>);
@@ -1238,7 +1210,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">fmt_layer_downcasts_to_parts</span>() {
         <span class="kw">let</span> <span class="ident">f</span> <span class="op">=</span> <span class="ident">format</span>::<span class="ident">Format</span>::<span class="ident">default</span>();
-        <span class="kw">let</span> <span class="ident">fmt</span> <span class="op">=</span> <span class="ident">fmt</span>::<span class="ident">Layer</span>::<span class="ident">builder</span>().<span class="ident">event_format</span>(<span class="ident">f</span>).<span class="ident">finish</span>();
+        <span class="kw">let</span> <span class="ident">fmt</span> <span class="op">=</span> <span class="ident">fmt</span>::<span class="ident">Layer</span>::<span class="ident">default</span>().<span class="ident">event_format</span>(<span class="ident">f</span>);
         <span class="kw">let</span> <span class="ident">subscriber</span> <span class="op">=</span> <span class="ident">fmt</span>.<span class="ident">with_subscriber</span>(<span class="ident">Registry</span>::<span class="ident">default</span>());
         <span class="kw">let</span> <span class="ident">dispatch</span> <span class="op">=</span> <span class="ident">Dispatch</span>::<span class="ident">new</span>(<span class="ident">subscriber</span>);
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">dispatch</span>.<span class="ident">downcast_ref</span>::<span class="op">&lt;</span><span class="ident">format</span>::<span class="ident">DefaultFields</span><span class="op">&gt;</span>().<span class="ident">is_some</span>());
@@ -1248,7 +1220,7 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">is_lookup_span</span>() {
         <span class="kw">fn</span> <span class="ident">assert_lookup_span</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="ident">registry</span>::<span class="ident">LookupSpan</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw">_</span>: <span class="ident">T</span>) {}
-        <span class="kw">let</span> <span class="ident">fmt</span> <span class="op">=</span> <span class="ident">fmt</span>::<span class="ident">Layer</span>::<span class="ident">builder</span>().<span class="ident">finish</span>();
+        <span class="kw">let</span> <span class="ident">fmt</span> <span class="op">=</span> <span class="ident">fmt</span>::<span class="ident">Layer</span>::<span class="ident">default</span>();
         <span class="kw">let</span> <span class="ident">subscriber</span> <span class="op">=</span> <span class="ident">fmt</span>.<span class="ident">with_subscriber</span>(<span class="ident">Registry</span>::<span class="ident">default</span>());
         <span class="ident">assert_lookup_span</span>(<span class="ident">subscriber</span>)
     }

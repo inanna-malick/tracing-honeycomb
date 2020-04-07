@@ -68,6 +68,11 @@
 <span id="68">68</span>
 <span id="69">69</span>
 <span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="attribute">#![<span class="ident">deny</span>(
     <span class="ident">warnings</span>,
@@ -92,6 +97,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">tracing_distributed</span>::{<span class="ident">TelemetryLayer</span>, <span class="ident">TraceCtxError</span>};
 
 <span class="doccomment">/// Register the current span as the local root of a distributed trace.</span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// Specialized to the honeycomb.io-specific SpanId and TraceId provided by this crate.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">register_dist_tracing_root</span>(
     <span class="ident">trace_id</span>: <span class="ident">TraceId</span>,
@@ -100,15 +106,18 @@
     <span class="ident">tracing_distributed</span>::<span class="ident">register_dist_tracing_root</span>(<span class="ident">trace_id</span>, <span class="ident">remote_parent_span</span>)
 }
 
-<span class="doccomment">/// Retrieve the distributed trace context associated with the current span. Returns the</span>
-<span class="doccomment">/// `TraceId`, if any, that the current span is associated with along with the `SpanId`</span>
-<span class="doccomment">/// belonging to the current span.</span>
+<span class="doccomment">/// Retrieve the distributed trace context associated with the current span.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// Returns the `TraceId`, if any, that the current span is associated with along with</span>
+<span class="doccomment">/// the `SpanId` belonging to the current span.</span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// Specialized to the honeycomb.io-specific SpanId and TraceId provided by this crate.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">current_dist_trace_ctx</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">TraceId</span>, <span class="ident">SpanId</span>), <span class="ident">TraceCtxError</span><span class="op">&gt;</span> {
     <span class="ident">tracing_distributed</span>::<span class="ident">current_dist_trace_ctx</span>()
 }
 
 <span class="doccomment">/// Construct a TelemetryLayer that does not publish telemetry to any backend.</span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// Specialized to the honeycomb.io-specific SpanId and TraceId provided by this crate.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_blackhole_telemetry_layer</span>(
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TelemetryLayer</span><span class="op">&lt;</span><span class="ident">tracing_distributed</span>::<span class="ident">BlackholeTelemetry</span><span class="op">&lt;</span><span class="ident">SpanId</span>, <span class="ident">TraceId</span><span class="op">&gt;</span>, <span class="ident">SpanId</span>, <span class="ident">TraceId</span><span class="op">&gt;</span> {
@@ -124,6 +133,7 @@
 }
 
 <span class="doccomment">/// Construct a TelemetryLayer that publishes telemetry to honeycomb.io using the provided honeycomb config.</span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// Specialized to the honeycomb.io-specific SpanId and TraceId provided by this crate.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_honeycomb_telemetry_layer</span>(
     <span class="ident">service_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>,
