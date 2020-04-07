@@ -1,4 +1,4 @@
-[![tracing-honeycomb on crates.io](https://img.shields.io/crates/v/tracing-honeycomb)](https://crates.io/crates/tracing-honeycomb) [![Documentation (latest release)](https://docs.rs/tracing-honeycomb/badge.svg)](https://docs.rs/tracing-honeycomb/) [![Documentation (master)](https://img.shields.io/badge/docs-master-brightgreen)](https://inanna-malick.github.io/honeycomb-tracing/tracing_honeycomb/)[![License](https://img.shields.io/badge/license-MIT-green.svg)](../LICENSE)
+[![tracing-honeycomb on crates.io](https://img.shields.io/crates/v/tracing-honeycomb)](https://crates.io/crates/tracing-honeycomb) [![Documentation (latest release)](https://docs.rs/tracing-honeycomb/badge.svg)](https://docs.rs/tracing-honeycomb/) [![Documentation (master)](https://img.shields.io/badge/docs-master-brightgreen)](https://inanna-malick.github.io/honeycomb-tracing/tracing_honeycomb/)[![License](https://img.shields.io/badge/license-MIT-green.svg)](../LICENSE)[![inanna-malick](https://circleci.com/gh/inanna-malick/honeycomb-tracing.svg?style=svg)](https://app.circleci.com/pipelines/github/inanna-malick/honeycomb-tracing)
 
 # {{crate}}
 
@@ -51,9 +51,7 @@ tracing::subscriber::set_global_default(subscriber).expect("setting global defau
 
 ### Testing
 
-Since `TraceCtx::current_trace_ctx` and `TraceCtx::record_on_current_span` can be expected to return `Ok` as long as some `TelemetryLayer` has been registered as part of the layer/subscriber stack and the current span is active, it's valid to `.expect` them to always succeed & to panic if they do not. However, you probably don't want to publish telemetry while running unit or integration tests.
-
-This library provides a `BlackholeTelemetry` `Telemetry` instance that discards spans and events without publishing them to any backend. Use as:
+Since `TraceCtx::current_trace_ctx` and `TraceCtx::record_on_current_span` can be expected to return `Ok` as long as some `TelemetryLayer` has been registered as part of the layer/subscriber stack and the current span is active, it's valid to `.expect` them to always succeed & to panic if they do not. As a result, you may find yourself writing code that fails if no distributed tracing context is present. This means that unit and integration tests covering such code must provide a `TelemetryLayer`. However, you probably don't want to publish telemetry while running unit or integration tests. You can fix this problem by registering a `TelemetryLayer` constructed using `BlackholeTelemetry`. `BlackholeTelemetry` discards spans and events without publishing them to any backend.
 
 ```rust
 let telemetry_layer = mk_honeycomb_blackhole_tracing_layer(); 

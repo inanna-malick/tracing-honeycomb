@@ -13,3 +13,4 @@ See [`tracing-honeycomb`](tracing-honeycomb/README.md) for examples.
 ## License
 
 This project is licensed under the terms of the MIT license
+
