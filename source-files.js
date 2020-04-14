@@ -128,7 +128,7 @@ sourcesIndex["unicase"] = {"name":"","dirs":[{"name":"unicode","files":["map.rs"
 sourcesIndex["unicode_bidi"] = {"name":"","dirs":[{"name":"char_data","files":["mod.rs","tables.rs"]}],"files":["deprecated.rs","explicit.rs","format_chars.rs","implicit.rs","level.rs","lib.rs","prepare.rs"]};
 sourcesIndex["unicode_normalization"] = {"name":"","files":["__test_api.rs","decompose.rs","lib.rs","lookups.rs","normalize.rs","perfect_hash.rs","quick_check.rs","recompose.rs","stream_safe.rs","tables.rs"]};
 sourcesIndex["unicode_xid"] = {"name":"","files":["lib.rs","tables.rs"]};
-sourcesIndex["url"] = {"name":"","files":["encoding.rs","form_urlencoded.rs","host.rs","lib.rs","origin.rs","parser.rs","path_segments.rs","quirks.rs","slicing.rs"]};
+sourcesIndex["url"] = {"name":"","files":["form_urlencoded.rs","host.rs","lib.rs","origin.rs","parser.rs","path_segments.rs","query_encoding.rs","quirks.rs","slicing.rs"]};
 sourcesIndex["uuid"] = {"name":"","dirs":[{"name":"adapter","dirs":[{"name":"core_support","files":["mod.rs"]}],"files":["mod.rs"]},{"name":"parser","files":["core_support.rs","mod.rs","std_support.rs"]}],"files":["builder.rs","core_support.rs","lib.rs","prelude.rs","std_support.rs","v4.rs"]};
 sourcesIndex["want"] = {"name":"","files":["lib.rs"]};
 createSourceSidebar();
