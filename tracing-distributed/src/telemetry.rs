@@ -86,6 +86,10 @@ pub(crate) mod test {
         type SpanId = SpanId;
         type TraceId = TraceId;
 
+        fn mk_visitor(&self) -> Self::Visitor {
+            BlackholeVisitor
+        }
+
         fn report_span(&self, span: Span<BlackholeVisitor, SpanId, TraceId>) {
             // succeed or die. failure is unrecoverable (mutex poisoned)
             let mut spans = self.spans.lock().unwrap();
