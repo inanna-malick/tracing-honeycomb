@@ -1,13 +1,12 @@
 use crate::telemetry::Telemetry;
 use crate::trace;
-use chrono::{DateTime, Utc};
 use std::any::TypeId;
 use std::collections::HashMap;
-use std::default::Default;
 use std::sync::RwLock;
 use tracing::span::{Attributes, Id, Record};
 use tracing::{Event, Subscriber};
 use tracing_subscriber::{layer::Context, registry, Layer};
+use std::time::SystemTime;
 
 /// A `tracing_subscriber::Layer` that publishes events and spans to some backend
 /// using the provided `Telemetry` capability.
@@ -164,7 +163,7 @@ where
     S: Subscriber + for<'a> registry::LookupSpan<'a>,
     TraceId: 'static + Clone + Eq + Send + Sync,
     SpanId: 'static + Clone + Eq + Send + Sync,
-    V: 'static + tracing::field::Visit + Default + Send + Sync,
+    V: 'static + tracing::field::Visit + Send + Sync,
     T: 'static + Telemetry<Visitor = V, TraceId = TraceId, SpanId = SpanId>,
 {
     fn new_span(&self, attrs: &Attributes, id: &Id, ctx: Context<S>) {
@@ -172,7 +171,7 @@ where
         let mut extensions_mut = span.extensions_mut();
         extensions_mut.insert(SpanInitAt::new());
 
-        let mut visitor: V = Default::default();
+        let mut visitor: V = self.telemetry.mk_visitor();
         attrs.record(&mut visitor);
         extensions_mut.insert::<V>(visitor);
     }
@@ -204,9 +203,9 @@ where
         match parent_id {
             None => {} // not part of a trace, don't bother recording via honeycomb
             Some(parent_id) => {
-                let initialized_at = Utc::now();
+                let initialized_at = SystemTime::now();
 
-                let mut visitor = Default::default();
+                let mut visitor = self.telemetry.mk_visitor();
                 event.record(&mut visitor);
 
                 // TODO: dedup
@@ -263,8 +262,7 @@ where
                 .remove()
                 .expect("should be present on all spans");
 
-            let now = Utc::now();
-            let elapsed = now.signed_duration_since(initialized_at);
+            let completed_at = SystemTime::now();
 
             let parent_id = match trace_ctx.parent_span {
                 None => span
@@ -279,7 +277,7 @@ where
                 parent_id,
                 initialized_at,
                 trace_id: trace_ctx.trace_id,
-                elapsed,
+                completed_at,
                 service_name: self.service_name,
                 values: visitor,
             };
@@ -309,11 +307,11 @@ where
 // TODO: delete?
 struct LazyTraceCtx<SpanId, TraceId>(TraceCtx<SpanId, TraceId>);
 
-struct SpanInitAt(DateTime<Utc>);
+struct SpanInitAt(SystemTime);
 
 impl SpanInitAt {
     fn new() -> Self {
-        let initialized_at = Utc::now();
+        let initialized_at = SystemTime::now();
 
         Self(initialized_at)
     }

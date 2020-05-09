@@ -4,8 +4,9 @@ use std::collections::HashMap;
 use std::fmt;
 use tracing::field::{Field, Visit};
 use tracing_distributed::{Event, Span};
+use chrono::{DateTime, Utc};
 
-/// Visitor that builds honeycomb-compatible values from tracing fields.
+// Visitor that builds honeycomb-compatible values from tracing fields.
 #[derive(Default, Debug)]
 #[doc(hidden)]
 pub struct HoneycombVisitor(pub(crate) HashMap<String, Value>);
@@ -89,9 +90,10 @@ pub(crate) fn event_to_values(
         json!(format!("{}", event.meta.level())),
     );
 
+    let initialized_at: DateTime<Utc> = event.initialized_at.into();
     values.insert(
         "Timestamp".to_string(),
-        json!(event.initialized_at.to_rfc3339()),
+        json!(initialized_at.to_rfc3339()),
     );
 
     // not honeycomb-special but tracing-provided
@@ -132,20 +134,29 @@ pub(crate) fn span_to_values(
 
     values.insert("level".to_string(), json!(format!("{}", span.meta.level())));
 
+    let initialized_at: DateTime<Utc> = span.initialized_at.into();
     values.insert(
         "Timestamp".to_string(),
-        json!(span.initialized_at.to_rfc3339()),
+        json!(initialized_at.to_rfc3339()),
     );
 
     // not honeycomb-special but tracing-provided
     values.insert("name".to_string(), json!(span.meta.name()));
     values.insert("target".to_string(), json!(span.meta.target()));
 
-    // honeycomb-special (I think, todo: get full list of known values)
-    values.insert(
-        "duration_ms".to_string(),
-        json!(span.elapsed.num_milliseconds()),
-    );
+
+    match span.completed_at.duration_since(span.initialized_at) {
+        Ok(d) => {
+            // honeycomb-special (I think, todo: get full list of known values)
+            values.insert(
+                "duration_ms".to_string(),
+                json!(d.as_millis() as u64),
+            );
+        }
+        Err(e) => {
+            eprintln!("error comparing system times in tracing-honeycomg, indicates possible clock skew: {:?}", e);
+        }
+    }
 
     values
 }

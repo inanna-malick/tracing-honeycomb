@@ -41,6 +41,10 @@ impl Telemetry for HoneycombTelemetry {
     type TraceId = TraceId;
     type SpanId = SpanId;
 
+    fn mk_visitor(&self) -> Self::Visitor {
+        Default::default()
+    }
+
     fn report_span(&self, span: Span<Self::Visitor, Self::SpanId, Self::TraceId>) {
         let data = span_to_values(span);
         self.report_data(data);

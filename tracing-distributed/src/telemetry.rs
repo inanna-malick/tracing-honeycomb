@@ -4,13 +4,18 @@ use std::marker::PhantomData;
 /// Represents the ability to publish events and spans to some arbitrary backend.
 pub trait Telemetry {
     /// Type used to record tracing fields.
-    type Visitor: Default + tracing::field::Visit;
+    type Visitor: tracing::field::Visit;
     /// Globally unique identifier, uniquely identifies a trace.
     type TraceId: Send + Sync + Clone;
     /// Identifies spans within a trace.
     type SpanId: Send + Sync + Clone;
+
+    /// Initialize a visitor, used to record values from spans and events as they are observed
+    fn mk_visitor(&self) -> Self::Visitor;
+
     /// Report a `Span` to this Telemetry instance's backend.
     fn report_span(&self, span: Span<Self::Visitor, Self::SpanId, Self::TraceId>);
+
     /// Report an `Event` to this Telemetry instance's backend.
     fn report_event(&self, event: Event<Self::Visitor, Self::SpanId, Self::TraceId>);
 }
@@ -41,6 +46,10 @@ where
     type Visitor = BlackholeVisitor;
     type TraceId = TraceId;
     type SpanId = SpanId;
+
+    fn mk_visitor(&self) -> Self::Visitor {
+        Default::default()
+    }
 
     fn report_span(&self, _: Span<Self::Visitor, Self::SpanId, Self::TraceId>) {}
 

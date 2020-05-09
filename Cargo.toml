@@ -3,4 +3,5 @@
 members = [
     "tracing-distributed",
     "tracing-honeycomb",
+    "tracing-jaeger",
 ]

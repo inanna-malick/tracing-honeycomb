@@ -1,6 +1,6 @@
 use crate::telemetry_layer::TraceCtxRegistry;
-use chrono::{DateTime, Utc};
 use tracing_subscriber::registry::LookupSpan;
+use std::time::SystemTime;
 
 /// Register the current span as the local root of a distributed trace.
 pub fn register_dist_tracing_root<SpanId, TraceId>(
@@ -97,9 +97,9 @@ pub struct Span<Visitor, SpanId, TraceId> {
     /// optional parent span id
     pub parent_id: Option<SpanId>,
     /// UTC time at which this span was initialized
-    pub initialized_at: DateTime<Utc>,
+    pub initialized_at: SystemTime,
     /// `chrono::Duration` elapsed between the time this span was initialized and the time it was completed
-    pub elapsed: chrono::Duration,
+    pub completed_at: SystemTime,
     /// `tracing::Metadata` for this span
     pub meta: &'static tracing::Metadata<'static>,
     /// name of the service on which this span occured
@@ -116,7 +116,7 @@ pub struct Event<Visitor, SpanId, TraceId> {
     /// optional parent span id
     pub parent_id: Option<SpanId>,
     /// UTC time at which this event was initialized
-    pub initialized_at: DateTime<Utc>,
+    pub initialized_at: SystemTime,
     /// `tracing::Metadata` for this event
     pub meta: &'static tracing::Metadata<'static>,
     /// name of the service on which this event occured
