@@ -17,13 +17,13 @@ mod visitor;
 pub use crate::opentelemetry::OpenTelemetry;
 pub use crate::visitor::OpenTelemetryVisitor;
 pub use ::opentelemetry::api::trace::span_context::{SpanId, TraceId};
+use ::opentelemetry::exporter::trace::SpanExporter;
 use ::opentelemetry::sdk::Config;
+use rand::Rng;
+use std::collections::HashMap;
 use std::sync::Mutex;
 #[doc(no_inline)]
 pub use tracing_distributed::{TelemetryLayer, TraceCtxError};
-use ::opentelemetry::exporter::trace::SpanExporter;
-use std::collections::HashMap;
-use rand::Rng;
 
 /// Register the current span as the local root of a distributed trace.
 ///

@@ -3,10 +3,10 @@ use crate::trace;
 use std::any::TypeId;
 use std::collections::HashMap;
 use std::sync::RwLock;
+use std::time::SystemTime;
 use tracing::span::{Attributes, Id, Record};
 use tracing::{Event, Subscriber};
 use tracing_subscriber::{layer::Context, registry, Layer};
-use std::time::SystemTime;
 
 /// A `tracing_subscriber::Layer` that publishes events and spans to some backend
 /// using the provided `Telemetry` capability.

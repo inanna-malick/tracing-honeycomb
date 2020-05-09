@@ -1,15 +1,14 @@
+use rand::Rng;
 use std::{env, str::FromStr, time::Duration};
 use tokio::process::Command;
 use tokio::time::delay_for;
 use tracing::instrument;
 use tracing_jaeger::{
-    current_dist_trace_ctx, new_opentelemetry_layer, register_dist_tracing_root, SpanId,
-    TraceId,
+    current_dist_trace_ctx, new_opentelemetry_layer, register_dist_tracing_root, SpanId, TraceId,
 };
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::registry;
-use rand::Rng;
 
 #[instrument]
 async fn spawn_children(n: u32, process_name: String) {
@@ -78,9 +77,14 @@ fn register_global_subscriber() {
             service_name: "trace-demo".to_string(),
             tags: vec![],
         })
-        .init().unwrap();
+        .init()
+        .unwrap();
 
-    let telemetry_layer = new_opentelemetry_layer("async-tracing_example", Box::new(exporter), Default::default());
+    let telemetry_layer = new_opentelemetry_layer(
+        "async-tracing_example",
+        Box::new(exporter),
+        Default::default(),
+    );
 
     let subscriber = registry::Registry::default() // provide underlying span data store
         .with(LevelFilter::INFO) // filter out low-level debug tracing (eg tokio executor)

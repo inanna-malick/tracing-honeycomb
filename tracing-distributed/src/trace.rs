@@ -1,6 +1,6 @@
 use crate::telemetry_layer::TraceCtxRegistry;
-use tracing_subscriber::registry::LookupSpan;
 use std::time::SystemTime;
+use tracing_subscriber::registry::LookupSpan;
 
 /// Register the current span as the local root of a distributed trace.
 pub fn register_dist_tracing_root<SpanId, TraceId>(
