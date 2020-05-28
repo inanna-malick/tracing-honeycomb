@@ -14,7 +14,7 @@ readme = "README.md"
 tracing = "0.1.12"
 tracing-core = "0.1.9"
 tracing-distributed =  { path = "../tracing-distributed" , version = "0.2.0"}
-opentelemetry = {path = "../../opentelemetry-rust", version = "0.4.0" }
+opentelemetry = "0.5.0"
 rand = "0.7"
 
 
@@ -24,5 +24,5 @@ futures-preview = { version = "0.3.0-alpha.19", features = ["compat"] }
 tracing-subscriber = "0.2.0"
 tokio = { version = "0.2", features = ["full"] }
 tracing-futures = "0.2.1"
-opentelemetry-jaeger = {path = "../../opentelemetry-rust/opentelemetry-jaeger", version = "0.3.0" }
+opentelemetry-jaeger = "0.4.0"
 rand = "0.7"
