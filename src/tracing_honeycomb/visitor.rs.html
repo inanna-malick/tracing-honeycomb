@@ -149,15 +149,17 @@
 <span id="149">149</span>
 <span id="150">150</span>
 <span id="151">151</span>
+<span id="152">152</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">honeycomb</span>::{<span class="ident">SpanId</span>, <span class="ident">TraceId</span>};
 <span class="kw">use</span> ::<span class="ident">libhoney</span>::{<span class="ident">json</span>, <span class="ident">Value</span>};
+<span class="kw">use</span> <span class="ident">chrono</span>::{<span class="ident">DateTime</span>, <span class="ident">Utc</span>};
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">HashMap</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
 <span class="kw">use</span> <span class="ident">tracing</span>::<span class="ident">field</span>::{<span class="ident">Field</span>, <span class="ident">Visit</span>};
 <span class="kw">use</span> <span class="ident">tracing_distributed</span>::{<span class="ident">Event</span>, <span class="ident">Span</span>};
 
-<span class="doccomment">/// Visitor that builds honeycomb-compatible values from tracing fields.</span>
+<span class="comment">// Visitor that builds honeycomb-compatible values from tracing fields.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>, <span class="ident">Debug</span>)]</span>
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HoneycombVisitor</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Value</span><span class="op">&gt;</span>);
@@ -241,10 +243,8 @@
         <span class="macro">json</span><span class="macro">!</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">event</span>.<span class="ident">meta</span>.<span class="ident">level</span>())),
     );
 
-    <span class="ident">values</span>.<span class="ident">insert</span>(
-        <span class="string">&quot;Timestamp&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="macro">json</span><span class="macro">!</span>(<span class="ident">event</span>.<span class="ident">initialized_at</span>.<span class="ident">to_rfc3339</span>()),
-    );
+    <span class="kw">let</span> <span class="ident">initialized_at</span>: <span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">Utc</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">event</span>.<span class="ident">initialized_at</span>.<span class="ident">into</span>();
+    <span class="ident">values</span>.<span class="ident">insert</span>(<span class="string">&quot;Timestamp&quot;</span>.<span class="ident">to_string</span>(), <span class="macro">json</span><span class="macro">!</span>(<span class="ident">initialized_at</span>.<span class="ident">to_rfc3339</span>()));
 
     <span class="comment">// not honeycomb-special but tracing-provided</span>
     <span class="ident">values</span>.<span class="ident">insert</span>(<span class="string">&quot;name&quot;</span>.<span class="ident">to_string</span>(), <span class="macro">json</span><span class="macro">!</span>(<span class="ident">event</span>.<span class="ident">meta</span>.<span class="ident">name</span>()));
@@ -284,20 +284,22 @@
 
     <span class="ident">values</span>.<span class="ident">insert</span>(<span class="string">&quot;level&quot;</span>.<span class="ident">to_string</span>(), <span class="macro">json</span><span class="macro">!</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">span</span>.<span class="ident">meta</span>.<span class="ident">level</span>())));
 
-    <span class="ident">values</span>.<span class="ident">insert</span>(
-        <span class="string">&quot;Timestamp&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="macro">json</span><span class="macro">!</span>(<span class="ident">span</span>.<span class="ident">initialized_at</span>.<span class="ident">to_rfc3339</span>()),
-    );
+    <span class="kw">let</span> <span class="ident">initialized_at</span>: <span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">Utc</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">span</span>.<span class="ident">initialized_at</span>.<span class="ident">into</span>();
+    <span class="ident">values</span>.<span class="ident">insert</span>(<span class="string">&quot;Timestamp&quot;</span>.<span class="ident">to_string</span>(), <span class="macro">json</span><span class="macro">!</span>(<span class="ident">initialized_at</span>.<span class="ident">to_rfc3339</span>()));
 
     <span class="comment">// not honeycomb-special but tracing-provided</span>
     <span class="ident">values</span>.<span class="ident">insert</span>(<span class="string">&quot;name&quot;</span>.<span class="ident">to_string</span>(), <span class="macro">json</span><span class="macro">!</span>(<span class="ident">span</span>.<span class="ident">meta</span>.<span class="ident">name</span>()));
     <span class="ident">values</span>.<span class="ident">insert</span>(<span class="string">&quot;target&quot;</span>.<span class="ident">to_string</span>(), <span class="macro">json</span><span class="macro">!</span>(<span class="ident">span</span>.<span class="ident">meta</span>.<span class="ident">target</span>()));
 
-    <span class="comment">// honeycomb-special (I think, todo: get full list of known values)</span>
-    <span class="ident">values</span>.<span class="ident">insert</span>(
-        <span class="string">&quot;duration_ms&quot;</span>.<span class="ident">to_string</span>(),
-        <span class="macro">json</span><span class="macro">!</span>(<span class="ident">span</span>.<span class="ident">elapsed</span>.<span class="ident">num_milliseconds</span>()),
-    );
+    <span class="kw">match</span> <span class="ident">span</span>.<span class="ident">completed_at</span>.<span class="ident">duration_since</span>(<span class="ident">span</span>.<span class="ident">initialized_at</span>) {
+        <span class="prelude-val">Ok</span>(<span class="ident">d</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="comment">// honeycomb-special (I think, todo: get full list of known values)</span>
+            <span class="ident">values</span>.<span class="ident">insert</span>(<span class="string">&quot;duration_ms&quot;</span>.<span class="ident">to_string</span>(), <span class="macro">json</span><span class="macro">!</span>(<span class="ident">d</span>.<span class="ident">as_millis</span>() <span class="kw">as</span> <span class="ident">u64</span>));
+        }
+        <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="macro">eprintln</span><span class="macro">!</span>(<span class="string">&quot;error comparing system times in tracing-honeycomg, indicates possible clock skew: {:?}&quot;</span>, <span class="ident">e</span>);
+        }
+    }
 
     <span class="ident">values</span>
 }

@@ -4,7 +4,7 @@
 }</pre></div><div class='docblock'><p>Unix-specific extensions for the <code>TcpBuilder</code> type in this library.</p>
 </div>
             <h2 id='required-methods' class='small-section-header'>Required methods<a href='#required-methods' class='anchor'></a></h2><div class='methods'><h3 id='tymethod.reuse_port' class='method'><code id='reuse_port.v'>fn <a href='#tymethod.reuse_port' class='fnname'>reuse_port</a>(&amp;self, reuse: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/std/io/error/type.Result.html" title="type std::io::error::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.reference.html">&amp;</a>Self&gt;</code></h3><div class='docblock'><p>Set value for the <code>SO_REUSEPORT</code> option on this socket.</p>
-<p>This indicates that futher calls to <code>bind</code> may allow reuse of local
+<p>This indicates that further calls to <code>bind</code> may allow reuse of local
 addresses. For IPv4 sockets this means that a socket may bind even when
 there's a socket already listening on this port.</p>
 </div><h3 id='tymethod.get_reuse_port' class='method'><code id='get_reuse_port.v'>fn <a href='#tymethod.get_reuse_port' class='fnname'>get_reuse_port</a>(&amp;self) -&gt; <a class="type" href="https://doc.rust-lang.org/nightly/std/io/error/type.Result.html" title="type std::io::error::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>&gt;</code></h3><div class='docblock'><p>Check the value of the <code>SO_REUSEPORT</code> option on this socket.</p>

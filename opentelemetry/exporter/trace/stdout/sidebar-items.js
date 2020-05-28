@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Builder","Builder"],["Exporter","A [`SpanExporter`] that writes to [`Stdout`] or other configured [`Write`]."]]});

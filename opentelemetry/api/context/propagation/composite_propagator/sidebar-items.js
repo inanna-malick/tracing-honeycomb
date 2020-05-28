@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["HttpTextCompositePropagator","A propagator that chains multiple [`HttpTextFormat`] propagators together, injecting or extracting by their respective HTTP header names."]]});

@@ -1,0 +1,184 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `opentelemetry` crate."><meta name="keywords" content="rust, rustlang, rust-lang, opentelemetry"><title>opentelemetry - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../dark.css"><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="shortcut icon" href="../favicon.ico"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../opentelemetry/index.html'><div class='logo-container'><img src='../rust-logo.png' alt='logo'></div></a><p class='location'>Crate opentelemetry</p><div class="sidebar-elems"><a id='all-types' href='all.html'><p>See all opentelemetry's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li></ul></div><p class='location'></p><script>window.sidebarCurrent = {name: 'opentelemetry', ty: 'mod', relpath: '../'};</script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../src/opentelemetry/lib.rs.html#1-226' title='goto source code'>[src]</a></span><span class='in-band'>Crate <a class="mod" href=''>opentelemetry</a></span></h1><div class='docblock'><h1 id="opentelemetry-overview" class="section-header"><a href="#opentelemetry-overview">OpenTelemetry Overview</a></h1><h2 id="distributed-tracing" class="section-header"><a href="#distributed-tracing">Distributed Tracing</a></h2>
+<p>A distributed trace is a set of events, triggered as a result of a single
+logical operation, consolidated across various components of an application. A
+distributed trace contains events that cross process, network and security
+boundaries. A distributed trace may be initiated when someone presses a button
+to start an action on a website - in this example, the trace will represent
+calls made between the downstream services that handled the chain of requests
+initiated by this button being pressed.</p>
+<h3 id="trace" class="section-header"><a href="#trace">Trace</a></h3>
+<p><strong>Traces</strong> in OpenTelemetry are defined implicitly by their <strong>Spans</strong>. In
+particular, a <strong>Trace</strong> can be thought of as a directed acyclic graph (DAG) of
+<strong>Spans</strong>, where the edges between <strong>Spans</strong> are defined as parent/child
+relationship.</p>
+<p>For example, the following is an example <strong>Trace</strong> made up of 6 <strong>Spans</strong>:</p>
+<pre><code class="language-ascii">Causal relationships between Spans in a single Trace
+
+        [Span A]  ←←←(the root span)
+            |
+     +------+------+
+     |             |
+ [Span B]      [Span C] ←←←(Span C is a `child` of Span A)
+     |             |
+ [Span D]      +---+-------+
+               |           |
+           [Span E]    [Span F]
+</code></pre>
+<p>Sometimes it's easier to visualize <strong>Traces</strong> with a time axis as in the diagram
+below:</p>
+<pre><code class="language-ascii">Temporal relationships between Spans in a single Trace
+
+––|–––––––|–––––––|–––––––|–––––––|–––––––|–––––––|–––––––|–&gt; time
+
+ [Span A···················································]
+   [Span B··············································]
+      [Span D··········································]
+    [Span C········································]
+         [Span E·······]        [Span F··]
+</code></pre>
+<h3 id="span" class="section-header"><a href="#span">Span</a></h3>
+<p>Each <strong>Span</strong> encapsulates the following state:</p>
+<ul>
+<li>An operation name</li>
+<li>A start and finish timestamp</li>
+<li>A set of zero or more key:value <strong>Attributes</strong>. The keys must be strings. The
+values may be strings, bools, or numeric types.</li>
+<li>A set of zero or more <strong>Events</strong>, each of which is itself a key:value map
+paired with a timestamp. The keys must be strings, though the values may be of
+the same types as Span <strong>Attributes</strong>.</li>
+<li>Parent's <strong>Span</strong> identifier.</li>
+<li><strong>Links</strong> to zero or more causally-related <strong>Spans</strong>
+(via the <strong>SpanContext</strong> of those related <strong>Spans</strong>).</li>
+<li><strong>SpanContext</strong> identification of a Span. See below.</li>
+</ul>
+<h3 id="spancontext" class="section-header"><a href="#spancontext">SpanContext</a></h3>
+<p>Represents all the information that identifies <strong>Span</strong> in the <strong>Trace</strong> and
+is propagated to child Spans and across process boundaries. A
+<strong>SpanContext</strong> contains the tracing identifiers and the options that are
+propagated from parent to child <strong>Spans</strong>.</p>
+<ul>
+<li><strong>TraceId</strong> is the identifier for a trace. It is worldwide unique with
+practically sufficient probability by being made as 16 randomly generated
+bytes. TraceId is used to group all spans for a specific trace together across
+all processes.</li>
+<li><strong>SpanId</strong> is the identifier for a span. It is globally unique with
+practically sufficient probability by being made as 8 randomly generated
+bytes. When passed to a child Span this identifier becomes the parent span id
+for the child <strong>Span</strong>.</li>
+<li><strong>TraceFlags</strong> represents the options for a trace. It is represented as 1
+byte (bitmap).
+<ul>
+<li>Sampling bit -  Bit to represent whether trace is sampled or not (mask
+<code>0x1</code>).</li>
+</ul>
+</li>
+<li><strong>Tracestate</strong> carries tracing-system specific context in a list of key value
+pairs. <strong>Tracestate</strong> allows different vendors propagate additional
+information and inter-operate with their legacy Id formats. For more details
+see <a href="https://w3c.github.io/trace-context/#tracestate-field">this</a>.</li>
+</ul>
+<h3 id="links-between-spans" class="section-header"><a href="#links-between-spans">Links between spans</a></h3>
+<p>A <strong>Span</strong> may be linked to zero or more other <strong>Spans</strong> (defined by
+<strong>SpanContext</strong>) that are causally related. <strong>Links</strong> can point to
+<strong>SpanContexts</strong> inside a single <strong>Trace</strong> or across different <strong>Traces</strong>.
+<strong>Links</strong> can be used to represent batched operations where a <strong>Span</strong> was
+initiated by multiple initiating <strong>Span</strong>s, each representing a single incoming
+item being processed in the batch.</p>
+<p>Another example of using a <strong>Link</strong> is to declare the relationship between
+the originating and following trace. This can be used when a <strong>Trace</strong> enters trusted
+boundaries of a service and service policy requires the generation of a new
+Trace rather than trusting the incoming Trace context. The new linked Trace may
+also represent a long running asynchronous data processing operation that was
+initiated by one of many fast incoming requests.</p>
+<p>When using the scatter/gather (also called fork/join) pattern, the root
+operation starts multiple downstream processing operations and all of them are
+aggregated back in a single <strong>Span</strong>. This last <strong>Span</strong> is linked to many
+operations it aggregates. All of them are the <strong>Span</strong>s from the same Trace. And
+similar to the Parent field of a <strong>Span</strong>. It is recommended, however, to not
+set parent of the <strong>Span</strong> in this scenario as semantically the parent field
+represents a single parent scenario, in many cases the parent <strong>Span</strong> fully
+encloses the child <strong>Span</strong>. This is not the case in scatter/gather and batch
+scenarios.</p>
+<h2 id="metrics" class="section-header"><a href="#metrics">Metrics</a></h2>
+<p>OpenTelemetry allows to record raw measurements or metrics with predefined
+aggregation and set of labels.</p>
+<p>Recording raw measurements using OpenTelemetry API allows to defer to end-user
+the decision on what aggregation algorithm should be applied for this metric as
+well as defining labels (dimensions). It will be used in client libraries like
+gRPC to record raw measurements &quot;server_latency&quot; or &quot;received_bytes&quot;. So end
+user will decide what type of aggregated values should be collected out of these
+raw measurements. It may be simple average or elaborate histogram calculation.</p>
+<p>Recording of metrics with the pre-defined aggregation using OpenTelemetry API is
+not less important. It allows to collect values like cpu and memory usage, or
+simple metrics like &quot;queue length&quot;.</p>
+<h3 id="recording-raw-measurements" class="section-header"><a href="#recording-raw-measurements">Recording raw measurements</a></h3>
+<p>The main types used to record raw measurements are <code>Measure</code> and
+<code>Measurement</code>. List of <code>Measurement</code>s alongside the additional context can be
+recorded using OpenTelemetry API. So user may define to aggregate those
+<code>Measurement</code>s and use the context passed alongside to define additional
+dimensions of the resulting metric.</p>
+<h4 id="measure" class="section-header"><a href="#measure">Measure</a></h4>
+<p><code>Measure</code> describes the type of the individual values recorded by a library. It
+defines a contract between the library exposing the measurements and an
+application that will aggregate those individual measurements into a <code>Metric</code>.
+<code>Measure</code> is identified by name, description and a unit of values.</p>
+<h4 id="measurement" class="section-header"><a href="#measurement">Measurement</a></h4>
+<p><code>Measurement</code> describes a single value to be collected for a <code>Measure</code>.
+<code>Measurement</code> is an empty interface in API surface. This interface is defined in
+SDK.</p>
+<h3 id="recording-metrics-with-predefined-aggregation" class="section-header"><a href="#recording-metrics-with-predefined-aggregation">Recording metrics with predefined aggregation</a></h3>
+<p>The base trait for creating new metrics metrics is called <code>Meter</code>. It
+defines basic methods like creating metrics with a name and labels. Structs
+implementing the various metrics define their aggregation type as well as a structure of
+individual measurements or Points. API defines the following types of
+pre-aggregated metrics:</p>
+<ul>
+<li>Counter metric to report instantaneous measurement. Counter values can go
+up or stay the same, but can never go down. Counter values cannot be
+negative. There are two types of counter metric values - <code>i64</code> and <code>f64</code>.</li>
+<li>Gauge metric to report instantaneous measurement of a numeric value. Gauges can
+go both up and down. The gauges values can be negative. There are two types of
+gauge metric values - <code>i64</code> and <code>f64</code>.</li>
+</ul>
+<p>The <code>Meter</code> API allows you to construct the metric of a chosen type. The SDK
+defines the way to query the current value of a metric to be exported.</p>
+<p>Every type of a metric has it's API to record values to be aggregated. API
+supports both - push and pull model of setting the <code>Metric</code> value.</p>
+<h3 id="metrics-data-model-and-sdk" class="section-header"><a href="#metrics-data-model-and-sdk">Metrics data model and SDK</a></h3>
+<p>Metrics data model is defined in SDK and is based on
+<a href="https://github.com/open-telemetry/opentelemetry-proto/blob/master/opentelemetry/proto/metrics/v1/metrics.proto">metrics.proto</a>.
+This data model is used by all the OpenTelemetry exporters as an input.
+Different exporters have different capabilities (e.g. which data types are
+supported) and different constraints (e.g. which characters are allowed in label
+keys). Metrics is intended to be a superset of what's possible, not a lowest
+common denominator that's supported everywhere. All exporters consume data from
+Metrics Data Model via a Metric Producer interface defined in OpenTelemetry SDK.</p>
+<p>Because of this, Metrics puts minimal constraints on the data (e.g. which
+characters are allowed in keys), and code dealing with Metrics should avoid
+validation and sanitization of the Metrics data. Instead, pass the data to the
+backend, rely on the backend to perform validation, and pass back any errors
+from the backend.</p>
+<p>OpenTelemetry defines the naming convention for metric names as well as a
+well-known metric names in <a href="https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/resource/semantic_conventions/README.md">Semantic Conventions</a> document.</p>
+<h2 id="resources" class="section-header"><a href="#resources">Resources</a></h2>
+<p>A <code>Resource</code> captures information about the entity for which telemetry is recorded. For
+example, metrics exposed by a Kubernetes container can be linked to a resource that specifies
+the cluster, namespace, pod, and container name.</p>
+<p>A <code>Resource</code> may also capture an entire hierarchy of entity identification. It may describe the
+host in the cloud and specific container or an application running in the process.</p>
+<p>Note, that some of the process identification information can be associated with telemetry
+automatically by the OpenTelemetry SDK or a specific exporter.</p>
+<h2 id="propagators" class="section-header"><a href="#propagators">Propagators</a></h2>
+<p>OpenTelemetry uses <code>Propagators</code> to serialize and deserialize <code>SpanContext</code> and
+<code>DistributedContext</code> into a binary or text format. Currently there are two types of propagators:</p>
+<ul>
+<li><code>BinaryFormat</code> which is used to serialize and deserialize a value into a binary representation.</li>
+<li><code>HTTPTextFormat</code> which is used to inject and extract a value as text into carriers that travel
+in-band across process boundaries.</li>
+</ul>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table><tr class='module-item'><td><a class="mod" href="api/index.html" title='opentelemetry::api mod'>api</a></td><td class='docblock-short'><p>OpenTelemetry API: What applications use and SDKs implement.</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="exporter/index.html" title='opentelemetry::exporter mod'>exporter</a></td><td class='docblock-short'><p>OpenTelemetry data exporters</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="global/index.html" title='opentelemetry::global mod'>global</a></td><td class='docblock-short'><p>OpenTelemetry Global API</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="sdk/index.html" title='opentelemetry::sdk mod'>sdk</a></td><td class='docblock-short'><p>OpenTelemetry SDK</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../";window.currentCrate = "opentelemetry";</script><script src="../aliases.js"></script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>

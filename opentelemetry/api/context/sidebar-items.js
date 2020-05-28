@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["propagation","OpenTelemetry Propagator interface"]],"struct":[["Context","An execution-scoped collection of values."],["ContextGuard","A guard that resets the current context to the prior context when dropped."]]});

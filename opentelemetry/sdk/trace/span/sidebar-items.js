@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Span","Single operation within a trace."]]});

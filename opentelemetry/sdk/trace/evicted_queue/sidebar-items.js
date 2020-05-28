@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["EvictedQueue","This queue maintains an ordered list of elements, and a count of dropped elements. Elements are removed from the queue in a first in first out fashion."]]});

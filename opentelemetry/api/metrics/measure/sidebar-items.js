@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["Measure","An interface for recording values where the count or rate of events is meaningful."],["MeasureHandle","`MeasureHandle` is a handle for `Measure` instances."]]});

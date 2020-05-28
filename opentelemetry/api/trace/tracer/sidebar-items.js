@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["SpanBuilder","`SpanBuilder` allows span attributes to be configured before the span has started."]],"trait":[["Tracer","Interface for constructing `Span`s."]]});

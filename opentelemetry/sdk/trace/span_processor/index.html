@@ -1,0 +1,79 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `span_processor` mod in crate `opentelemetry`."><meta name="keywords" content="rust, rustlang, rust-lang, span_processor"><title>opentelemetry::sdk::trace::span_processor - Rust</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script src="../../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../../opentelemetry/index.html'><div class='logo-container'><img src='../../../../rust-logo.png' alt='logo'></div></a><p class='location'>Module span_processor</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#structs">Structs</a></li></ul></div><p class='location'><a href='../../../index.html'>opentelemetry</a>::<wbr><a href='../../index.html'>sdk</a>::<wbr><a href='../index.html'>trace</a></p><script>window.sidebarCurrent = {name: 'span_processor', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../../../../src/opentelemetry/sdk/trace/span_processor.rs.html#1-343' title='goto source code'>[src]</a></span><span class='in-band'>Module <a href='../../../index.html'>opentelemetry</a>::<wbr><a href='../../index.html'>sdk</a>::<wbr><a href='../index.html'>trace</a>::<wbr><a class="mod" href=''>span_processor</a></span></h1><div class='docblock'><h1 id="span-processor" class="section-header"><a href="#span-processor">Span Processor</a></h1>
+<p>Span processor is an interface which allows hooks for span start and end
+method invocations. Span processors are invoked only when <a href="../../../api/trace/span/trait.Span.html#tymethod.is_recording"><code>is_recording</code></a>
+is <code>true</code>.
+Built-in span processors are responsible for batching and conversion of
+spans to exportable representation and passing batches to exporters.
+Span processors can be registered directly on SDK <a href="../../../api/trace/provider/trait.Provider.html"><code>Provider</code></a> and they are
+invoked in the same order as they were registered.
+All <a href="../../../api/trace/tracer/trait.Tracer.html"><code>Tracer</code></a> instances created by a <a href="../../../api/trace/provider/trait.Provider.html"><code>Provider</code></a> share the same span
+processors. Changes to this collection reflect in all <a href="../../../api/trace/tracer/trait.Tracer.html"><code>Tracer</code></a> instances.
+The following diagram shows <a href="../../../api/trace/span_processor/trait.SpanProcessor.html"><code>SpanProcessor</code></a>'s relationship to other
+components in the SDK:</p>
+<pre><code class="language-ascii">+-----+--------------+   +-------------------------+   +-------------------+
+|     |              |   |                         |   |                   |
+|     |              |   | BatchExporterProcessor  |   |    SpanExporter   |
+|     |              +---&gt; SimpleExporterProcessor +---&gt;  (JaegerExporter) |
+|     |              |   |                         |   |                   |
+| SDK | Span.start() |   +-------------------------+   +-------------------+
+|     | Span.end()   |
+|     |              |   +---------------------+
+|     |              |   |                     |
+|     |              +---&gt; ZPagesProcessor     |
+|     |              |   |                     |
++-----+--------------+   +---------------------+
+</code></pre>
+<h1 id="examples" class="section-header"><a href="#examples">Examples</a></h1><h4 id="exporting-spans-with-a-simple-exporter" class="section-header"><a href="#exporting-spans-with-a-simple-exporter">Exporting spans with a simple exporter:</a></h4>
+<p>Note that the simple processor exports synchronously every time a span is ended. If you find this
+limiting, consider the batch processor instead.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">opentelemetry</span>::{<span class="ident">api</span>, <span class="ident">sdk</span>, <span class="ident">global</span>};
+
+<span class="comment">// Configure your preferred exporter</span>
+<span class="kw">let</span> <span class="ident">exporter</span> <span class="op">=</span> <span class="ident">api</span>::<span class="ident">NoopSpanExporter</span> {};
+
+<span class="comment">// Then use the `with_simple_exporter` method to have the provider export when spans finish.</span>
+<span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">sdk</span>::<span class="ident">Provider</span>::<span class="ident">builder</span>()
+    .<span class="ident">with_simple_exporter</span>(<span class="ident">exporter</span>)
+    .<span class="ident">build</span>();
+
+<span class="ident">global</span>::<span class="ident">set_provider</span>(<span class="ident">provider</span>);</pre></div>
+<h4 id="exporting-spans-asynchronously-in-batches" class="section-header"><a href="#exporting-spans-asynchronously-in-batches">Exporting spans asynchronously in batches:</a></h4>
+<p>This processor can be configured with an <a href="https://docs.rs/futures/0.3.4/futures/executor/index.html"><code>executor</code></a> of your choice to batch and upload spans
+asynchronously when they end. If you have added a library like <a href="https://tokio.rs"><code>tokio</code></a> or <a href="https://async.rs"><code>async-std</code></a>, you
+can pass in their respective <code>spawn</code> and <code>interval</code> functions to have batching performed in
+those contexts.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">stream</span>};
+<span class="kw">use</span> <span class="ident">opentelemetry</span>::{<span class="ident">api</span>, <span class="ident">sdk</span>, <span class="ident">global</span>};
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">Duration</span>;
+
+<span class="attribute">#[<span class="ident">tokio</span>::<span class="ident">main</span>]</span>
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="comment">// Configure your preferred exporter</span>
+    <span class="kw">let</span> <span class="ident">exporter</span> <span class="op">=</span> <span class="ident">api</span>::<span class="ident">NoopSpanExporter</span> {};
+
+    <span class="comment">// Then build a batch processor. You can use whichever executor you have available, for</span>
+    <span class="comment">// example if you are using `async-std` instead of `tokio` you can replace the spawn and</span>
+    <span class="comment">// interval functions with `async_std::task::spawn` and `async_std::stream::interval`.</span>
+    <span class="kw">let</span> <span class="ident">batch</span> <span class="op">=</span> <span class="ident">sdk</span>::<span class="ident">BatchSpanProcessor</span>::<span class="ident">builder</span>(<span class="ident">exporter</span>, <span class="ident">tokio</span>::<span class="ident">spawn</span>, <span class="ident">tokio</span>::<span class="ident">time</span>::<span class="ident">interval</span>)
+        .<span class="ident">with_max_queue_size</span>(<span class="number">4096</span>)
+        .<span class="ident">build</span>();
+
+    <span class="comment">// Then use the `with_batch_exporter` method to have the provider export spans in batches.</span>
+    <span class="kw">let</span> <span class="ident">provider</span> <span class="op">=</span> <span class="ident">sdk</span>::<span class="ident">Provider</span>::<span class="ident">builder</span>()
+        .<span class="ident">with_batch_exporter</span>(<span class="ident">batch</span>)
+        .<span class="ident">build</span>();
+
+    <span class="ident">global</span>::<span class="ident">set_provider</span>(<span class="ident">provider</span>);
+}</pre></div>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table><tr class='module-item'><td><a class="struct" href="struct.BatchConfig.html" title='opentelemetry::sdk::trace::span_processor::BatchConfig struct'>BatchConfig</a></td><td class='docblock-short'><p>Batch span processor configuration</p>
+</td></tr><tr class='module-item'><td><a class="struct" href="struct.BatchSpanProcessor.html" title='opentelemetry::sdk::trace::span_processor::BatchSpanProcessor struct'>BatchSpanProcessor</a></td><td class='docblock-short'><p>A <a href="../../../api/trace/span_processor/trait.SpanProcessor.html"><code>SpanProcessor</code></a> that asynchronously buffers finished spans and reports
+them at a preconfigured interval.</p>
+</td></tr><tr class='module-item'><td><a class="struct" href="struct.BatchSpanProcessorBuilder.html" title='opentelemetry::sdk::trace::span_processor::BatchSpanProcessorBuilder struct'>BatchSpanProcessorBuilder</a></td><td class='docblock-short'><p>A builder for creating <a href="struct.BatchSpanProcessor.html"><code>BatchSpanProcessor</code></a> instances.</p>
+</td></tr><tr class='module-item'><td><a class="struct" href="struct.BatchSpanProcessorWorker.html" title='opentelemetry::sdk::trace::span_processor::BatchSpanProcessorWorker struct'>BatchSpanProcessorWorker</a></td><td class='docblock-short'><p>A worker process that batches and processes spans as they are reported.</p>
+</td></tr><tr class='module-item'><td><a class="struct" href="struct.SimpleSpanProcessor.html" title='opentelemetry::sdk::trace::span_processor::SimpleSpanProcessor struct'>SimpleSpanProcessor</a></td><td class='docblock-short'><p>A <a href="../../../api/trace/span_processor/trait.SpanProcessor.html"><code>SpanProcessor</code></a> that exports synchronously when spans are finished.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../../";window.currentCrate = "opentelemetry";</script><script src="../../../../aliases.js"></script><script src="../../../../main.js"></script><script defer src="../../../../search-index.js"></script></body></html>

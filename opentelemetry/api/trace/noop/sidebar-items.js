@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["NoopProvider","A no-op instance of a `Provider`."],["NoopSpan","A no-op instance of a `Span`."],["NoopSpanExporter","A no-op instance of an [`SpanExporter`]."],["NoopTracer","A no-op instance of a `Tracer`."]]});

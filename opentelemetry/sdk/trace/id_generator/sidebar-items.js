@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["IdGenerator","Generates Trace and Span ids"]]});

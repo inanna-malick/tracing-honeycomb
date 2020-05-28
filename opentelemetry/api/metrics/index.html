@@ -1,0 +1,67 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `metrics` mod in crate `opentelemetry`."><meta name="keywords" content="rust, rustlang, rust-lang, metrics"><title>opentelemetry::api::metrics - Rust</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../opentelemetry/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a><p class='location'>Module metrics</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li></ul></div><p class='location'><a href='../../index.html'>opentelemetry</a>::<wbr><a href='../index.html'>api</a></p><script>window.sidebarCurrent = {name: 'metrics', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../../../src/opentelemetry/api/metrics/mod.rs.html#1-247' title='goto source code'>[src]</a></span><span class='in-band'>Module <a href='../../index.html'>opentelemetry</a>::<wbr><a href='../index.html'>api</a>::<wbr><a class="mod" href=''>metrics</a></span></h1><div class='docblock'><h1 id="opentelemetry-metrics-api" class="section-header"><a href="#opentelemetry-metrics-api">OpenTelemetry Metrics API</a></h1>
+<p>The user-facing metrics API supports producing diagnostic measurements
+using three basic kinds of instrument. &quot;Metrics&quot; are the thing being
+produced--mathematical, statistical summaries of certain observable
+behavior in the program. <code>Instrument</code>s are the devices used by the
+program to record observations about their behavior. Therefore, we use
+&quot;metric instrument&quot; to refer to a program object, allocated through the
+API, used for recording metrics. There are three distinct instruments
+in the Metrics API, commonly known as <code>Counter</code>s, <code>Gauge</code>s, and
+<code>Measure</code>s.</p>
+<p>Monitoring and alerting are the common use-case for the data provided
+through metric instruments, after various collection and aggregation
+strategies are applied to the data. We find there are many other uses
+for the metric events that stream into these instruments. We imagine
+metric data being aggregated and recorded as events in tracing and
+logging systems too, and for this reason OpenTelemetry requires a
+separation of the API from the SDK.</p>
+<p>To capture measurements using an <code>Instrument</code>, you need an SDK that
+implements the <code>Meter</code> API.</p>
+<h2 id="metric-kinds-and-inputs" class="section-header"><a href="#metric-kinds-and-inputs">Metric kinds and inputs</a></h2>
+<p>The API distinguishes metric instruments by semantic meaning, not by
+the type of value produced in an exporter.  This is a departure from
+convention, compared with a number of common metric libraries, and
+stems from the separation of the API and the SDK.  The SDK ultimately
+determines how to handle metric events and could potentially implement
+non-standard behavior.</p>
+<p>This explains why the metric API does not have metric instrument kinds
+for exporting &quot;Histogram&quot; and &quot;Summary&quot; distribution explicitly, for
+example.  These are both semantically <code>Measure</code> instruments and an SDK
+can be configured to produce histograms or distribution summaries from
+Measure events.  It is out of scope for the Metrics API to specify how
+these alternatives are configured in a particular SDK.</p>
+<p>We believe the three metric kinds <code>Counter</code>, <code>Gauge</code>, and <code>Measure</code>
+form a sufficient basis for expression of a wide variety of metric data.
+Programmers write and read these as <code>add()</code>, <code>set()</code>, and <code>record()</code>
+method calls, signifying the semantics and standard interpretation,
+and we believe these three methods are all that are needed.</p>
+<p>Nevertheless, it is common to apply restrictions on metric values, the
+inputs to <code>add()</code>, <code>set()</code>, and <code>record()</code>, in order to refine their
+standard interpretation.  Generally, there is a question of whether
+the instrument can be used to compute a rate, because that is usually
+a desirable analysis.  Each metric instrument offers an optional
+declaration, specifying restrictions on values input to the metric.
+For example, Measures are declared as non-negative by default,
+appropriate for reporting sizes and durations; a Measure option is
+provided to record positive or negative values, but it does not change
+the kind of instrument or the method name used, as the semantics are
+unchanged.</p>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table><tr class='module-item'><td><a class="mod" href="counter/index.html" title='opentelemetry::api::metrics::counter mod'>counter</a></td><td class='docblock-short'><p>Metrics Counter Interface</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="gauge/index.html" title='opentelemetry::api::metrics::gauge mod'>gauge</a></td><td class='docblock-short'><p>Metrics Gauge Interface</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="measure/index.html" title='opentelemetry::api::metrics::measure mod'>measure</a></td><td class='docblock-short'><p>Metrics Measure Interface</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="noop/index.html" title='opentelemetry::api::metrics::noop mod'>noop</a></td><td class='docblock-short'><p>No-op OpenTelemetry Metrics Implementation</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="value/index.html" title='opentelemetry::api::metrics::value mod'>value</a></td><td class='docblock-short'><p>OpenTelemetry Metrics Measurement Values</p>
+</td></tr></table><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table><tr class='module-item'><td><a class="struct" href="struct.Measurement.html" title='opentelemetry::api::metrics::Measurement struct'>Measurement</a></td><td class='docblock-short'><p>Used to record <code>MeasurementValue</code>s for a given <code>Instrument</code> for use in
+batch recording by a <code>Meter</code>.</p>
+</td></tr><tr class='module-item'><td><a class="struct" href="struct.MetricOptions.html" title='opentelemetry::api::metrics::MetricOptions struct'>MetricOptions</a></td><td class='docblock-short'><p><code>MetricOptions</code> contains some options for metrics of any kind.</p>
+</td></tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table><tr class='module-item'><td><a class="trait" href="trait.Instrument.html" title='opentelemetry::api::metrics::Instrument trait'>Instrument</a></td><td class='docblock-short'><p>The implementation-level interface to Set/Add/Record individual
+metrics without precomputed labels.</p>
+</td></tr><tr class='module-item'><td><a class="trait" href="trait.InstrumentHandle.html" title='opentelemetry::api::metrics::InstrumentHandle trait'>InstrumentHandle</a></td><td class='docblock-short'><p>The implementation-level interface to Set/Add/Record individual
+metrics with precomputed labels.</p>
+</td></tr><tr class='module-item'><td><a class="trait" href="trait.LabelSet.html" title='opentelemetry::api::metrics::LabelSet trait'>LabelSet</a></td><td class='docblock-short'><p><code>LabelSet</code> is an implementation-level interface that represents a
+set of <code>KeyValue</code> for use as pre-defined labels in the metrics API.</p>
+</td></tr><tr class='module-item'><td><a class="trait" href="trait.Meter.html" title='opentelemetry::api::metrics::Meter trait'>Meter</a></td><td class='docblock-short'><p>Meter is an interface to the metrics portion of the OpenTelemetry SDK.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "opentelemetry";</script><script src="../../../aliases.js"></script><script src="../../../main.js"></script><script defer src="../../../search-index.js"></script></body></html>

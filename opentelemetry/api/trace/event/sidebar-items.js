@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Event","A `Span` has the ability to add events. Events have a time associated with the moment when they are added to the `Span`."]]});

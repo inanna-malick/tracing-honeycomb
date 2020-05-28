@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["EvictedHashMap","A hash map with a capped number of attributes that retains the most recently set entries."]]});

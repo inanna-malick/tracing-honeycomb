@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["SpanProcessor","`SpanProcessor`s allow finished spans to be processed."]]});

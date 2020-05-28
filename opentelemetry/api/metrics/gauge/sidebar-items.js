@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["Gauge","An interface for recording values where the metric cannot be expressed as a sum or because the measurement interval is arbitrary."],["GaugeHandle","`GaugeHandle` is a handle for `Gauge` instances."]]});

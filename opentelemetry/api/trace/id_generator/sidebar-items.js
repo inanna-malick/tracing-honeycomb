@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["IdGenerator","Interface for generating IDs"]]});

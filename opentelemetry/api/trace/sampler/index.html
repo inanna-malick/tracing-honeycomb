@@ -1,0 +1,38 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `sampler` mod in crate `opentelemetry`."><meta name="keywords" content="rust, rustlang, rust-lang, sampler"><title>opentelemetry::api::trace::sampler - Rust</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script src="../../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../../opentelemetry/index.html'><div class='logo-container'><img src='../../../../rust-logo.png' alt='logo'></div></a><p class='location'>Module sampler</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li></ul></div><p class='location'><a href='../../../index.html'>opentelemetry</a>::<wbr><a href='../../index.html'>api</a>::<wbr><a href='../index.html'>trace</a></p><script>window.sidebarCurrent = {name: 'sampler', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../../../../src/opentelemetry/api/trace/sampler.rs.html#1-79' title='goto source code'>[src]</a></span><span class='in-band'>Module <a href='../../../index.html'>opentelemetry</a>::<wbr><a href='../../index.html'>api</a>::<wbr><a href='../index.html'>trace</a>::<wbr><a class="mod" href=''>sampler</a></span></h1><div class='docblock'><h1 id="opentelemetry-sampler-interface" class="section-header"><a href="#opentelemetry-sampler-interface">OpenTelemetry Sampler Interface</a></h1><h2 id="sampling" class="section-header"><a href="#sampling">Sampling</a></h2>
+<p>Sampling is a mechanism to control the noise and overhead introduced by
+OpenTelemetry by reducing the number of samples of traces collected and sent to
+the backend.</p>
+<p>Sampling may be implemented on different stages of a trace collection.
+OpenTelemetry API defines a <code>Sampler</code> interface that can be used at
+instrumentation points by libraries to check the sampling <code>SamplingDecision</code> early and
+optimize the amount of telemetry that needs to be collected.</p>
+<p>All other sampling algorithms may be implemented on SDK layer in exporters, or
+even out of process in Agent or Collector.</p>
+<p>The OpenTelemetry API has two properties responsible for the data collection:</p>
+<ul>
+<li><code>is_recording</code> method on a <code>Span</code>. If <code>true</code> the current <code>Span</code> records
+tracing events (attributes, events, status, etc.), otherwise all tracing
+events are dropped. Users can use this property to determine if expensive
+trace events can be avoided. <code>SpanProcessor</code>s will receive
+all spans with this flag set. However, <code>SpanExporter</code>s will
+not receive them unless the <code>Sampled</code> flag was set.</li>
+<li><code>Sampled</code> flag in <code>trace_flags</code> on <code>SpanContext</code>. This flag is propagated via
+the <code>SpanContext</code> to child Spans. For more details see the <a href="https://w3c.github.io/trace-context/">W3C
+specification</a>. This flag indicates that
+the <code>Span</code> has been <code>sampled</code> and will be exported. <code>SpanProcessor</code>s and
+<code>SpanExporter</code>s will receive spans with the <code>Sampled</code> flag set for
+processing.</li>
+</ul>
+<p>The flag combination <code>SampledFlag == false</code> and <code>is_recording</code> == true<code>means that the current</code>Span<code>does record information, but most likely the child</code>Span` will not.</p>
+<p>The flag combination <code>SampledFlag == true</code> and <code>IsRecording == false</code>
+could cause gaps in the distributed trace, and because of this OpenTelemetry API
+MUST NOT allow this combination.</p>
+</div><h2 id='structs' class='section-header'><a href="#structs">Structs</a></h2>
+<table><tr class='module-item'><td><a class="struct" href="struct.SamplingResult.html" title='opentelemetry::api::trace::sampler::SamplingResult struct'>SamplingResult</a></td><td class='docblock-short'><p>The result of sampling logic for a given <code>Span</code>.</p>
+</td></tr></table><h2 id='enums' class='section-header'><a href="#enums">Enums</a></h2>
+<table><tr class='module-item'><td><a class="enum" href="enum.SamplingDecision.html" title='opentelemetry::api::trace::sampler::SamplingDecision enum'>SamplingDecision</a></td><td class='docblock-short'><p>Decision about whether or not to sample</p>
+</td></tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
+<table><tr class='module-item'><td><a class="trait" href="trait.Sampler.html" title='opentelemetry::api::trace::sampler::Sampler trait'>Sampler</a></td><td class='docblock-short'><p>The <code>Sampler</code> interface allows implementations to provide samplers which will
+return a sampling <code>SamplingResult</code> based on information that is typically
+available just before the <code>Span</code> was created.</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../../";window.currentCrate = "opentelemetry";</script><script src="../../../../aliases.js"></script><script src="../../../../main.js"></script><script defer src="../../../../search-index.js"></script></body></html>

@@ -5,8 +5,14 @@ trait. See the crate docs, and the docs for <code>Future</code>, for full detail
 <table><tr class='module-item'><td><a class="struct" href="struct.AndThen.html" title='tokio::prelude::future::AndThen struct'>AndThen</a></td><td class='docblock-short'><p>Future for the <code>and_then</code> combinator, chaining a computation onto the end of
 another future which completes successfully.</p>
 </td></tr><tr class='module-item'><td><a class="struct" href="struct.CatchUnwind.html" title='tokio::prelude::future::CatchUnwind struct'>CatchUnwind</a></td><td class='docblock-short'><p>Future for the <code>catch_unwind</code> combinator.</p>
+</td></tr><tr class='module-item'><td><a class="struct" href="struct.Collect.html" title='tokio::prelude::future::Collect struct'>Collect</a></td><td class='docblock-short'><p>A future which takes a list of futures and resolves with a vector of the
+completed values.</p>
+</td></tr><tr class='module-item'><td><a class="struct" href="struct.Done.html" title='tokio::prelude::future::Done struct'>Done</a></td><td class='docblock-short'><p>A future representing a value that is immediately ready.</p>
 </td></tr><tr class='module-item'><td><a class="struct" href="struct.Empty.html" title='tokio::prelude::future::Empty struct'>Empty</a></td><td class='docblock-short'><p>A future which is never resolved.</p>
+</td></tr><tr class='module-item'><td><a class="struct" href="struct.Err.html" title='tokio::prelude::future::Err struct'>Err</a></td><td class='docblock-short'><p>A future representing a value that is immediately ready.</p>
 </td></tr><tr class='module-item'><td><a class="struct" href="struct.ExecuteError.html" title='tokio::prelude::future::ExecuteError struct'>ExecuteError</a></td><td class='docblock-short'><p>Errors returned from the <code>Spawn::spawn</code> function.</p>
+</td></tr><tr class='module-item'><td><a class="struct" href="struct.Failed.html" title='tokio::prelude::future::Failed struct'>Failed</a></td><td class='docblock-short'><p>A future representing a value that is immediately ready.</p>
+</td></tr><tr class='module-item'><td><a class="struct" href="struct.Finished.html" title='tokio::prelude::future::Finished struct'>Finished</a></td><td class='docblock-short'><p>A future representing a value that is immediately ready.</p>
 </td></tr><tr class='module-item'><td><a class="struct" href="struct.Flatten.html" title='tokio::prelude::future::Flatten struct'>Flatten</a></td><td class='docblock-short'><p>Future for the <code>flatten</code> combinator, flattening a future-of-a-future to get just
 the result of the final future.</p>
 </td></tr><tr class='module-item'><td><a class="struct" href="struct.FlattenStream.html" title='tokio::prelude::future::FlattenStream struct'>FlattenStream</a></td><td class='docblock-short'><p>Future for the <code>flatten_stream</code> combinator, flattening a
@@ -32,6 +38,7 @@ scheduled.</p>
 </td></tr><tr class='module-item'><td><a class="struct" href="struct.LoopFn.html" title='tokio::prelude::future::LoopFn struct'>LoopFn</a></td><td class='docblock-short'><p>A future implementing a tail-recursive loop.</p>
 </td></tr><tr class='module-item'><td><a class="struct" href="struct.Map.html" title='tokio::prelude::future::Map struct'>Map</a></td><td class='docblock-short'><p>Future for the <code>map</code> combinator, changing the type of a future.</p>
 </td></tr><tr class='module-item'><td><a class="struct" href="struct.MapErr.html" title='tokio::prelude::future::MapErr struct'>MapErr</a></td><td class='docblock-short'><p>Future for the <code>map_err</code> combinator, changing the error type of a future.</p>
+</td></tr><tr class='module-item'><td><a class="struct" href="struct.Ok.html" title='tokio::prelude::future::Ok struct'>Ok</a></td><td class='docblock-short'><p>A future representing a value that is immediately ready.</p>
 </td></tr><tr class='module-item'><td><a class="struct" href="struct.OrElse.html" title='tokio::prelude::future::OrElse struct'>OrElse</a></td><td class='docblock-short'><p>Future for the <code>or_else</code> combinator, chaining a computation onto the end of
 a future which fails with an error.</p>
 </td></tr><tr class='module-item'><td><a class="struct" href="struct.PollFn.html" title='tokio::prelude::future::PollFn struct'>PollFn</a></td><td class='docblock-short'><p>A future which adapts a function returning <code>Poll</code>.</p>
@@ -65,9 +72,15 @@ available at some later point in time.</p>
 </td></tr><tr class='module-item'><td><a class="trait" href="trait.FutureFrom.html" title='tokio::prelude::future::FutureFrom trait'>FutureFrom</a></td><td class='docblock-short'><p>Asynchronous conversion from a type <code>T</code>.</p>
 </td></tr><tr class='module-item'><td><a class="trait" href="trait.IntoFuture.html" title='tokio::prelude::future::IntoFuture trait'>IntoFuture</a></td><td class='docblock-short'><p>Class of types which can be converted into a future.</p>
 </td></tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
-<table><tr class='module-item'><td><a class="fn" href="fn.empty.html" title='tokio::prelude::future::empty fn'>empty</a></td><td class='docblock-short'><p>Creates a future which never resolves, representing a computation that never
+<table><tr class='module-item'><td><a class="fn" href="fn.collect.html" title='tokio::prelude::future::collect fn'>collect</a></td><td class='docblock-short'><p>Creates a future which represents a collection of the results of the futures
+given.</p>
+</td></tr><tr class='module-item'><td><a class="fn" href="fn.done.html" title='tokio::prelude::future::done fn'>done</a></td><td class='docblock-short'><p>Creates a new &quot;leaf future&quot; which will resolve with the given result.</p>
+</td></tr><tr class='module-item'><td><a class="fn" href="fn.empty.html" title='tokio::prelude::future::empty fn'>empty</a></td><td class='docblock-short'><p>Creates a future which never resolves, representing a computation that never
 finishes.</p>
 </td></tr><tr class='module-item'><td><a class="fn" href="fn.err.html" title='tokio::prelude::future::err fn'>err</a></td><td class='docblock-short'><p>Creates a &quot;leaf future&quot; from an immediate value of a failed computation.</p>
+</td></tr><tr class='module-item'><td><a class="fn" href="fn.failed.html" title='tokio::prelude::future::failed fn'>failed</a></td><td class='docblock-short'><p>Creates a &quot;leaf future&quot; from an immediate value of a failed computation.</p>
+</td></tr><tr class='module-item'><td><a class="fn" href="fn.finished.html" title='tokio::prelude::future::finished fn'>finished</a></td><td class='docblock-short'><p>Creates a &quot;leaf future&quot; from an immediate value of a finished and
+successful computation.</p>
 </td></tr><tr class='module-item'><td><a class="fn" href="fn.join_all.html" title='tokio::prelude::future::join_all fn'>join_all</a></td><td class='docblock-short'><p>Creates a future which represents a collection of the results of the futures
 given.</p>
 </td></tr><tr class='module-item'><td><a class="fn" href="fn.lazy.html" title='tokio::prelude::future::lazy fn'>lazy</a></td><td class='docblock-short'><p>Creates a new future which will eventually be the same as the one created

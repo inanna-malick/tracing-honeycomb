@@ -163,6 +163,10 @@
 <span id="163">163</span>
 <span id="164">164</span>
 <span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">visitor</span>::{<span class="ident">event_to_values</span>, <span class="ident">span_to_values</span>, <span class="ident">HoneycombVisitor</span>};
 <span class="kw">use</span> <span class="ident">libhoney</span>::<span class="ident">FieldHolder</span>;
@@ -206,6 +210,10 @@
     <span class="kw">type</span> <span class="ident">Visitor</span> <span class="op">=</span> <span class="ident">HoneycombVisitor</span>;
     <span class="kw">type</span> <span class="ident">TraceId</span> <span class="op">=</span> <span class="ident">TraceId</span>;
     <span class="kw">type</span> <span class="ident">SpanId</span> <span class="op">=</span> <span class="ident">SpanId</span>;
+
+    <span class="kw">fn</span> <span class="ident">mk_visitor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">Visitor</span> {
+        <span class="ident">Default</span>::<span class="ident">default</span>()
+    }
 
     <span class="kw">fn</span> <span class="ident">report_span</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">span</span>: <span class="ident">Span</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Visitor</span>, <span class="self">Self</span>::<span class="ident">SpanId</span>, <span class="self">Self</span>::<span class="ident">TraceId</span><span class="op">&gt;</span>) {
         <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">span_to_values</span>(<span class="ident">span</span>);

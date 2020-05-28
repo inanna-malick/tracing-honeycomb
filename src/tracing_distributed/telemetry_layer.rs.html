@@ -445,16 +445,13 @@
 <span id="445">445</span>
 <span id="446">446</span>
 <span id="447">447</span>
-<span id="448">448</span>
-<span id="449">449</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">telemetry</span>::<span class="ident">Telemetry</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">trace</span>;
-<span class="kw">use</span> <span class="ident">chrono</span>::{<span class="ident">DateTime</span>, <span class="ident">Utc</span>};
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">any</span>::<span class="ident">TypeId</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">HashMap</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">default</span>::<span class="ident">Default</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">RwLock</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">SystemTime</span>;
 <span class="kw">use</span> <span class="ident">tracing</span>::<span class="ident">span</span>::{<span class="ident">Attributes</span>, <span class="ident">Id</span>, <span class="ident">Record</span>};
 <span class="kw">use</span> <span class="ident">tracing</span>::{<span class="ident">Event</span>, <span class="ident">Subscriber</span>};
 <span class="kw">use</span> <span class="ident">tracing_subscriber</span>::{<span class="ident">layer</span>::<span class="ident">Context</span>, <span class="ident">registry</span>, <span class="ident">Layer</span>};
@@ -614,7 +611,7 @@
     <span class="ident">S</span>: <span class="ident">Subscriber</span> <span class="op">+</span> <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">registry</span>::<span class="ident">LookupSpan</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
     <span class="ident">TraceId</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">Eq</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span>,
     <span class="ident">SpanId</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">Eq</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span>,
-    <span class="ident">V</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">tracing</span>::<span class="ident">field</span>::<span class="ident">Visit</span> <span class="op">+</span> <span class="ident">Default</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span>,
+    <span class="ident">V</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">tracing</span>::<span class="ident">field</span>::<span class="ident">Visit</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span>,
     <span class="ident">T</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">Telemetry</span><span class="op">&lt;</span><span class="ident">Visitor</span> <span class="op">=</span> <span class="ident">V</span>, <span class="ident">TraceId</span> <span class="op">=</span> <span class="ident">TraceId</span>, <span class="ident">SpanId</span> <span class="op">=</span> <span class="ident">SpanId</span><span class="op">&gt;</span>,
 {
     <span class="kw">fn</span> <span class="ident">new_span</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">attrs</span>: <span class="kw-2">&amp;</span><span class="ident">Attributes</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">Id</span>, <span class="ident">ctx</span>: <span class="ident">Context</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) {
@@ -622,7 +619,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">extensions_mut</span> <span class="op">=</span> <span class="ident">span</span>.<span class="ident">extensions_mut</span>();
         <span class="ident">extensions_mut</span>.<span class="ident">insert</span>(<span class="ident">SpanInitAt</span>::<span class="ident">new</span>());
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">visitor</span>: <span class="ident">V</span> <span class="op">=</span> <span class="ident">Default</span>::<span class="ident">default</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">visitor</span>: <span class="ident">V</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">telemetry</span>.<span class="ident">mk_visitor</span>();
         <span class="ident">attrs</span>.<span class="ident">record</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">visitor</span>);
         <span class="ident">extensions_mut</span>.<span class="ident">insert</span>::<span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span>(<span class="ident">visitor</span>);
     }
@@ -654,9 +651,9 @@
         <span class="kw">match</span> <span class="ident">parent_id</span> {
             <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {} <span class="comment">// not part of a trace, don&#39;t bother recording via honeycomb</span>
             <span class="prelude-val">Some</span>(<span class="ident">parent_id</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">let</span> <span class="ident">initialized_at</span> <span class="op">=</span> <span class="ident">Utc</span>::<span class="ident">now</span>();
+                <span class="kw">let</span> <span class="ident">initialized_at</span> <span class="op">=</span> <span class="ident">SystemTime</span>::<span class="ident">now</span>();
 
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">visitor</span> <span class="op">=</span> <span class="ident">Default</span>::<span class="ident">default</span>();
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">visitor</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">telemetry</span>.<span class="ident">mk_visitor</span>();
                 <span class="ident">event</span>.<span class="ident">record</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">visitor</span>);
 
                 <span class="comment">// TODO: dedup</span>
@@ -713,8 +710,7 @@
                 .<span class="ident">remove</span>()
                 .<span class="ident">expect</span>(<span class="string">&quot;should be present on all spans&quot;</span>);
 
-            <span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="ident">Utc</span>::<span class="ident">now</span>();
-            <span class="kw">let</span> <span class="ident">elapsed</span> <span class="op">=</span> <span class="ident">now</span>.<span class="ident">signed_duration_since</span>(<span class="ident">initialized_at</span>);
+            <span class="kw">let</span> <span class="ident">completed_at</span> <span class="op">=</span> <span class="ident">SystemTime</span>::<span class="ident">now</span>();
 
             <span class="kw">let</span> <span class="ident">parent_id</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">trace_ctx</span>.<span class="ident">parent_span</span> {
                 <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">span</span>
@@ -729,7 +725,7 @@
                 <span class="ident">parent_id</span>,
                 <span class="ident">initialized_at</span>,
                 <span class="ident">trace_id</span>: <span class="ident">trace_ctx</span>.<span class="ident">trace_id</span>,
-                <span class="ident">elapsed</span>,
+                <span class="ident">completed_at</span>,
                 <span class="ident">service_name</span>: <span class="self">self</span>.<span class="ident">service_name</span>,
                 <span class="ident">values</span>: <span class="ident">visitor</span>,
             };
@@ -759,11 +755,11 @@
 <span class="comment">// TODO: delete?</span>
 <span class="kw">struct</span> <span class="ident">LazyTraceCtx</span><span class="op">&lt;</span><span class="ident">SpanId</span>, <span class="ident">TraceId</span><span class="op">&gt;</span>(<span class="ident">TraceCtx</span><span class="op">&lt;</span><span class="ident">SpanId</span>, <span class="ident">TraceId</span><span class="op">&gt;</span>);
 
-<span class="kw">struct</span> <span class="ident">SpanInitAt</span>(<span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">Utc</span><span class="op">&gt;</span>);
+<span class="kw">struct</span> <span class="ident">SpanInitAt</span>(<span class="ident">SystemTime</span>);
 
 <span class="kw">impl</span> <span class="ident">SpanInitAt</span> {
     <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">initialized_at</span> <span class="op">=</span> <span class="ident">Utc</span>::<span class="ident">now</span>();
+        <span class="kw">let</span> <span class="ident">initialized_at</span> <span class="op">=</span> <span class="ident">SystemTime</span>::<span class="ident">now</span>();
 
         <span class="self">Self</span>(<span class="ident">initialized_at</span>)
     }

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["TraceContextPropagator","Extracts and injects `SpanContext`s into `Carrier`s using the trace-context format."]]});

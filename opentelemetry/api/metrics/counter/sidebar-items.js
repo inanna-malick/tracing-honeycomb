@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["Counter","An interface for recording values where the sum is of primary interest."],["CounterHandle","`CounterHandle` is a handle for `Counter` instances."]]});

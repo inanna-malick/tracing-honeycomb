@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Builder","Builder for provider attributes."],["Provider","Creator and registry of named `Tracer` instances."]]});

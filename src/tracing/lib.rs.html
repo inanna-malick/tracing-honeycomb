@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.13/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.14/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -787,6 +787,58 @@
 <span id="787">787</span>
 <span id="788">788</span>
 <span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
+<span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
+<span id="803">803</span>
+<span id="804">804</span>
+<span id="805">805</span>
+<span id="806">806</span>
+<span id="807">807</span>
+<span id="808">808</span>
+<span id="809">809</span>
+<span id="810">810</span>
+<span id="811">811</span>
+<span id="812">812</span>
+<span id="813">813</span>
+<span id="814">814</span>
+<span id="815">815</span>
+<span id="816">816</span>
+<span id="817">817</span>
+<span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! A scoped, structured logging and diagnostics system.</span>
 <span class="doccomment">//!</span>
@@ -885,7 +937,7 @@
 <span class="doccomment">//! or `Event`. If a call to `Subscriber::enabled` returns `false` for a given</span>
 <span class="doccomment">//! set of metadata, that `Subscriber` will *not* be notified about the</span>
 <span class="doccomment">//! corresponding `Span` or `Event`. For performance reasons, if no currently</span>
-<span class="doccomment">//! active subscribers express  interest in a given set of metadata by returning</span>
+<span class="doccomment">//! active subscribers express interest in a given set of metadata by returning</span>
 <span class="doccomment">//! `true`, then the corresponding `Span` or `Event` will never be constructed.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Usage</span>
@@ -1115,7 +1167,7 @@
 <span class="doccomment">//! #     field: &quot;Hello world!&quot;</span>
 <span class="doccomment">//! # };</span>
 <span class="doccomment">//! // `my_struct.field` will be recorded using its `fmt::Display` implementation.</span>
-<span class="doccomment">//! event!(Level::TRACE,  %my_struct.field);</span>
+<span class="doccomment">//! event!(Level::TRACE, %my_struct.field);</span>
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
@@ -1374,6 +1426,58 @@
 <span class="doccomment">//! Once a subscriber has been set, instrumentation points may be added to the</span>
 <span class="doccomment">//! executable using the `tracing` crate&#39;s macros.</span>
 <span class="doccomment">//!</span>
+<span class="doccomment">//! ## `log` Compatibility</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The [`log`] crate provides a simple, lightweight logging facade for Rust.</span>
+<span class="doccomment">//! While `tracing` builds upon `log`&#39;s foundation with richer structured</span>
+<span class="doccomment">//! diagnostic data, `log`&#39;s simplicity and ubiquity make it the &quot;lowest common</span>
+<span class="doccomment">//! denominator&quot; for text-based logging in Rust — a vast majority of Rust</span>
+<span class="doccomment">//! libraries and applications either emit or consume `log` records. Therefore,</span>
+<span class="doccomment">//! `tracing` provides multiple forms of interoperability with `log`: `tracing`</span>
+<span class="doccomment">//! instrumentation can emit `log` records, and a compatibility layer enables</span>
+<span class="doccomment">//! `tracing` [`Subscriber`]s to consume `log` records as `tracing` [`Event`]s.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ### Emitting `log` Records</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! This crate provides two feature flags, &quot;log&quot; and &quot;log-always&quot;, which will</span>
+<span class="doccomment">//! cause [spans] and [events] to emit `log` records. When the &quot;log&quot; feature is</span>
+<span class="doccomment">//! enabled, if no `tracing` `Subscriber` is active, invoking an event macro or</span>
+<span class="doccomment">//! creating a span with fields will emit a `log` record. This is intended</span>
+<span class="doccomment">//! primarily for use in libraries which wish to emit diagnostics that can be</span>
+<span class="doccomment">//! consumed by applications using `tracing` *or* `log`, without paying the</span>
+<span class="doccomment">//! additional overhead of emitting both forms of diagnostics when `tracing` is</span>
+<span class="doccomment">//! in use.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Enabling the &quot;log-always&quot; feature will cause `log` records to be emitted</span>
+<span class="doccomment">//! even if a `tracing` `Subscriber` _is_ set. This is intended to be used in</span>
+<span class="doccomment">//! applications where a `log` `Logger` is being used to record a textual log,</span>
+<span class="doccomment">//! and `tracing` is used only to record other forms of diagnostics (such as</span>
+<span class="doccomment">//! metrics, profiling, or distributed tracing data). Unlike the &quot;log&quot; feature,</span>
+<span class="doccomment">//! libraries generally should **not** enable the &quot;log-always&quot; feature, as doing</span>
+<span class="doccomment">//! so will prevent applications from being able to opt out of the `log` records.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! See [here][flags] for more details on this crate&#39;s feature flags.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The generated `log` records&#39; messages will be a string representation of the</span>
+<span class="doccomment">//! span or event&#39;s fields, and all additional information recorded by `log`</span>
+<span class="doccomment">//! (target, verbosity level, module path, file, and line number) will also be</span>
+<span class="doccomment">//! populated. Additionally, `log` records are also generated when spans are</span>
+<span class="doccomment">//! entered, exited, and closed. Since these additional span lifecycle logs have</span>
+<span class="doccomment">//! the potential to be very verbose, and don&#39;t include additional fields, they</span>
+<span class="doccomment">//! are categorized under a separate `log` target, &quot;tracing::span&quot;, which may be</span>
+<span class="doccomment">//! enabled or disabled separately from other `log` records emitted by `tracing`.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ### Consuming `log` Records</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The [`tracing-log`] crate provides a compatibility layer which</span>
+<span class="doccomment">//! allows a `tracing` [`Subscriber`] to consume `log` records as though they</span>
+<span class="doccomment">//! were `tracing` [events]. This allows applications using `tracing` to record</span>
+<span class="doccomment">//! the logs emitted by dependencies using `log` as events within the context of</span>
+<span class="doccomment">//! the application&#39;s trace tree. See [that crate&#39;s documentation][log-tracer]</span>
+<span class="doccomment">//! for details.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! [log-tracer]: https://docs.rs/tracing-log/latest/tracing_log/#convert-log-records-to-tracing-events</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//! ## Related Crates</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! In addition to `tracing` and `tracing-core`, the [`tokio-rs/tracing`] repository</span>
@@ -1396,6 +1500,8 @@
 <span class="doccomment">//!    dependencies which use `log`. Note that if you&#39;re using</span>
 <span class="doccomment">//!    `tracing-subscriber`&#39;s `FmtSubscriber`, you don&#39;t need to depend on</span>
 <span class="doccomment">//!    `tracing-log` directly.</span>
+<span class="doccomment">//!  - [`tracing-appender`] provides utilities for outputting tracing data,</span>
+<span class="doccomment">//!     including a file appender and non blocking writer.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Additionally, there are also several third-party crates which are not</span>
 <span class="doccomment">//! maintained by the `tokio` project. These include:</span>
@@ -1405,8 +1511,8 @@
 <span class="doccomment">//!    `tracing` events and generates histograms.</span>
 <span class="doccomment">//!  - [`tracing-opentelemetry`] provides a subscriber for emitting traces to</span>
 <span class="doccomment">//!    [OpenTelemetry]-compatible distributed tracing systems.</span>
-<span class="doccomment">//!  - [`tracing-honeycomb`] implements a subscriber for reporting traces to</span>
-<span class="doccomment">//!    [honeycomb.io].</span>
+<span class="doccomment">//!  - [`tracing-honeycomb`] Provides a layer that reports traces spanning multiple machines to [honeycomb.io]. Backed by [`tracing-distributed`].</span>
+<span class="doccomment">//!  - [`tracing-distributed`] Provides a generic implementation of a layer that reports traces spanning multiple machines to some backend.</span>
 <span class="doccomment">//!  - [`tracing-actix`] provides `tracing` integration for the `actix` actor</span>
 <span class="doccomment">//!    framework.</span>
 <span class="doccomment">//!  - [`tracing-gelf`] implements a subscriber for exporting traces in Greylog</span>
@@ -1419,7 +1525,8 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [`tracing-opentelemetry`]: https://crates.io/crates/tracing-opentelemetry</span>
 <span class="doccomment">//! [OpenTelemetry]: https://opentelemetry.io/</span>
-<span class="doccomment">//! [`tracing-honeycomb`]: https://crates.io/crates/honeycomb-tracing</span>
+<span class="doccomment">//! [`tracing-honeycomb`]: https://crates.io/crates/tracing-honeycomb</span>
+<span class="doccomment">//! [`tracing-distributed`]: https://crates.io/crates/tracing-distributed</span>
 <span class="doccomment">//! [honeycomb.io]: https://www.honeycomb.io/</span>
 <span class="doccomment">//! [`tracing-actix`]: https://crates.io/crates/tracing-actix</span>
 <span class="doccomment">//! [`tracing-gelf`]: https://crates.io/crates/tracing-gelf</span>
@@ -1430,7 +1537,7 @@
 <span class="doccomment">//! undergoing active development. They may be less stable than `tracing` and</span>
 <span class="doccomment">//! `tracing-core`.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! ##  Crate Feature Flags</span>
+<span class="doccomment">//! ## Crate Feature Flags</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! The following crate feature flags are available:</span>
 <span class="doccomment">//!</span>
@@ -1455,7 +1562,7 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//!   ```toml</span>
 <span class="doccomment">//!   [dependencies]</span>
-<span class="doccomment">//!   tracing = { version = &quot;0.1.13&quot;, default-features = false }</span>
+<span class="doccomment">//!   tracing = { version = &quot;0.1.14&quot;, default-features = false }</span>
 <span class="doccomment">//!   ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//!   *Compiler support: requires rustc 1.39+*</span>
@@ -1467,6 +1574,7 @@
 <span class="doccomment">//! [`Span`]: span/struct.Span.html</span>
 <span class="doccomment">//! [`in_scope`]: span/struct.Span.html#method.in_scope</span>
 <span class="doccomment">//! [`Event`]: struct.Event.html</span>
+<span class="doccomment">//! [event]: struct.Event.html</span>
 <span class="doccomment">//! [`Subscriber`]: subscriber/trait.Subscriber.html</span>
 <span class="doccomment">//! [Subscriber::event]: subscriber/trait.Subscriber.html#tymethod.event</span>
 <span class="doccomment">//! [`enter`]: subscriber/trait.Subscriber.html#tymethod.enter</span>
@@ -1482,13 +1590,15 @@
 <span class="doccomment">//! [`tracing-subscriber`]: https://crates.io/crates/tracing-subscriber</span>
 <span class="doccomment">//! [`tracing-log`]: https://crates.io/crates/tracing-log</span>
 <span class="doccomment">//! [`tracing-timing`]: https://crates.io/crates/tracing-timing</span>
+<span class="doccomment">//! [`tracing-appender`]: https://crates.io/crates/tracing-appender</span>
 <span class="doccomment">//! [`env_logger`]: https://crates.io/crates/env_logger</span>
 <span class="doccomment">//! [`FmtSubscriber`]: https://docs.rs/tracing-subscriber/latest/tracing_subscriber/fmt/struct.Subscriber.html</span>
 <span class="doccomment">//! [static verbosity level]: level_filters/index.html#compile-time-filters</span>
 <span class="doccomment">//! [instrument]: https://docs.rs/tracing-attributes/latest/tracing_attributes/attr.instrument.html</span>
+<span class="doccomment">//! [flags]: #crate-feature-flags</span>
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>), <span class="ident">no_std</span>)]</span>
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">feature</span>(<span class="ident">doc_cfg</span>))]</span>
-<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/tracing/0.1.13&quot;</span>)]</span>
+<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/tracing/0.1.14&quot;</span>)]</span>
 <span class="attribute">#![<span class="ident">warn</span>(
     <span class="ident">missing_debug_implementations</span>,
     <span class="ident">missing_docs</span>,
@@ -1517,11 +1627,10 @@
 
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">cfg_if</span>;
-<span class="kw">use</span> <span class="ident">tracing_core</span>;
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;log&quot;</span>)]</span>
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="kw">pub</span> <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">log</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">log</span>;
 
 <span class="comment">// Somehow this `use` statement is necessary for us to re-export the `core`</span>
 <span class="comment">// macros on Rust 1.26.0. I&#39;m not sure how this makes it work, but it does.</span>
@@ -1529,22 +1638,17 @@
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="kw">use</span> <span class="ident">tracing_core</span>::<span class="kw-2">*</span>;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::{
-    <span class="ident">dispatcher</span>::<span class="ident">Dispatch</span>,
-    <span class="ident">event</span>::<span class="ident">Event</span>,
-    <span class="ident">field</span>::<span class="ident">Value</span>,
-    <span class="ident">subscriber</span>::<span class="ident">Subscriber</span>,
-    <span class="ident">tracing_core</span>::{<span class="ident">event</span>, <span class="ident">Level</span>, <span class="ident">Metadata</span>},
-};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::{<span class="ident">dispatcher</span>::<span class="ident">Dispatch</span>, <span class="ident">event</span>::<span class="ident">Event</span>, <span class="ident">field</span>::<span class="ident">Value</span>, <span class="ident">subscriber</span>::<span class="ident">Subscriber</span>};
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::{
-    <span class="ident">span</span>::<span class="ident">Id</span>,
-    <span class="ident">tracing_core</span>::{
-        <span class="ident">callsite</span>::{<span class="self">self</span>, <span class="ident">Callsite</span>},
-        <span class="ident">metadata</span>,
-    },
+<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">span</span>::<span class="ident">Id</span>;
+
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">tracing_core</span>::{
+    <span class="ident">callsite</span>::{<span class="self">self</span>, <span class="ident">Callsite</span>},
+    <span class="ident">metadata</span>,
 };
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">tracing_core</span>::{<span class="ident">event</span>, <span class="ident">Level</span>, <span class="ident">Metadata</span>};
 
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">span</span>::<span class="ident">Span</span>;

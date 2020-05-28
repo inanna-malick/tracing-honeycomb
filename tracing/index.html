@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `tracing` crate."><meta name="keywords" content="rust, rustlang, rust-lang, tracing"><title>tracing - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../dark.css"><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="shortcut icon" href="../favicon.ico"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../tracing/index.html'><div class='logo-container'><img src='../rust-logo.png' alt='logo'></div></a><p class='location'>Crate tracing</p><div class="sidebar-elems"><a id='all-types' href='all.html'><p>See all tracing's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li></ul></div><p class='location'></p><script>window.sidebarCurrent = {name: 'tracing', ty: 'mod', relpath: '../'};</script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../src/tracing/lib.rs.html#1-789' title='goto source code'>[src]</a></span><span class='in-band'>Crate <a class="mod" href=''>tracing</a></span></h1><div class='docblock'><p>A scoped, structured logging and diagnostics system.</p>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `tracing` crate."><meta name="keywords" content="rust, rustlang, rust-lang, tracing"><title>tracing - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../dark.css"><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="shortcut icon" href="../favicon.ico"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../tracing/index.html'><div class='logo-container'><img src='../rust-logo.png' alt='logo'></div></a><p class='location'>Crate tracing</p><div class="sidebar-elems"><a id='all-types' href='all.html'><p>See all tracing's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li></ul></div><p class='location'></p><script>window.sidebarCurrent = {name: 'tracing', ty: 'mod', relpath: '../'};</script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../src/tracing/lib.rs.html#1-841' title='goto source code'>[src]</a></span><span class='in-band'>Crate <a class="mod" href=''>tracing</a></span></h1><div class='docblock'><p>A scoped, structured logging and diagnostics system.</p>
 <h1 id="overview" class="section-header"><a href="#overview">Overview</a></h1>
 <p><code>tracing</code> is a framework for instrumenting Rust programs to collect
 structured, event-based diagnostic information.</p>
@@ -74,7 +74,7 @@ the notifications they receive based on <a href="struct.Metadata.html">metadata<
 or <code>Event</code>. If a call to <code>Subscriber::enabled</code> returns <code>false</code> for a given
 set of metadata, that <code>Subscriber</code> will <em>not</em> be notified about the
 corresponding <code>Span</code> or <code>Event</code>. For performance reasons, if no currently
-active subscribers express  interest in a given set of metadata by returning
+active subscribers express interest in a given set of metadata by returning
 <code>true</code>, then the corresponding <code>Span</code> or <code>Event</code> will never be constructed.</p>
 <h1 id="usage" class="section-header"><a href="#usage">Usage</a></h1>
 <p>First, add this to your <code>Cargo.toml</code>:</p>
@@ -213,7 +213,7 @@ recorded using its <a href="https://doc.rust-lang.org/std/fmt/trait.Display.html
 
 <div class="example-wrap"><pre class="rust rust-example-rendered">
 <span class="comment">// `my_struct.field` will be recorded using its `fmt::Display` implementation.</span>
-<span class="macro">event</span><span class="macro">!</span>(<span class="ident">Level</span>::<span class="ident">TRACE</span>,  <span class="op">%</span><span class="ident">my_struct</span>.<span class="ident">field</span>);</pre></div>
+<span class="macro">event</span><span class="macro">!</span>(<span class="ident">Level</span>::<span class="ident">TRACE</span>, <span class="op">%</span><span class="ident">my_struct</span>.<span class="ident">field</span>);</pre></div>
 <p>Additionally, a span may declare fields with the special value <a href="field/struct.Empty.html"><code>Empty</code></a>,
 which indicates that that the value for that field does not currently exist
 but may be recorded later. For example:</p>
@@ -378,6 +378,47 @@ currently executing thread; other threads will not see the change from with_defa
 <p>Any trace events generated outside the context of a subscriber will not be collected.</p>
 <p>Once a subscriber has been set, instrumentation points may be added to the
 executable using the <code>tracing</code> crate's macros.</p>
+<h2 id="log-compatibility" class="section-header"><a href="#log-compatibility"><code>log</code> Compatibility</a></h2>
+<p>The <a href="https://docs.rs/log/0.4.6/log/"><code>log</code></a> crate provides a simple, lightweight logging facade for Rust.
+While <code>tracing</code> builds upon <code>log</code>'s foundation with richer structured
+diagnostic data, <code>log</code>'s simplicity and ubiquity make it the &quot;lowest common
+denominator&quot; for text-based logging in Rust — a vast majority of Rust
+libraries and applications either emit or consume <code>log</code> records. Therefore,
+<code>tracing</code> provides multiple forms of interoperability with <code>log</code>: <code>tracing</code>
+instrumentation can emit <code>log</code> records, and a compatibility layer enables
+<code>tracing</code> <a href="subscriber/trait.Subscriber.html"><code>Subscriber</code></a>s to consume <code>log</code> records as <code>tracing</code> <a href="struct.Event.html"><code>Event</code></a>s.</p>
+<h3 id="emitting-log-records" class="section-header"><a href="#emitting-log-records">Emitting <code>log</code> Records</a></h3>
+<p>This crate provides two feature flags, &quot;log&quot; and &quot;log-always&quot;, which will
+cause [spans] and [events] to emit <code>log</code> records. When the &quot;log&quot; feature is
+enabled, if no <code>tracing</code> <code>Subscriber</code> is active, invoking an event macro or
+creating a span with fields will emit a <code>log</code> record. This is intended
+primarily for use in libraries which wish to emit diagnostics that can be
+consumed by applications using <code>tracing</code> <em>or</em> <code>log</code>, without paying the
+additional overhead of emitting both forms of diagnostics when <code>tracing</code> is
+in use.</p>
+<p>Enabling the &quot;log-always&quot; feature will cause <code>log</code> records to be emitted
+even if a <code>tracing</code> <code>Subscriber</code> <em>is</em> set. This is intended to be used in
+applications where a <code>log</code> <code>Logger</code> is being used to record a textual log,
+and <code>tracing</code> is used only to record other forms of diagnostics (such as
+metrics, profiling, or distributed tracing data). Unlike the &quot;log&quot; feature,
+libraries generally should <strong>not</strong> enable the &quot;log-always&quot; feature, as doing
+so will prevent applications from being able to opt out of the <code>log</code> records.</p>
+<p>See <a href="#crate-feature-flags">here</a> for more details on this crate's feature flags.</p>
+<p>The generated <code>log</code> records' messages will be a string representation of the
+span or event's fields, and all additional information recorded by <code>log</code>
+(target, verbosity level, module path, file, and line number) will also be
+populated. Additionally, <code>log</code> records are also generated when spans are
+entered, exited, and closed. Since these additional span lifecycle logs have
+the potential to be very verbose, and don't include additional fields, they
+are categorized under a separate <code>log</code> target, &quot;tracing::span&quot;, which may be
+enabled or disabled separately from other <code>log</code> records emitted by <code>tracing</code>.</p>
+<h3 id="consuming-log-records" class="section-header"><a href="#consuming-log-records">Consuming <code>log</code> Records</a></h3>
+<p>The <a href="https://crates.io/crates/tracing-log"><code>tracing-log</code></a> crate provides a compatibility layer which
+allows a <code>tracing</code> <a href="subscriber/trait.Subscriber.html"><code>Subscriber</code></a> to consume <code>log</code> records as though they
+were <code>tracing</code> [events]. This allows applications using <code>tracing</code> to record
+the logs emitted by dependencies using <code>log</code> as events within the context of
+the application's trace tree. See <a href="https://docs.rs/tracing-log/latest/tracing_log/#convert-log-records-to-tracing-events">that crate's documentation</a>
+for details.</p>
 <h2 id="related-crates" class="section-header"><a href="#related-crates">Related Crates</a></h2>
 <p>In addition to <code>tracing</code> and <code>tracing-core</code>, the <a href="https://github.com/tokio-rs/tracing"><code>tokio-rs/tracing</code></a> repository
 contains several additional crates designed to be used with the <code>tracing</code> ecosystem.
@@ -398,6 +439,8 @@ trace tree. This is useful when a project using <code>tracing</code> have
 dependencies which use <code>log</code>. Note that if you're using
 <code>tracing-subscriber</code>'s <code>FmtSubscriber</code>, you don't need to depend on
 <code>tracing-log</code> directly.</li>
+<li><a href="https://crates.io/crates/tracing-appender"><code>tracing-appender</code></a> provides utilities for outputting tracing data,
+including a file appender and non blocking writer.</li>
 </ul>
 <p>Additionally, there are also several third-party crates which are not
 maintained by the <code>tokio</code> project. These include:</p>
@@ -407,8 +450,8 @@ It provides a subscriber that records the time elapsed between pairs of
 <code>tracing</code> events and generates histograms.</li>
 <li><a href="https://crates.io/crates/tracing-opentelemetry"><code>tracing-opentelemetry</code></a> provides a subscriber for emitting traces to
 <a href="https://opentelemetry.io/">OpenTelemetry</a>-compatible distributed tracing systems.</li>
-<li><a href="https://crates.io/crates/honeycomb-tracing"><code>tracing-honeycomb</code></a> implements a subscriber for reporting traces to
-<a href="https://www.honeycomb.io/">honeycomb.io</a>.</li>
+<li><a href="https://crates.io/crates/tracing-honeycomb"><code>tracing-honeycomb</code></a> Provides a layer that reports traces spanning multiple machines to <a href="https://www.honeycomb.io/">honeycomb.io</a>. Backed by <a href="https://crates.io/crates/tracing-distributed"><code>tracing-distributed</code></a>.</li>
+<li><a href="https://crates.io/crates/tracing-distributed"><code>tracing-distributed</code></a> Provides a generic implementation of a layer that reports traces spanning multiple machines to some backend.</li>
 <li><a href="https://crates.io/crates/tracing-actix"><code>tracing-actix</code></a> provides <code>tracing</code> integration for the <code>actix</code> actor
 framework.</li>
 <li><a href="https://crates.io/crates/tracing-gelf"><code>tracing-gelf</code></a> implements a subscriber for exporting traces in Greylog
@@ -451,7 +494,7 @@ which may add to the compile time of crates that do not already use it.</p>
 <p><code>std</code>: Depend on the Rust standard library (enabled by default).</p>
 <p><code>no_std</code> users may disable this feature with <code>default-features = false</code>:</p>
 <pre><code class="language-toml">[dependencies]
-tracing = { version = &quot;0.1.13&quot;, default-features = false }
+tracing = { version = &quot;0.1.14&quot;, default-features = false }
 </code></pre>
 <p><em>Compiler support: requires rustc 1.39+</em></p>
 <p><strong>Note</strong>:<code>tracing</code>'s <code>no_std</code> support requires <code>liballoc</code>.</p>

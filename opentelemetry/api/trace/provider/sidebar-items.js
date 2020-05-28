@@ -1,0 +1,1 @@
+initSidebarItems({"trait":[["Provider","An interface to create `Tracer` instances."]]});

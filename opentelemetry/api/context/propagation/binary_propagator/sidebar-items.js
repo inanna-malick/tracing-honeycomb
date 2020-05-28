@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["BinaryPropagator","Extracts and injects `SpanContext`s from byte arrays."]],"trait":[["BinaryFormat","Used to serialize and deserialize `SpanContext`s to and from a binary representation."]]});

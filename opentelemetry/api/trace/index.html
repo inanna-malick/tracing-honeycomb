@@ -1,0 +1,104 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `trace` mod in crate `opentelemetry`."><meta name="keywords" content="rust, rustlang, rust-lang, trace"><title>opentelemetry::api::trace - Rust</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../opentelemetry/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a><p class='location'>Module trace</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#modules">Modules</a></li></ul></div><p class='location'><a href='../../index.html'>opentelemetry</a>::<wbr><a href='../index.html'>api</a></p><script>window.sidebarCurrent = {name: 'trace', ty: 'mod', relpath: '../'};</script><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../../../src/opentelemetry/api/trace/mod.rs.html#1-126' title='goto source code'>[src]</a></span><span class='in-band'>Module <a href='../../index.html'>opentelemetry</a>::<wbr><a href='../index.html'>api</a>::<wbr><a class="mod" href=''>trace</a></span></h1><div class='docblock'><h1 id="opentelemetry-tracing-api" class="section-header"><a href="#opentelemetry-tracing-api">OpenTelemetry Tracing API.</a></h1>
+<p>The tracing API consist of a few main traits:</p>
+<ul>
+<li>The <code>Tracer</code> trait which describes all tracing operations.</li>
+<li>The <code>Span</code> trait with is a mutable object storing information about the
+current operation execution.</li>
+<li>The <code>SpanContext</code> struct is the portion of a <code>Span</code> which must be
+serialized and propagated along side of a distributed context</li>
+</ul>
+<h2 id="tracer" class="section-header"><a href="#tracer">Tracer</a></h2>
+<p>The OpenTelemetry library achieves in-process context propagation of <code>Span</code>s by
+way of the <code>Tracer</code>.</p>
+<p>The <code>Tracer</code> is responsible for tracking the currently active <code>Span</code>, and
+exposes methods for creating and activating new <code>Span</code>s. The <code>Tracer</code> is
+configured with <code>Propagator</code>s which support transferring span context across
+process boundaries.</p>
+<p><code>Tracer</code>s are generally expected to be used as singletons. Implementations
+SHOULD provide a single global default <code>Tracer</code>.</p>
+<p>Some applications may require multiple <code>Tracer</code> instances, e.g. to create
+<code>Span</code>s on behalf of other applications. Implementations MAY provide a global
+registry of <code>Tracer</code>s for such applications.</p>
+<h2 id="span" class="section-header"><a href="#span">Span</a></h2>
+<p>A <code>Span</code> represents a single operation within a trace. Spans can be nested to
+form a trace tree. Each trace contains a root span, which typically describes
+the end-to-end latency and, optionally, one or more sub-spans for its
+sub-operations.</p>
+<p><code>Span</code>s encapsulate:</p>
+<ul>
+<li>The span name</li>
+<li>An immutable <code>SpanContext</code> that uniquely identifies the <code>Span</code></li>
+<li>A parent span in the form of a <code>SpanContext</code>, or None</li>
+<li>A start timestamp</li>
+<li>An end timestamp</li>
+<li>An ordered mapping of <code>Attribute</code>s</li>
+<li>A list of <code>Link</code>s to other <code>Span</code>s</li>
+<li>A list of timestamped <code>Event</code>s</li>
+<li>A <code>Status</code>.</li>
+</ul>
+<p>The <em>span name</em> is a human-readable string which concisely identifies the work
+represented by the <code>Span</code>, for example, an RPC method name, a function name,
+or the name of a subtask or stage within a larger computation. The span name
+should be the most general string that identifies a (statistically) interesting
+<em>class of Spans</em>, rather than individual Span instances. That is, &quot;get_user&quot; is
+a reasonable name, while &quot;get_user/314159&quot;, where &quot;314159&quot; is a user ID, is not
+a good name due to its high cardinality.</p>
+<p>For example, here are potential span names for an endpoint that gets a
+hypothetical account information:</p>
+<table><thead><tr><th>Span Name</th><th>Guidance</th></tr></thead><tbody>
+<tr><td><code>get</code></td><td>Too general</td></tr>
+<tr><td><code>get_account/42</code></td><td>Too specific</td></tr>
+<tr><td><code>get_account</code></td><td>Good, and account_id=42 would make a nice Span attribute</td></tr>
+<tr><td><code>get_account/{accountId}</code></td><td>Also good (using the &quot;HTTP route&quot;)</td></tr>
+</tbody></table>
+<p>The <code>Span</code>'s start and end timestamps reflect the elapsed real time of the
+operation. A <code>Span</code>'s start time SHOULD be set to the current time on span
+creation. After the <code>Span</code> is created, it SHOULD be possible to
+change the its name, set its <code>Attribute</code>s, and add <code>Link</code>s and <code>Event</code>s. These
+MUST NOT be changed after the <code>Span</code>'s end time has been set.</p>
+<p><code>Span</code>s are not meant to be used to propagate information within a process. To
+prevent misuse, implementations SHOULD NOT provide access to a <code>Span</code>'s
+attributes besides its <code>SpanContext</code>.</p>
+<p>Vendors may implement the <code>Span</code> interface to effect vendor-specific logic.
+However, alternative implementations MUST NOT allow callers to create <code>Span</code>s
+directly. All <code>Span</code>s MUST be created via a <code>Tracer</code>.</p>
+<h2 id="spancontext" class="section-header"><a href="#spancontext">SpanContext</a></h2>
+<p>A <code>SpanContext</code> represents the portion of a <code>Span</code> which must be serialized and
+propagated along side of a distributed context. <code>SpanContext</code>s are immutable.
+<code>SpanContext</code>.</p>
+<p>The OpenTelemetry <code>SpanContext</code> representation conforms to the <a href="https://www.w3.org/TR/trace-context/">w3c TraceContext
+specification</a>. It contains two
+identifiers - a <code>TraceId</code> and a <code>SpanId</code> - along with a set of common
+<code>TraceFlags</code> and system-specific <code>TraceState</code> values.</p>
+<p><code>TraceId</code> A valid trace identifier is a non-zero <code>u128</code></p>
+<p><code>SpanId</code> A valid span identifier is a non-zero <code>u64</code> byte.</p>
+<p><code>TraceFlags</code> contain details about the trace. Unlike Tracestate values,
+TraceFlags are present in all traces. Currently, the only <code>TraceFlags</code> is a
+boolean <code>sampled</code>
+<a href="https://www.w3.org/TR/trace-context/#trace-flags">flag</a>.</p>
+<p><code>Tracestate</code> carries system-specific configuration data, represented as a list
+of key-value pairs. TraceState allows multiple tracing systems to participate in
+the same trace.</p>
+<p><code>IsValid</code> is a boolean flag which returns true if the SpanContext has a non-zero
+TraceID and a non-zero SpanID.</p>
+<p><code>IsRemote</code> is a boolean flag which returns true if the SpanContext was propagated
+from a remote parent. When creating children from remote spans, their IsRemote
+flag MUST be set to false.</p>
+<p>Please review the W3C specification for details on the <a href="https://www.w3.org/TR/trace-context/#tracestate-field">Tracestate
+field</a>.</p>
+</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
+<table><tr class='module-item'><td><a class="mod" href="b3_propagator/index.html" title='opentelemetry::api::trace::b3_propagator mod'>b3_propagator</a></td><td class='docblock-short'><p>B3 Propagator</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="context/index.html" title='opentelemetry::api::trace::context mod'>context</a></td><td class='docblock-short'><p>Context extensions for tracing</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="event/index.html" title='opentelemetry::api::trace::event mod'>event</a></td><td class='docblock-short'><p>OpenTelemetry Trace Event Interface</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="futures/index.html" title='opentelemetry::api::trace::futures mod'>futures</a></td><td class='docblock-short'><p>OpenTelemetry Futures Compatibility</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="id_generator/index.html" title='opentelemetry::api::trace::id_generator mod'>id_generator</a></td><td class='docblock-short'><p>OpenTelemetry Id Generator Interface</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="link/index.html" title='opentelemetry::api::trace::link mod'>link</a></td><td class='docblock-short'><p>OpenTelemetry Trace Link Interface</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="noop/index.html" title='opentelemetry::api::trace::noop mod'>noop</a></td><td class='docblock-short'><p>No-op OpenTelemetry Trace Implementation</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="provider/index.html" title='opentelemetry::api::trace::provider mod'>provider</a></td><td class='docblock-short'><p>OpenTelemetry Tracer Provider Interface</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="sampler/index.html" title='opentelemetry::api::trace::sampler mod'>sampler</a></td><td class='docblock-short'><p>OpenTelemetry Sampler Interface</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="span/index.html" title='opentelemetry::api::trace::span mod'>span</a></td><td class='docblock-short'><p>OpenTelemetry Span interface</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="span_context/index.html" title='opentelemetry::api::trace::span_context mod'>span_context</a></td><td class='docblock-short'><p>OpenTelemetry SpanContext interface</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="span_processor/index.html" title='opentelemetry::api::trace::span_processor mod'>span_processor</a></td><td class='docblock-short'><p>OpenTelemetry Span Processor Interface</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="trace_context_propagator/index.html" title='opentelemetry::api::trace::trace_context_propagator mod'>trace_context_propagator</a></td><td class='docblock-short'><p>Trace Context Propagator</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="tracer/index.html" title='opentelemetry::api::trace::tracer mod'>tracer</a></td><td class='docblock-short'><p>OpenTelemetry Tracer interface</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "opentelemetry";</script><script src="../../../aliases.js"></script><script src="../../../main.js"></script><script defer src="../../../search-index.js"></script></body></html>

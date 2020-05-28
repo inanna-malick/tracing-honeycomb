@@ -126,7 +126,7 @@
 <span id="126">126</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">telemetry_layer</span>::<span class="ident">TraceCtxRegistry</span>;
-<span class="kw">use</span> <span class="ident">chrono</span>::{<span class="ident">DateTime</span>, <span class="ident">Utc</span>};
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">SystemTime</span>;
 <span class="kw">use</span> <span class="ident">tracing_subscriber</span>::<span class="ident">registry</span>::<span class="ident">LookupSpan</span>;
 
 <span class="doccomment">/// Register the current span as the local root of a distributed trace.</span>
@@ -224,9 +224,9 @@
     <span class="doccomment">/// optional parent span id</span>
     <span class="kw">pub</span> <span class="ident">parent_id</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SpanId</span><span class="op">&gt;</span>,
     <span class="doccomment">/// UTC time at which this span was initialized</span>
-    <span class="kw">pub</span> <span class="ident">initialized_at</span>: <span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">Utc</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">initialized_at</span>: <span class="ident">SystemTime</span>,
     <span class="doccomment">/// `chrono::Duration` elapsed between the time this span was initialized and the time it was completed</span>
-    <span class="kw">pub</span> <span class="ident">elapsed</span>: <span class="ident">chrono</span>::<span class="ident">Duration</span>,
+    <span class="kw">pub</span> <span class="ident">completed_at</span>: <span class="ident">SystemTime</span>,
     <span class="doccomment">/// `tracing::Metadata` for this span</span>
     <span class="kw">pub</span> <span class="ident">meta</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">tracing</span>::<span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>,
     <span class="doccomment">/// name of the service on which this span occured</span>
@@ -243,7 +243,7 @@
     <span class="doccomment">/// optional parent span id</span>
     <span class="kw">pub</span> <span class="ident">parent_id</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SpanId</span><span class="op">&gt;</span>,
     <span class="doccomment">/// UTC time at which this event was initialized</span>
-    <span class="kw">pub</span> <span class="ident">initialized_at</span>: <span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">Utc</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">initialized_at</span>: <span class="ident">SystemTime</span>,
     <span class="doccomment">/// `tracing::Metadata` for this event</span>
     <span class="kw">pub</span> <span class="ident">meta</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">tracing</span>::<span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>,
     <span class="doccomment">/// name of the service on which this event occured</span>

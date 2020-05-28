@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.13/src/span.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>span.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.14/src/span.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>span.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1037,6 +1037,36 @@
 <span id="1037">1037</span>
 <span id="1038">1038</span>
 <span id="1039">1039</span>
+<span id="1040">1040</span>
+<span id="1041">1041</span>
+<span id="1042">1042</span>
+<span id="1043">1043</span>
+<span id="1044">1044</span>
+<span id="1045">1045</span>
+<span id="1046">1046</span>
+<span id="1047">1047</span>
+<span id="1048">1048</span>
+<span id="1049">1049</span>
+<span id="1050">1050</span>
+<span id="1051">1051</span>
+<span id="1052">1052</span>
+<span id="1053">1053</span>
+<span id="1054">1054</span>
+<span id="1055">1055</span>
+<span id="1056">1056</span>
+<span id="1057">1057</span>
+<span id="1058">1058</span>
+<span id="1059">1059</span>
+<span id="1060">1060</span>
+<span id="1061">1061</span>
+<span id="1062">1062</span>
+<span id="1063">1063</span>
+<span id="1064">1064</span>
+<span id="1065">1065</span>
+<span id="1066">1066</span>
+<span id="1067">1067</span>
+<span id="1068">1068</span>
+<span id="1069">1069</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Spans represent periods of time in which a program was executing in a</span>
 <span class="doccomment">//! particular context.</span>
@@ -1049,7 +1079,7 @@
 <span class="doccomment">//! - An [`Id`] assigned by the subscriber that uniquely identifies it in relation</span>
 <span class="doccomment">//!   to other spans.</span>
 <span class="doccomment">//! - The span&#39;s [parent] in the trace tree.</span>
-<span class="doccomment">//! - [Metadata] describing that describes static characteristics of all spans</span>
+<span class="doccomment">//! - [Metadata] that describes static characteristics of all spans</span>
 <span class="doccomment">//!   originating from that callsite, such as its name, source code location,</span>
 <span class="doccomment">//!   [verbosity level], and the names of its fields.</span>
 <span class="doccomment">//!</span>
@@ -1201,7 +1231,7 @@
 <span class="doccomment">//! might want to have a span representing the listener, and instrument each</span>
 <span class="doccomment">//! spawned handler task with its own span. We would want our instrumentation to</span>
 <span class="doccomment">//! record that the handler tasks were spawned as a result of the listener task.</span>
-<span class="doccomment">//! However, we might  not consider the handler tasks to be _part_ of the time</span>
+<span class="doccomment">//! However, we might not consider the handler tasks to be _part_ of the time</span>
 <span class="doccomment">//! spent in the listener task, so we would not consider those spans children of</span>
 <span class="doccomment">//! the listener span. Instead, we would record that the handler tasks follow</span>
 <span class="doccomment">//! from the listener, recording the causal relationship but treating the spans</span>
@@ -1269,7 +1299,7 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! However, if multiple handles exist, the span can still be re-entered even if</span>
 <span class="doccomment">//! one or more is dropped. For determining when _all_ handles to a span have</span>
-<span class="doccomment">//! been dropped, `Subscriber`s have a [`clone_span`]  method, which is called</span>
+<span class="doccomment">//! been dropped, `Subscriber`s have a [`clone_span`] method, which is called</span>
 <span class="doccomment">//! every time a span handle is cloned. Combined with `drop_span`, this may be</span>
 <span class="doccomment">//! used to track the number of handles to a given span — if `drop_span` has</span>
 <span class="doccomment">//! been called one more time than the number of calls to `clone_span` for a</span>
@@ -1404,6 +1434,10 @@
     <span class="ident">span</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Span</span>,
 }
 
+<span class="doccomment">/// `log` target for span lifecycle (creation/enter/exit/close) records.</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;log&quot;</span>)]</span>
+<span class="kw">const</span> <span class="ident">LIFECYCLE_LOG_TARGET</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;tracing::span&quot;</span>;
+
 <span class="comment">// ===== impl Span =====</span>
 
 <span class="kw">impl</span> <span class="ident">Span</span> {
@@ -1526,7 +1560,12 @@
         };
 
         <span class="macro">if_log_enabled</span><span class="macro">!</span> {{
-            <span class="ident">span</span>.<span class="ident">log</span>(<span class="macro">format_args</span><span class="macro">!</span>(<span class="string">&quot;++ {}; {}&quot;</span>, <span class="ident">meta</span>.<span class="ident">name</span>(), <span class="ident">FmtAttrs</span>(<span class="ident">attrs</span>)));
+            <span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">attrs</span>.<span class="ident">is_empty</span>() {
+                <span class="ident">LIFECYCLE_LOG_TARGET</span>
+            } <span class="kw">else</span> {
+                <span class="ident">meta</span>.<span class="ident">target</span>()
+            };
+            <span class="ident">span</span>.<span class="ident">log</span>(<span class="ident">target</span>, <span class="macro">format_args</span><span class="macro">!</span>(<span class="string">&quot;++ {}{}&quot;</span>, <span class="ident">meta</span>.<span class="ident">name</span>(), <span class="ident">FmtAttrs</span>(<span class="ident">attrs</span>)));
         }}
 
         <span class="ident">span</span>
@@ -1605,7 +1644,7 @@
 
         <span class="macro">if_log_enabled</span><span class="macro">!</span> {{
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">meta</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">meta</span> {
-                <span class="self">self</span>.<span class="ident">log</span>(<span class="macro">format_args</span><span class="macro">!</span>(<span class="string">&quot;-&gt; {}&quot;</span>, <span class="ident">meta</span>.<span class="ident">name</span>()));
+                <span class="self">self</span>.<span class="ident">log</span>(<span class="ident">LIFECYCLE_LOG_TARGET</span>, <span class="macro">format_args</span><span class="macro">!</span>(<span class="string">&quot;-&gt; {}&quot;</span>, <span class="ident">meta</span>.<span class="ident">name</span>()));
             }
         }}
 
@@ -1738,7 +1777,12 @@
 
         <span class="macro">if_log_enabled</span><span class="macro">!</span> {{
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">meta</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">meta</span> {
-                <span class="self">self</span>.<span class="ident">log</span>(<span class="macro">format_args</span><span class="macro">!</span>(<span class="string">&quot;{}; {}&quot;</span>, <span class="ident">meta</span>.<span class="ident">name</span>(), <span class="ident">FmtValues</span>(<span class="kw-2">&amp;</span><span class="ident">record</span>)));
+                <span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">record</span>.<span class="ident">is_empty</span>() {
+                    <span class="ident">LIFECYCLE_LOG_TARGET</span>
+                } <span class="kw">else</span> {
+                    <span class="ident">meta</span>.<span class="ident">target</span>()
+                };
+                <span class="self">self</span>.<span class="ident">log</span>(<span class="ident">target</span>, <span class="macro">format_args</span><span class="macro">!</span>(<span class="string">&quot;{}{}&quot;</span>, <span class="ident">meta</span>.<span class="ident">name</span>(), <span class="ident">FmtValues</span>(<span class="kw-2">&amp;</span><span class="ident">record</span>)));
             }
         }}
 
@@ -1760,7 +1804,7 @@
     <span class="doccomment">/// empty.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// If `is_none` returns `true` for a given span, then [`is_disabled`] will</span>
-    <span class="doccomment">/// also return `true`.  However, when a span is disabled by the subscriber</span>
+    <span class="doccomment">/// also return `true`. However, when a span is disabled by the subscriber</span>
     <span class="doccomment">/// rather than constructed by `Span::none`, this method will return</span>
     <span class="doccomment">/// `false`, while `is_disabled` will return `true`.</span>
     <span class="doccomment">///</span>
@@ -1839,23 +1883,35 @@
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;log&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">log</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">message</span>: <span class="ident">fmt</span>::<span class="ident">Arguments</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) {
+    <span class="kw">fn</span> <span class="ident">log</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">target</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">message</span>: <span class="ident">fmt</span>::<span class="ident">Arguments</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">meta</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">meta</span> {
             <span class="kw">let</span> <span class="ident">logger</span> <span class="op">=</span> <span class="ident">log</span>::<span class="ident">logger</span>();
             <span class="kw">let</span> <span class="ident">log_meta</span> <span class="op">=</span> <span class="ident">log</span>::<span class="ident">Metadata</span>::<span class="ident">builder</span>()
                 .<span class="ident">level</span>(<span class="macro">level_to_log</span><span class="macro">!</span>(<span class="ident">meta</span>.<span class="ident">level</span>()))
-                .<span class="ident">target</span>(<span class="ident">meta</span>.<span class="ident">target</span>())
+                .<span class="ident">target</span>(<span class="ident">target</span>)
                 .<span class="ident">build</span>();
             <span class="kw">if</span> <span class="ident">logger</span>.<span class="ident">enabled</span>(<span class="kw-2">&amp;</span><span class="ident">log_meta</span>) {
-                <span class="ident">logger</span>.<span class="ident">log</span>(
-                    <span class="kw-2">&amp;</span><span class="ident">log</span>::<span class="ident">Record</span>::<span class="ident">builder</span>()
-                        .<span class="ident">metadata</span>(<span class="ident">log_meta</span>)
-                        .<span class="ident">module_path</span>(<span class="ident">meta</span>.<span class="ident">module_path</span>())
-                        .<span class="ident">file</span>(<span class="ident">meta</span>.<span class="ident">file</span>())
-                        .<span class="ident">line</span>(<span class="ident">meta</span>.<span class="ident">line</span>())
-                        .<span class="ident">args</span>(<span class="ident">message</span>)
-                        .<span class="ident">build</span>(),
-                );
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">inner</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span> {
+                    <span class="ident">logger</span>.<span class="ident">log</span>(
+                        <span class="kw-2">&amp;</span><span class="ident">log</span>::<span class="ident">Record</span>::<span class="ident">builder</span>()
+                            .<span class="ident">metadata</span>(<span class="ident">log_meta</span>)
+                            .<span class="ident">module_path</span>(<span class="ident">meta</span>.<span class="ident">module_path</span>())
+                            .<span class="ident">file</span>(<span class="ident">meta</span>.<span class="ident">file</span>())
+                            .<span class="ident">line</span>(<span class="ident">meta</span>.<span class="ident">line</span>())
+                            .<span class="ident">args</span>(<span class="macro">format_args</span><span class="macro">!</span>(<span class="string">&quot;{}; span={}&quot;</span>, <span class="ident">message</span>, <span class="ident">inner</span>.<span class="ident">id</span>.<span class="ident">into_u64</span>()))
+                            .<span class="ident">build</span>(),
+                    );
+                } <span class="kw">else</span> {
+                    <span class="ident">logger</span>.<span class="ident">log</span>(
+                        <span class="kw-2">&amp;</span><span class="ident">log</span>::<span class="ident">Record</span>::<span class="ident">builder</span>()
+                            .<span class="ident">metadata</span>(<span class="ident">log_meta</span>)
+                            .<span class="ident">module_path</span>(<span class="ident">meta</span>.<span class="ident">module_path</span>())
+                            .<span class="ident">file</span>(<span class="ident">meta</span>.<span class="ident">file</span>())
+                            .<span class="ident">line</span>(<span class="ident">meta</span>.<span class="ident">line</span>())
+                            .<span class="ident">args</span>(<span class="ident">message</span>)
+                            .<span class="ident">build</span>(),
+                    );
+                }
             }
         }
     }
@@ -1952,7 +2008,7 @@
 
         <span class="macro">if_log_enabled</span><span class="macro">!</span>({
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">meta</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">meta</span> {
-                <span class="self">self</span>.<span class="ident">log</span>(<span class="macro">format_args</span><span class="macro">!</span>(<span class="string">&quot;-- {}&quot;</span>, <span class="ident">meta</span>.<span class="ident">name</span>()));
+                <span class="self">self</span>.<span class="ident">log</span>(<span class="ident">LIFECYCLE_LOG_TARGET</span>, <span class="macro">format_args</span><span class="macro">!</span>(<span class="string">&quot;-- {}&quot;</span>, <span class="ident">meta</span>.<span class="ident">name</span>()));
             }
         })
     }
@@ -2033,7 +2089,7 @@
 
         <span class="macro">if_log_enabled</span><span class="macro">!</span> {{
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">meta</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">span</span>.<span class="ident">meta</span> {
-                <span class="self">self</span>.<span class="ident">span</span>.<span class="ident">log</span>(<span class="macro">format_args</span><span class="macro">!</span>(<span class="string">&quot;&lt;- {}&quot;</span>, <span class="ident">meta</span>.<span class="ident">name</span>()));
+                <span class="self">self</span>.<span class="ident">span</span>.<span class="ident">log</span>(<span class="ident">LIFECYCLE_LOG_TARGET</span>, <span class="macro">format_args</span><span class="macro">!</span>(<span class="string">&quot;&lt;- {}&quot;</span>, <span class="ident">meta</span>.<span class="ident">name</span>()));
             }
         }}
     }
@@ -2046,8 +2102,10 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="ident">Display</span> <span class="kw">for</span> <span class="ident">FmtValues</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="prelude-val">Ok</span>(());
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">is_first</span> <span class="op">=</span> <span class="bool-val">true</span>;
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">record</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="op">|</span><span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">field</span>::<span class="ident">Field</span>, <span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">fmt</span>::<span class="ident">Debug</span><span class="op">|</span> {
-            <span class="ident">res</span> <span class="op">=</span> <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;{}={:?} &quot;</span>, <span class="ident">k</span>, <span class="ident">v</span>);
+            <span class="ident">res</span> <span class="op">=</span> <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;{} {}={:?}&quot;</span>, <span class="kw">if</span> <span class="ident">is_first</span> { <span class="string">&quot;;&quot;</span> } <span class="kw">else</span> { <span class="string">&quot;&quot;</span> }, <span class="ident">k</span>, <span class="ident">v</span>);
+            <span class="ident">is_first</span> <span class="op">=</span> <span class="bool-val">false</span>;
         });
         <span class="ident">res</span>
     }
@@ -2060,8 +2118,10 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="ident">Display</span> <span class="kw">for</span> <span class="ident">FmtAttrs</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="prelude-val">Ok</span>(());
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">is_first</span> <span class="op">=</span> <span class="bool-val">true</span>;
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">record</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="op">|</span><span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">field</span>::<span class="ident">Field</span>, <span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">fmt</span>::<span class="ident">Debug</span><span class="op">|</span> {
-            <span class="ident">res</span> <span class="op">=</span> <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;{}={:?} &quot;</span>, <span class="ident">k</span>, <span class="ident">v</span>);
+            <span class="ident">res</span> <span class="op">=</span> <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;{} {}={:?}&quot;</span>, <span class="kw">if</span> <span class="ident">is_first</span> { <span class="string">&quot;;&quot;</span> } <span class="kw">else</span> { <span class="string">&quot;&quot;</span> }, <span class="ident">k</span>, <span class="ident">v</span>);
+            <span class="ident">is_first</span> <span class="op">=</span> <span class="bool-val">false</span>;
         });
         <span class="ident">res</span>
     }
