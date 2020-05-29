@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/crossbeam-queue-0.2.1/src/array_queue.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>array_queue.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../crossbeam_queue/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/crossbeam-queue-0.2.2/src/array_queue.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>array_queue.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../crossbeam_queue/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -431,6 +431,10 @@
 <span id="431">431</span>
 <span id="432">432</span>
 <span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! The implementation is based on Dmitry Vyukov&#39;s bounded MPMC queue.</span>
 <span class="doccomment">//!</span>
@@ -446,13 +450,12 @@
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">cell</span>::<span class="ident">UnsafeCell</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">fmt</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">marker</span>::<span class="ident">PhantomData</span>;
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">mem</span>;
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">ptr</span>;
+<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">mem</span>::{<span class="self">self</span>, <span class="ident">MaybeUninit</span>};
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">sync</span>::<span class="ident">atomic</span>::{<span class="self">self</span>, <span class="ident">AtomicUsize</span>, <span class="ident">Ordering</span>};
 
 <span class="kw">use</span> <span class="ident">crossbeam_utils</span>::{<span class="ident">Backoff</span>, <span class="ident">CachePadded</span>};
 
-<span class="kw">use</span> <span class="ident">err</span>::{<span class="ident">PopError</span>, <span class="ident">PushError</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">err</span>::{<span class="ident">PopError</span>, <span class="ident">PushError</span>};
 
 <span class="doccomment">/// A slot in a queue.</span>
 <span class="kw">struct</span> <span class="ident">Slot</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
@@ -463,7 +466,7 @@
     <span class="ident">stamp</span>: <span class="ident">AtomicUsize</span>,
 
     <span class="doccomment">/// The value in this slot.</span>
-    <span class="ident">value</span>: <span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+    <span class="ident">value</span>: <span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="doccomment">/// A bounded multi-producer multi-consumer queue.</span>
@@ -542,22 +545,22 @@
         <span class="kw">let</span> <span class="ident">head</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="kw">let</span> <span class="ident">tail</span> <span class="op">=</span> <span class="number">0</span>;
 
-        <span class="comment">// Allocate a buffer of `cap` slots.</span>
+        <span class="comment">// Allocate a buffer of `cap` slots initialized</span>
+        <span class="comment">// with stamps.</span>
         <span class="kw">let</span> <span class="ident">buffer</span> <span class="op">=</span> {
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="op">&lt;</span><span class="ident">Slot</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">with_capacity</span>(<span class="ident">cap</span>);
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Slot</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> (<span class="number">0</span>..<span class="ident">cap</span>)
+                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> {
+                    <span class="comment">// Set the stamp to `{ lap: 0, index: i }`.</span>
+                    <span class="ident">Slot</span> {
+                        <span class="ident">stamp</span>: <span class="ident">AtomicUsize</span>::<span class="ident">new</span>(<span class="ident">i</span>),
+                        <span class="ident">value</span>: <span class="ident">UnsafeCell</span>::<span class="ident">new</span>(<span class="ident">MaybeUninit</span>::<span class="ident">uninit</span>()),
+                    }
+                })
+                .<span class="ident">collect</span>();
             <span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">v</span>.<span class="ident">as_mut_ptr</span>();
             <span class="ident">mem</span>::<span class="ident">forget</span>(<span class="ident">v</span>);
             <span class="ident">ptr</span>
         };
-
-        <span class="comment">// Initialize stamps in the slots.</span>
-        <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">cap</span> {
-            <span class="kw">unsafe</span> {
-                <span class="comment">// Set the stamp to `{ lap: 0, index: i }`.</span>
-                <span class="kw">let</span> <span class="ident">slot</span> <span class="op">=</span> <span class="ident">buffer</span>.<span class="ident">add</span>(<span class="ident">i</span>);
-                <span class="ident">ptr</span>::<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> (<span class="kw-2">*</span><span class="ident">slot</span>).<span class="ident">stamp</span>, <span class="ident">AtomicUsize</span>::<span class="ident">new</span>(<span class="ident">i</span>));
-            }
-        }
 
         <span class="comment">// One lap is the smallest power of two greater than `cap`.</span>
         <span class="kw">let</span> <span class="ident">one_lap</span> <span class="op">=</span> (<span class="ident">cap</span> <span class="op">+</span> <span class="number">1</span>).<span class="ident">next_power_of_two</span>();
@@ -621,7 +624,7 @@
                     <span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
                         <span class="comment">// Write the value into the slot and update the stamp.</span>
                         <span class="kw">unsafe</span> {
-                            <span class="ident">slot</span>.<span class="ident">value</span>.<span class="ident">get</span>().<span class="ident">write</span>(<span class="ident">value</span>);
+                            <span class="ident">slot</span>.<span class="ident">value</span>.<span class="ident">get</span>().<span class="ident">write</span>(<span class="ident">MaybeUninit</span>::<span class="ident">new</span>(<span class="ident">value</span>));
                         }
                         <span class="ident">slot</span>.<span class="ident">stamp</span>.<span class="ident">store</span>(<span class="ident">tail</span> <span class="op">+</span> <span class="number">1</span>, <span class="ident">Ordering</span>::<span class="ident">Release</span>);
                         <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
@@ -700,7 +703,7 @@
                 ) {
                     <span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
                         <span class="comment">// Read the value from the slot and update the stamp.</span>
-                        <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">slot</span>.<span class="ident">value</span>.<span class="ident">get</span>().<span class="ident">read</span>() };
+                        <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">slot</span>.<span class="ident">value</span>.<span class="ident">get</span>().<span class="ident">read</span>().<span class="ident">assume_init</span>() };
                         <span class="ident">slot</span>.<span class="ident">stamp</span>
                             .<span class="ident">store</span>(<span class="ident">head</span>.<span class="ident">wrapping_add</span>(<span class="self">self</span>.<span class="ident">one_lap</span>), <span class="ident">Ordering</span>::<span class="ident">Release</span>);
                         <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">msg</span>);
@@ -734,7 +737,7 @@
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use crossbeam_queue::{ArrayQueue, PopError};</span>
+    <span class="doccomment">/// use crossbeam_queue::ArrayQueue;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let q = ArrayQueue::&lt;i32&gt;::new(100);</span>
     <span class="doccomment">///</span>
@@ -749,7 +752,7 @@
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use crossbeam_queue::{ArrayQueue, PopError};</span>
+    <span class="doccomment">/// use crossbeam_queue::ArrayQueue;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let q = ArrayQueue::new(100);</span>
     <span class="doccomment">///</span>
@@ -774,7 +777,7 @@
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use crossbeam_queue::{ArrayQueue, PopError};</span>
+    <span class="doccomment">/// use crossbeam_queue::ArrayQueue;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let q = ArrayQueue::new(1);</span>
     <span class="doccomment">///</span>
@@ -798,7 +801,7 @@
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use crossbeam_queue::{ArrayQueue, PopError};</span>
+    <span class="doccomment">/// use crossbeam_queue::ArrayQueue;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let q = ArrayQueue::new(100);</span>
     <span class="doccomment">/// assert_eq!(q.len(), 0);</span>
@@ -849,7 +852,12 @@
             };
 
             <span class="kw">unsafe</span> {
-                <span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">add</span>(<span class="ident">index</span>).<span class="ident">drop_in_place</span>();
+                <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> {
+                    <span class="kw">let</span> <span class="ident">slot</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">add</span>(<span class="ident">index</span>);
+                    <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">slot</span>.<span class="ident">value</span>.<span class="ident">get</span>();
+                    <span class="ident">value</span>.<span class="ident">as_mut_ptr</span>()
+                };
+                <span class="ident">p</span>.<span class="ident">drop_in_place</span>();
             }
         }
 
@@ -861,7 +869,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">ArrayQueue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
         <span class="ident">f</span>.<span class="ident">pad</span>(<span class="string">&quot;ArrayQueue { .. }&quot;</span>)
     }
 }

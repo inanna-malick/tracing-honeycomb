@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/crossbeam-queue-0.2.1/src/seg_queue.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>seg_queue.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../crossbeam_queue/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/crossbeam-queue-0.2.2/src/seg_queue.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>seg_queue.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../crossbeam_queue/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -481,18 +481,23 @@
 <span id="481">481</span>
 <span id="482">482</span>
 <span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">alloc</span>::<span class="ident">boxed</span>::<span class="ident">Box</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">cell</span>::<span class="ident">UnsafeCell</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">fmt</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">marker</span>::<span class="ident">PhantomData</span>;
-<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">mem</span>::{<span class="self">self</span>, <span class="ident">ManuallyDrop</span>};
+<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">mem</span>::<span class="ident">MaybeUninit</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">ptr</span>;
 <span class="kw">use</span> <span class="ident">core</span>::<span class="ident">sync</span>::<span class="ident">atomic</span>::{<span class="self">self</span>, <span class="ident">AtomicPtr</span>, <span class="ident">AtomicUsize</span>, <span class="ident">Ordering</span>};
 
 <span class="kw">use</span> <span class="ident">crossbeam_utils</span>::{<span class="ident">Backoff</span>, <span class="ident">CachePadded</span>};
 
-<span class="kw">use</span> <span class="ident">err</span>::<span class="ident">PopError</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">err</span>::<span class="ident">PopError</span>;
 
 <span class="comment">// Bits indicating the state of a slot:</span>
 <span class="comment">// * If a value has been written into the slot, `WRITE` is set.</span>
@@ -514,7 +519,7 @@
 <span class="doccomment">/// A slot in a block.</span>
 <span class="kw">struct</span> <span class="ident">Slot</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// The value.</span>
-    <span class="ident">value</span>: <span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="ident">ManuallyDrop</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">value</span>: <span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 
     <span class="doccomment">/// The state of the slot.</span>
     <span class="ident">state</span>: <span class="ident">AtomicUsize</span>,
@@ -544,7 +549,13 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Block</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Creates an empty block that starts at `start_index`.</span>
     <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Block</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">unsafe</span> { <span class="ident">mem</span>::<span class="ident">zeroed</span>() }
+        <span class="comment">// SAFETY: This is safe because:</span>
+        <span class="comment">//  [1] `Block::next` (AtomicPtr) may be safely zero initialized.</span>
+        <span class="comment">//  [2] `Block::slots` (Array) may be safely zero initialized because of [3, 4].</span>
+        <span class="comment">//  [3] `Slot::value` (UnsafeCell) may be safely zero initialized because it</span>
+        <span class="comment">//       holds a MaybeUninit.</span>
+        <span class="comment">//  [4] `Slot::state` (AtomicUsize) may be safely zero initialized.</span>
+        <span class="kw">unsafe</span> { <span class="ident">MaybeUninit</span>::<span class="ident">zeroed</span>().<span class="ident">assume_init</span>() }
     }
 
     <span class="doccomment">/// Waits until the next pointer is set.</span>
@@ -728,7 +739,7 @@
 
                     <span class="comment">// Write the value into the slot.</span>
                     <span class="kw">let</span> <span class="ident">slot</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">block</span>).<span class="ident">slots</span>.<span class="ident">get_unchecked</span>(<span class="ident">offset</span>);
-                    <span class="ident">slot</span>.<span class="ident">value</span>.<span class="ident">get</span>().<span class="ident">write</span>(<span class="ident">ManuallyDrop</span>::<span class="ident">new</span>(<span class="ident">value</span>));
+                    <span class="ident">slot</span>.<span class="ident">value</span>.<span class="ident">get</span>().<span class="ident">write</span>(<span class="ident">MaybeUninit</span>::<span class="ident">new</span>(<span class="ident">value</span>));
                     <span class="ident">slot</span>.<span class="ident">state</span>.<span class="ident">fetch_or</span>(<span class="ident">WRITE</span>, <span class="ident">Ordering</span>::<span class="ident">Release</span>);
 
                     <span class="kw">return</span>;
@@ -823,8 +834,7 @@
                     <span class="comment">// Read the value.</span>
                     <span class="kw">let</span> <span class="ident">slot</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">block</span>).<span class="ident">slots</span>.<span class="ident">get_unchecked</span>(<span class="ident">offset</span>);
                     <span class="ident">slot</span>.<span class="ident">wait_write</span>();
-                    <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">slot</span>.<span class="ident">value</span>.<span class="ident">get</span>().<span class="ident">read</span>();
-                    <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">ManuallyDrop</span>::<span class="ident">into_inner</span>(<span class="ident">m</span>);
+                    <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">slot</span>.<span class="ident">value</span>.<span class="ident">get</span>().<span class="ident">read</span>().<span class="ident">assume_init</span>();
 
                     <span class="comment">// Destroy the block if we&#39;ve reached the end, or if another thread wanted to</span>
                     <span class="comment">// destroy but couldn&#39;t because we were busy reading from the slot.</span>
@@ -869,7 +879,7 @@
     <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use crossbeam_queue::{SegQueue, PopError};</span>
+    <span class="doccomment">/// use crossbeam_queue::SegQueue;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// let q = SegQueue::new();</span>
     <span class="doccomment">/// assert_eq!(q.len(), 0);</span>
@@ -892,6 +902,14 @@
                 <span class="ident">tail</span> <span class="kw-2">&amp;</span><span class="op">=</span> <span class="op">!</span>((<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">SHIFT</span>) <span class="op">-</span> <span class="number">1</span>);
                 <span class="ident">head</span> <span class="kw-2">&amp;</span><span class="op">=</span> <span class="op">!</span>((<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">SHIFT</span>) <span class="op">-</span> <span class="number">1</span>);
 
+                <span class="comment">// Fix up indices if they fall onto block ends.</span>
+                <span class="kw">if</span> (<span class="ident">tail</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">SHIFT</span>) <span class="op">&amp;</span> (<span class="ident">LAP</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">LAP</span> <span class="op">-</span> <span class="number">1</span> {
+                    <span class="ident">tail</span> <span class="op">=</span> <span class="ident">tail</span>.<span class="ident">wrapping_add</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">SHIFT</span>);
+                }
+                <span class="kw">if</span> (<span class="ident">head</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">SHIFT</span>) <span class="op">&amp;</span> (<span class="ident">LAP</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">LAP</span> <span class="op">-</span> <span class="number">1</span> {
+                    <span class="ident">head</span> <span class="op">=</span> <span class="ident">head</span>.<span class="ident">wrapping_add</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">SHIFT</span>);
+                }
+
                 <span class="comment">// Rotate indices so that head falls into the first block.</span>
                 <span class="kw">let</span> <span class="ident">lap</span> <span class="op">=</span> (<span class="ident">head</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">SHIFT</span>) <span class="op">/</span> <span class="ident">LAP</span>;
                 <span class="ident">tail</span> <span class="op">=</span> <span class="ident">tail</span>.<span class="ident">wrapping_sub</span>((<span class="ident">lap</span> <span class="op">*</span> <span class="ident">LAP</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">SHIFT</span>);
@@ -900,15 +918,6 @@
                 <span class="comment">// Remove the lower bits.</span>
                 <span class="ident">tail</span> <span class="op">&gt;</span><span class="op">&gt;</span><span class="op">=</span> <span class="ident">SHIFT</span>;
                 <span class="ident">head</span> <span class="op">&gt;</span><span class="op">&gt;</span><span class="op">=</span> <span class="ident">SHIFT</span>;
-
-                <span class="comment">// Fix up indices if they fall onto block ends.</span>
-                <span class="kw">if</span> <span class="ident">head</span> <span class="op">=</span><span class="op">=</span> <span class="ident">BLOCK_CAP</span> {
-                    <span class="ident">head</span> <span class="op">=</span> <span class="number">0</span>;
-                    <span class="ident">tail</span> <span class="op">-</span><span class="op">=</span> <span class="ident">LAP</span>;
-                }
-                <span class="kw">if</span> <span class="ident">tail</span> <span class="op">=</span><span class="op">=</span> <span class="ident">BLOCK_CAP</span> {
-                    <span class="ident">tail</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-                }
 
                 <span class="comment">// Return the difference minus the number of blocks between tail and head.</span>
                 <span class="kw">return</span> <span class="ident">tail</span> <span class="op">-</span> <span class="ident">head</span> <span class="op">-</span> <span class="ident">tail</span> <span class="op">/</span> <span class="ident">LAP</span>;
@@ -935,7 +944,8 @@
                 <span class="kw">if</span> <span class="ident">offset</span> <span class="op">&lt;</span> <span class="ident">BLOCK_CAP</span> {
                     <span class="comment">// Drop the value in the slot.</span>
                     <span class="kw">let</span> <span class="ident">slot</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">block</span>).<span class="ident">slots</span>.<span class="ident">get_unchecked</span>(<span class="ident">offset</span>);
-                    <span class="ident">ManuallyDrop</span>::<span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span>(<span class="kw-2">*</span><span class="ident">slot</span>).<span class="ident">value</span>.<span class="ident">get</span>());
+                    <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">slot</span>.<span class="ident">value</span>.<span class="ident">get</span>();
+                    <span class="ident">p</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">drop_in_place</span>();
                 } <span class="kw">else</span> {
                     <span class="comment">// Deallocate the block and move to the next one.</span>
                     <span class="kw">let</span> <span class="ident">next</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">block</span>).<span class="ident">next</span>.<span class="ident">load</span>(<span class="ident">Ordering</span>::<span class="ident">Relaxed</span>);
@@ -955,7 +965,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">SegQueue</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
         <span class="ident">f</span>.<span class="ident">pad</span>(<span class="string">&quot;SegQueue { .. }&quot;</span>)
     }
 }
