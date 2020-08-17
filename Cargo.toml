@@ -1,6 +1,6 @@
 [package]
 name = "honeycomb-tracing"
-version = "0.0.2"
+version = "0.2.0"
 authors = ["pk <inanna@recursion.wtf>"]
 edition = "2018"
 description = "please use https://crates.io/crates/tracing-honeycomb instead"
