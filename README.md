@@ -1,2 +1,3 @@
-tracing subscriber for use with honeycomb.io distributed tracing. Supports generating random trace IDs or recording known trace IDs on the current span.
+The naming convention used by this crate has been updated to align with other tracinglibraries.
+Please use [tracing-honeycomb](https://crates.io/crates/tracing-honeycomb) instead.
 

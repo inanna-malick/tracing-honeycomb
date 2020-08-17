@@ -1,14 +1,5 @@
-// #![deny(warnings)]
-mod telemetry;
-mod telemetry_subscriber;
-mod types;
-mod visitor;
+/// The naming convention used by this crate has been updated to align with other tracing
+/// libraries. Please use https://crates.io/crates/tracing-honeycomb instead.
+pub fn use_tracing_honeycomb_instead() {}
 
-#[cfg(test)]
-#[macro_use]
-#[cfg(test)]
-extern crate lazy_static;
 
-pub use crate::telemetry::HoneycombTelemetry;
-pub use crate::telemetry_subscriber::TelemetrySubscriber;
-pub use crate::types::TraceId;
