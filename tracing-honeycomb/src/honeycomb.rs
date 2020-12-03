@@ -9,17 +9,18 @@ use tracing_distributed::{Event, Span, Telemetry};
 #[derive(Debug)]
 pub struct HoneycombTelemetry {
     honeycomb_client: Mutex<libhoney::Client<libhoney::transmission::Transmission>>,
+    sample_rate: usize,
 }
 
 impl HoneycombTelemetry {
-    pub(crate) fn new(cfg: libhoney::Config) -> Self {
+    pub(crate) fn new(cfg: libhoney::Config, sample_rate: usize) -> Self {
         let honeycomb_client = libhoney::init(cfg);
 
         // publishing requires &mut so just mutex-wrap it
         // FIXME: may not be performant, investigate options (eg mpsc)
         let honeycomb_client = Mutex::new(honeycomb_client);
 
-        HoneycombTelemetry { honeycomb_client }
+        HoneycombTelemetry { honeycomb_client, sample_rate }
     }
 
     fn report_data(&self, data: HashMap<String, ::libhoney::Value>) {
@@ -34,6 +35,14 @@ impl HoneycombTelemetry {
             eprintln!("error sending event to honeycomb, {:?}", err);
         }
     }
+
+    fn should_report(&self, trace_id: TraceId) -> bool {
+        if self.sample_rate <= 1 {
+            return true;
+        }
+
+        trace_id.0 as usize % self.sample_rate == 0
+    }
 }
 
 impl Telemetry for HoneycombTelemetry {
@@ -46,13 +55,17 @@ impl Telemetry for HoneycombTelemetry {
     }
 
     fn report_span(&self, span: Span<Self::Visitor, Self::SpanId, Self::TraceId>) {
-        let data = span_to_values(span);
-        self.report_data(data);
+        if self.should_report(span.trace_id) {
+            let data = span_to_values(span);
+            self.report_data(data);
+        }
     }
 
     fn report_event(&self, event: Event<Self::Visitor, Self::SpanId, Self::TraceId>) {
-        let data = event_to_values(event);
-        self.report_data(data);
+        if self.should_report(event.trace_id) {
+            let data = event_to_values(event);
+            self.report_data(data);
+        }
     }
 }
 
