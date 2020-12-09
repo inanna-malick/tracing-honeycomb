@@ -1,8 +1,11 @@
 use crate::visitor::{event_to_values, span_to_values, HoneycombVisitor};
 use libhoney::FieldHolder;
+use std::borrow::Cow;
 use std::collections::HashMap;
+use std::convert::{Infallible, TryInto};
 use std::str::FromStr;
 use tracing_distributed::{Event, Span, Telemetry};
+use uuid::Uuid;
 
 #[cfg(feature = "use_parking_lot")]
 use parking_lot::Mutex;
@@ -86,7 +89,7 @@ impl Telemetry for HoneycombTelemetry {
 /// `Display` and `FromStr` are guaranteed to round-trip.
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct SpanId {
-    pub(crate) tracing_id: tracing::Id,
+    pub(crate) tracing_id: tracing::span::Id,
     pub(crate) instance_id: u64,
 }
 
@@ -131,8 +134,14 @@ impl std::fmt::Display for SpanId {
 /// Uniquely identifies a single distributed trace.
 ///
 /// `Display` and `FromStr` are guaranteed to round-trip.
-#[derive(PartialEq, Eq, Hash, Copy, Clone, Debug)]
-pub struct TraceId(pub(crate) u128);
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+pub struct TraceId(TraceIdInner);
+
+#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+pub(crate) enum TraceIdInner {
+    Uuid(Uuid),
+    String(String),
+}
 
 impl TraceId {
     /// Metadata field name associated with this `TraceId` values.
@@ -140,27 +149,107 @@ impl TraceId {
         "trace-id"
     }
 
-    /// Generate a random trace ID by using a thread-level RNG to generate a u128
-    pub fn generate() -> Self {
-        use rand::Rng;
-        let u: u128 = rand::thread_rng().gen();
+    /// Generate a new TraceId backed by a UUID V4.
+    pub fn new() -> Self {
+        TraceId(TraceIdInner::Uuid(Uuid::new_v4()))
+    }
 
-        TraceId(u)
+    #[deprecated(
+        since = "0.2",
+        note = "Use `TraceId::new()` instead."
+    )]
+    /// Generate a new TraceId backed by a UUID V4.
+    pub fn generate() -> Self {
+        TraceId(TraceIdInner::Uuid(Uuid::new_v4()))
+    }
+}
+
+impl Into<String> for TraceId {
+    fn into(self) -> String {
+        format!("{}", self)
+    }
+}
+
+impl TryInto<u128> for TraceId {
+    type Error = uuid::Error;
+
+    fn try_into(self) -> Result<u128, Self::Error> {
+        Ok(match self.0 {
+            TraceIdInner::Uuid(uuid) => uuid.as_u128(),
+            TraceIdInner::String(s) => {
+                Uuid::parse_str(&s)?.as_u128()
+            },
+        })
+    }
+}
+
+impl TryInto<Uuid> for TraceId {
+    type Error = uuid::Error;
+
+    fn try_into(self) -> Result<Uuid, Self::Error> {
+        Ok(match self.0 {
+            TraceIdInner::Uuid(uuid) => uuid,
+            TraceIdInner::String(s) => {
+                Uuid::parse_str(&s)?
+            },
+        })
+    }
+}
+
+impl From<Cow<'_, &str>> for TraceId {
+    fn from(s: Cow<'_, &str>) -> Self {
+        Self(TraceIdInner::String(s.to_string()))
+    }
+}
+
+impl From<&str> for TraceId {
+    fn from(s: &str) -> Self {
+        Self(TraceIdInner::String(s.to_string()))
+    }
+}
+
+
+impl From<String> for TraceId {
+    fn from(s: String) -> Self {
+        Self(TraceIdInner::String(s))
+    }
+}
+
+impl From<Uuid> for TraceId {
+    fn from(uuid: Uuid) -> Self {
+        Self(TraceIdInner::Uuid(uuid))
+    }
+}
+
+impl From<u128> for TraceId {
+    fn from(u: u128) -> Self {
+        Self(TraceIdInner::Uuid(Uuid::from_u128(u)))
     }
 }
 
 impl FromStr for TraceId {
-    type Err = std::num::ParseIntError;
+    type Err = Infallible;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let u = u128::from_str_radix(s, 10)?;
-        Ok(Self(u))
+        Ok(match Uuid::parse_str(s) {
+            Ok(uuid) => Self(TraceIdInner::Uuid(uuid)),
+            Err(_) => Self(TraceIdInner::String(s.to_string())),
+        })
     }
 }
 
 impl std::fmt::Display for TraceId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
+        match &self.0 {
+            TraceIdInner::Uuid(uuid) => {
+                let buf = &mut [0; 36];
+                let human_id = uuid.to_hyphenated().encode_lower(buf);
+                write!(f, "{}", human_id)
+            },
+            TraceIdInner::String(s) => {
+                write!(f, "{}", s)
+            },
+        }
     }
 }
 
@@ -182,11 +271,27 @@ mod test {
         }
 
         #[test]
-        fn trace_id_round_trip(u in 1u128..) {
-            let trace_id = TraceId(u);
+        fn trace_id_round_trip_u128(u in 1u128..) {
+            let trace_id: TraceId = u.into();
             let s = trace_id.to_string();
             let res = TraceId::from_str(&s);
             assert_eq!(Ok(trace_id), res);
         }
+    }
+
+    #[test]
+    fn trace_id_round_trip_str() {
+        let trace_id: TraceId = "a string".into();
+        let s = trace_id.to_string();
+        let res = TraceId::from_str(&s);
+        assert_eq!(Ok(trace_id), res);
+    }
+
+    #[test]
+    fn trace_id_round_trip_empty_str() {
+        let trace_id: TraceId = "".into();
+        let s = trace_id.to_string();
+        let res = TraceId::from_str(&s);
+        assert_eq!(Ok(trace_id), res);
     }
 }
