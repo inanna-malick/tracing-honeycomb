@@ -9,11 +9,11 @@ use tracing_distributed::{Event, Span, Telemetry};
 #[derive(Debug)]
 pub struct HoneycombTelemetry {
     honeycomb_client: Mutex<libhoney::Client<libhoney::transmission::Transmission>>,
-    sample_rate: usize,
+    sample_rate: Option<u128>,
 }
 
 impl HoneycombTelemetry {
-    pub(crate) fn new(cfg: libhoney::Config, sample_rate: usize) -> Self {
+    pub(crate) fn new(cfg: libhoney::Config, sample_rate: Option<u128>) -> Self {
         let honeycomb_client = libhoney::init(cfg);
 
         // publishing requires &mut so just mutex-wrap it
@@ -37,11 +37,10 @@ impl HoneycombTelemetry {
     }
 
     fn should_report(&self, trace_id: TraceId) -> bool {
-        if self.sample_rate <= 1 {
-            return true;
+        match self.sample_rate {
+            Some(sample_rate) => trace_id.0 % sample_rate == 0,
+            None => true,
         }
-
-        trace_id.0 as usize % self.sample_rate == 0
     }
 }
 

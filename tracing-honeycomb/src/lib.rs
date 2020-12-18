@@ -66,7 +66,7 @@ pub fn new_honeycomb_telemetry_layer(
     let instance_id: u64 = rand::thread_rng().gen();
     TelemetryLayer::new(
         service_name,
-        HoneycombTelemetry::new(honeycomb_config, 1),
+        HoneycombTelemetry::new(honeycomb_config, None),
         move |tracing_id| SpanId {
             instance_id,
             tracing_id,
@@ -92,12 +92,12 @@ pub fn new_honeycomb_telemetry_layer(
 pub fn new_honeycomb_telemetry_layer_with_trace_sampling(
     service_name: &'static str,
     honeycomb_config: libhoney::Config,
-    sample_rate: usize,
+    sample_rate: u128,
 ) -> TelemetryLayer<HoneycombTelemetry, SpanId, TraceId> {
     let instance_id: u64 = rand::thread_rng().gen();
     TelemetryLayer::new(
         service_name,
-        HoneycombTelemetry::new(honeycomb_config, sample_rate),
+        HoneycombTelemetry::new(honeycomb_config, Some(sample_rate)),
         move |tracing_id| SpanId {
             instance_id,
             tracing_id,
