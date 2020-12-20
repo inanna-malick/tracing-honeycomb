@@ -77,6 +77,10 @@
 <span id="77">77</span>
 <span id="78">78</span>
 <span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="comment">// #![deny(</span>
 <span class="comment">//     warnings,</span>
@@ -101,9 +105,13 @@
 <span class="kw">use</span> ::<span class="ident">opentelemetry</span>::<span class="ident">sdk</span>::<span class="ident">Config</span>;
 <span class="kw">use</span> <span class="ident">rand</span>::<span class="ident">Rng</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">HashMap</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">Mutex</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">no_inline</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">tracing_distributed</span>::{<span class="ident">TelemetryLayer</span>, <span class="ident">TraceCtxError</span>};
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;use_parking_lot&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident">parking_lot</span>::<span class="ident">Mutex</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;use_parking_lot&quot;</span>))]</span>
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">Mutex</span>;
 
 <span class="doccomment">/// Register the current span as the local root of a distributed trace.</span>
 <span class="doccomment">///</span>

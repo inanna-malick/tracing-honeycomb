@@ -182,13 +182,25 @@
 <span id="182">182</span>
 <span id="183">183</span>
 <span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">visitor</span>::{<span class="ident">event_to_values</span>, <span class="ident">span_to_values</span>, <span class="ident">HoneycombVisitor</span>};
 <span class="kw">use</span> <span class="ident">libhoney</span>::<span class="ident">FieldHolder</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">HashMap</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">str</span>::<span class="ident">FromStr</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">Mutex</span>;
 <span class="kw">use</span> <span class="ident">tracing_distributed</span>::{<span class="ident">Event</span>, <span class="ident">Span</span>, <span class="ident">Telemetry</span>};
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;use_parking_lot&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident">parking_lot</span>::<span class="ident">Mutex</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;use_parking_lot&quot;</span>))]</span>
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">Mutex</span>;
 
 <span class="doccomment">/// Telemetry capability that publishes events and spans to Honeycomb.io.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
@@ -213,7 +225,11 @@
 
     <span class="kw">fn</span> <span class="ident">report_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">data</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, ::<span class="ident">libhoney</span>::<span class="ident">Value</span><span class="op">&gt;</span>) {
         <span class="comment">// succeed or die. failure is unrecoverable (mutex poisoned)</span>
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;use_parking_lot&quot;</span>))]</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">client</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">honeycomb_client</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;use_parking_lot&quot;</span>)]</span>
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">client</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">honeycomb_client</span>.<span class="ident">lock</span>();
+
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ev</span> <span class="op">=</span> <span class="ident">client</span>.<span class="ident">new_event</span>();
         <span class="ident">ev</span>.<span class="ident">add</span>(<span class="ident">data</span>);
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">ev</span>.<span class="ident">send</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">client</span>);
