@@ -2,11 +2,15 @@ use crate::telemetry::Telemetry;
 use crate::trace;
 use std::any::TypeId;
 use std::collections::HashMap;
-use std::sync::RwLock;
 use std::time::SystemTime;
 use tracing::span::{Attributes, Id, Record};
 use tracing::{Event, Subscriber};
 use tracing_subscriber::{layer::Context, registry, Layer};
+
+#[cfg(not(feature = "use_parking_lot"))]
+use std::sync::RwLock;
+#[cfg(feature = "use_parking_lot")]
+use parking_lot::RwLock;
 
 /// A `tracing_subscriber::Layer` that publishes events and spans to some backend
 /// using the provided `Telemetry` capability.
@@ -48,7 +52,12 @@ where
             trace_id,
             parent_span: remote_parent_span,
         };
+
+        #[cfg(not(feature = "use_parking_lot"))]
         let mut trace_ctx_registry = self.registry.write().expect("write lock!");
+        #[cfg(feature = "use_parking_lot")]
+        let mut trace_ctx_registry = self.registry.write();
+
         trace_ctx_registry.insert(id, trace_ctx); // TODO: handle overwrite?
     }
 
@@ -66,7 +75,11 @@ where
             let mut write_guard = span_ref.extensions_mut();
             match write_guard.get_mut::<LazyTraceCtx<SpanId, TraceId>>() {
                 None => {
+                    #[cfg(not(feature = "use_parking_lot"))]
                     let trace_ctx_registry = self.registry.read().unwrap();
+                    #[cfg(feature = "use_parking_lot")]
+                    let trace_ctx_registry = self.registry.read();
+
                     match trace_ctx_registry.get(&span_ref.id()) {
                         None => {
                             drop(write_guard);

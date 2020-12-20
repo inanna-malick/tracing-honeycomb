@@ -4,8 +4,13 @@ use opentelemetry::sdk::trace::config::Config;
 use opentelemetry::sdk::trace::evicted_hash_map::EvictedHashMap;
 use opentelemetry::sdk::EvictedQueue;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use tracing_distributed::{Event, Span, Telemetry};
+
+#[cfg(not(feature = "use_parking_lot"))]
+use std::sync::Mutex;
+#[cfg(feature = "use_parking_lot")]
+use parking_lot::Mutex;
 
 /// Telemetry capability that publishes events and spans to some OpenTelemetry backend
 #[derive(Debug)]
@@ -28,7 +33,10 @@ impl Telemetry for OpenTelemetry {
 
     fn report_span(&self, span: Span<Self::Visitor, Self::SpanId, Self::TraceId>) {
         // succeed or die. failure is unrecoverable (mutex poisoned)
+        #[cfg(not(feature = "use_parking_lot"))]
         let mut events = self.events.lock().unwrap();
+        #[cfg(feature = "use_parking_lot")]
+        let mut events = self.events.lock();
 
         let events = events
             .remove(&span.id)
@@ -40,7 +48,10 @@ impl Telemetry for OpenTelemetry {
     fn report_event(&self, event: Event<Self::Visitor, Self::SpanId, Self::TraceId>) {
         // events are reported as part of spandata, event must have a parent to be recorded
         if let Some(id) = event.parent_id {
+            #[cfg(not(feature = "use_parking_lot"))]
             let mut events = self.events.lock().unwrap();
+            #[cfg(feature = "use_parking_lot")]
+            let mut events = self.events.lock();
 
             if let Some(q) = events.get_mut(&id) {
                 q.append_vec(&mut vec![event_to_values(event)]);
