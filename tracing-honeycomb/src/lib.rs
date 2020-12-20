@@ -66,7 +66,38 @@ pub fn new_honeycomb_telemetry_layer(
     let instance_id: u64 = rand::thread_rng().gen();
     TelemetryLayer::new(
         service_name,
-        HoneycombTelemetry::new(honeycomb_config),
+        HoneycombTelemetry::new(honeycomb_config, None),
+        move |tracing_id| SpanId {
+            instance_id,
+            tracing_id,
+        },
+    )
+}
+
+/// Construct a TelemetryLayer that publishes telemetry to honeycomb.io using the
+/// provided honeycomb config, and sample rate. This function differs from
+/// `new_honeycomb_telemetry_layer` and the `sample_rate` on the
+/// `libhoney::Config` there in an important way. `libhoney` samples `Event`
+/// data, which is individual spans on each trace. This means that using the
+/// sampling logic in libhoney may result in missing event data or incomplete
+/// traces. Calling this function provides trace-level sampling, meaning sampling
+/// decisions are based on a modulo of the traceID, and events in a single trace
+/// will not be sampled differently. If the trace is sampled, then all spans
+/// under it will be sent to honeycomb. If a trace is not sampled, no spans or
+/// events under it will be sent. When using this trace-level sampling, the
+/// `sample_rate` parameter on the `libhoney::Config` should be set to 1, which
+/// is the default.
+///
+/// Specialized to the honeycomb.io-specific SpanId and TraceId provided by this crate.
+pub fn new_honeycomb_telemetry_layer_with_trace_sampling(
+    service_name: &'static str,
+    honeycomb_config: libhoney::Config,
+    sample_rate: u128,
+) -> TelemetryLayer<HoneycombTelemetry, SpanId, TraceId> {
+    let instance_id: u64 = rand::thread_rng().gen();
+    TelemetryLayer::new(
+        service_name,
+        HoneycombTelemetry::new(honeycomb_config, Some(sample_rate)),
         move |tracing_id| SpanId {
             instance_id,
             tracing_id,
