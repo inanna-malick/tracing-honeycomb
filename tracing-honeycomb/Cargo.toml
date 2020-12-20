@@ -1,6 +1,6 @@
 [package]
 name = "tracing-honeycomb"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Inanna Malick <inanna@recursion.wtf>"]
 edition = "2018"
 description = "Honeycomb.io tracing layer for multiprocess telemetry"
@@ -13,7 +13,7 @@ readme = "README.md"
 [dependencies]
 tracing = "0.1.12"
 tracing-core = "0.1.9"
-tracing-distributed =  { path = "../tracing-distributed" , version = "0.2.0"}
+tracing-distributed =  { path = "../tracing-distributed", version = "0.2.0" }
 libhoney-rust = "0.1.3"
 rand = "0.7"
 chrono = "0.4.9"
