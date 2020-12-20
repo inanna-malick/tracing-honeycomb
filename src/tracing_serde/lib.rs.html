@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-serde-0.1.1/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing_serde/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-serde-0.1.2/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing_serde/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -378,7 +378,277 @@
 <span id="378">378</span>
 <span id="379">379</span>
 <span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
 </pre><div class="example-wrap"><pre class="rust ">
+<span class="doccomment">//! # tracing-serde</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! An adapter for serializing [`tracing`] types using [`serde`].</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! [![Documentation][docs-badge]][docs-url]</span>
+<span class="doccomment">//! [![Documentation (master)][docs-master-badge]][docs-master-url]</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! [docs-badge]: https://docs.rs/tracing-serde/badge.svg</span>
+<span class="doccomment">//! [docs-url]: https://docs.rs/tracing-serde</span>
+<span class="doccomment">//! [docs-master-badge]: https://img.shields.io/badge/docs-master-blue</span>
+<span class="doccomment">//! [docs-master-url]: https://tracing-rs.netlify.com/tracing_serde</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Overview</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! [`tracing`] is a framework for instrumenting Rust programs to collect</span>
+<span class="doccomment">//! scoped, structured, and async-aware diagnostics.`tracing-serde` enables</span>
+<span class="doccomment">//! serializing `tracing` types using [`serde`].</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Traditional logging is based on human-readable text messages.</span>
+<span class="doccomment">//! `tracing` gives us machine-readable structured diagnostic</span>
+<span class="doccomment">//! information. This lets us interact with diagnostic data</span>
+<span class="doccomment">//! programmatically. With `tracing-serde`, you can implement a</span>
+<span class="doccomment">//! `Subscriber` to serialize your `tracing` types and make use of the</span>
+<span class="doccomment">//! existing ecosystem of `serde` serializers to talk with distributed</span>
+<span class="doccomment">//! tracing systems.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Serializing diagnostic information allows us to do more with our logged</span>
+<span class="doccomment">//! values. For instance, when working with logging data in JSON gives us</span>
+<span class="doccomment">//! pretty-print when we&#39;re debugging in development and you can emit JSON</span>
+<span class="doccomment">//! and tracing data to monitor your services in production.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The `tracing` crate provides the APIs necessary for instrumenting</span>
+<span class="doccomment">//! libraries and applications to emit trace data.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! *Compiler support: [requires `rustc` 1.40+][msrv]*</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! [msrv]: #supported-rust-versions</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Usage</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! First, add this to your `Cargo.toml`:</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ```toml</span>
+<span class="doccomment">//! [dependencies]</span>
+<span class="doccomment">//! tracing = &quot;0.1&quot;</span>
+<span class="doccomment">//! tracing-serde = &quot;0.1&quot;</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Next, add this to your crate:</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ```rust</span>
+<span class="doccomment">//! use tracing_serde::AsSerde;</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Please read the [`tracing` documentation](https://docs.rs/tracing/latest/tracing/index.html)</span>
+<span class="doccomment">//! for more information on how to create trace data.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! This crate provides the `as_serde` function, via the `AsSerde` trait,</span>
+<span class="doccomment">//! which enables serializing the `Attributes`, `Event`, `Id`, `Metadata`,</span>
+<span class="doccomment">//! and `Record` `tracing` values.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! For the full example, please see the [examples](../examples) folder.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Implement a `Subscriber` to format the serialization of `tracing`</span>
+<span class="doccomment">//! types how you&#39;d like.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ```rust</span>
+<span class="doccomment">//! # use tracing_core::{Subscriber, Metadata, Event};</span>
+<span class="doccomment">//! # use tracing_core::span::{Attributes, Id, Record};</span>
+<span class="doccomment">//! # use std::sync::atomic::{AtomicUsize, Ordering};</span>
+<span class="doccomment">//! use tracing_serde::AsSerde;</span>
+<span class="doccomment">//! use serde_json::json;</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! pub struct JsonSubscriber {</span>
+<span class="doccomment">//!     next_id: AtomicUsize, // you need to assign span IDs, so you need a counter</span>
+<span class="doccomment">//! }</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! impl Subscriber for JsonSubscriber {</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//!     fn new_span(&amp;self, attrs: &amp;Attributes&lt;&#39;_&gt;) -&gt; Id {</span>
+<span class="doccomment">//!         let id = self.next_id.fetch_add(1, Ordering::Relaxed);</span>
+<span class="doccomment">//!         let id = Id::from_u64(id as u64);</span>
+<span class="doccomment">//!         let json = json!({</span>
+<span class="doccomment">//!         &quot;new_span&quot;: {</span>
+<span class="doccomment">//!             &quot;attributes&quot;: attrs.as_serde(),</span>
+<span class="doccomment">//!             &quot;id&quot;: id.as_serde(),</span>
+<span class="doccomment">//!         }});</span>
+<span class="doccomment">//!         println!(&quot;{}&quot;, json);</span>
+<span class="doccomment">//!         id</span>
+<span class="doccomment">//!     }</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//!     fn event(&amp;self, event: &amp;Event&lt;&#39;_&gt;) {</span>
+<span class="doccomment">//!         let json = json!({</span>
+<span class="doccomment">//!            &quot;event&quot;: event.as_serde(),</span>
+<span class="doccomment">//!         });</span>
+<span class="doccomment">//!         println!(&quot;{}&quot;, json);</span>
+<span class="doccomment">//!     }</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//!     // ...</span>
+<span class="doccomment">//!     # fn enabled(&amp;self, _: &amp;Metadata&lt;&#39;_&gt;) -&gt; bool { false }</span>
+<span class="doccomment">//!     # fn enter(&amp;self, _: &amp;Id) {}</span>
+<span class="doccomment">//!     # fn exit(&amp;self, _: &amp;Id) {}</span>
+<span class="doccomment">//!     # fn record(&amp;self, _: &amp;Id, _: &amp;Record&lt;&#39;_&gt;) {}</span>
+<span class="doccomment">//!     # fn record_follows_from(&amp;self, _: &amp;Id, _: &amp;Id) {}</span>
+<span class="doccomment">//! }</span>
+<span class="doccomment">//! ```</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! After you implement your `Subscriber`, you can use your `tracing`</span>
+<span class="doccomment">//! subscriber (`JsonSubscriber` in the above example) to record serialized</span>
+<span class="doccomment">//! trace data.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Supported Rust Versions</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Tracing is built against the latest stable release. The minimum supported</span>
+<span class="doccomment">//! version is 1.40. The current Tracing version is not guaranteed to build on</span>
+<span class="doccomment">//! Rust versions earlier than the minimum supported version.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Tracing follows the same compiler support policies as the rest of the Tokio</span>
+<span class="doccomment">//! project. The current stable Rust compiler and the three most recent minor</span>
+<span class="doccomment">//! versions before it will always be supported. For example, if the current</span>
+<span class="doccomment">//! stable compiler version is 1.45, the minimum supported version will not be</span>
+<span class="doccomment">//! increased past 1.42, three minor versions prior. Increasing the minimum</span>
+<span class="doccomment">//! supported compiler version is not considered a semver breaking change as</span>
+<span class="doccomment">//! long as doing so complies with this policy.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! [`tracing`]: https://crates.io/crates/tracing</span>
+<span class="doccomment">//! [`serde`]: https://crates.io/crates/serde</span>
+<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/tracing-serde/0.1.2&quot;</span>)]</span>
+<span class="attribute">#![<span class="ident">doc</span>(
+    <span class="ident">html_logo_url</span> <span class="op">=</span> <span class="string">&quot;https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png&quot;</span>,
+    <span class="ident">issue_tracker_base_url</span> <span class="op">=</span> <span class="string">&quot;https://github.com/tokio-rs/tracing/issues/&quot;</span>
+)]</span>
 <span class="attribute">#![<span class="ident">warn</span>(
     <span class="ident">missing_debug_implementations</span>,
     <span class="comment">// missing_docs, // TODO: add documentation</span>
@@ -582,6 +852,22 @@
             <span class="ident">state</span>: <span class="prelude-val">Ok</span>(()),
         }
     }
+
+    <span class="doccomment">/// Completes serializing the visited object, returning `Ok(())` if all</span>
+    <span class="doccomment">/// fields were serialized correctly, or `Error(S::Error)` if a field could</span>
+    <span class="doccomment">/// not be serialized.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">finish</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>::<span class="prelude-val">Ok</span>, <span class="ident">S</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">state</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.<span class="ident">serializer</span>.<span class="ident">end</span>()
+    }
+
+    <span class="doccomment">/// Completes serializing the visited object, returning ownership of the underlying serializer</span>
+    <span class="doccomment">/// if all fields were serialized correctly, or `Err(S::Error)` if a field could not be</span>
+    <span class="doccomment">/// serialized.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">take_serializer</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">S</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">state</span><span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">serializer</span>)
+    }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Visit</span> <span class="kw">for</span> <span class="ident">SerdeMapVisitor</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>
@@ -620,16 +906,6 @@
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">state</span>.<span class="ident">is_ok</span>() {
             <span class="self">self</span>.<span class="ident">state</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">serializer</span>.<span class="ident">serialize_entry</span>(<span class="ident">field</span>.<span class="ident">name</span>(), <span class="kw-2">&amp;</span><span class="ident">value</span>)
         }
-    }
-}
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">SerializeMap</span><span class="op">&gt;</span> <span class="ident">SerdeMapVisitor</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Completes serializing the visited object, returning `Ok(())` if all</span>
-    <span class="doccomment">/// fields were serialized correctly, or `Error(S::Error)` if a field could</span>
-    <span class="doccomment">/// not be serialized.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">finish</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>::<span class="prelude-val">Ok</span>, <span class="ident">S</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">state</span><span class="question-mark">?</span>;
-        <span class="self">self</span>.<span class="ident">serializer</span>.<span class="ident">end</span>()
     }
 }
 
@@ -760,4 +1036,4 @@
     <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Sealed</span> {}
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "tracing_serde";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "tracing_serde";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

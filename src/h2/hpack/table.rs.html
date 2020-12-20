@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/h2-0.1.26/src/hpack/table.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>table.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../h2/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/h2-0.2.7/src/hpack/table.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>table.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../h2/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -763,7 +763,6 @@
 <span id="763">763</span>
 <span id="764">764</span>
 <span id="765">765</span>
-<span id="766">766</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">Header</span>;
 
@@ -771,9 +770,9 @@
 <span class="kw">use</span> <span class="ident">http</span>::<span class="ident">header</span>;
 <span class="kw">use</span> <span class="ident">http</span>::<span class="ident">method</span>::<span class="ident">Method</span>;
 
-<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">cmp</span>, <span class="ident">mem</span>, <span class="ident">usize</span>};
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">VecDeque</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">hash</span>::{<span class="ident">Hash</span>, <span class="ident">Hasher</span>};
+<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">cmp</span>, <span class="ident">mem</span>, <span class="ident">usize</span>};
 
 <span class="doccomment">/// HPACK encoder table</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
@@ -821,7 +820,7 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">struct</span> <span class="ident">HashValue</span>(<span class="ident">usize</span>);
 
-<span class="kw">const</span> <span class="ident">MAX_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> (<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span>);
+<span class="kw">const</span> <span class="ident">MAX_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span>;
 <span class="kw">const</span> <span class="ident">DYN_OFFSET</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">62</span>;
 
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">probe_loop</span> {
@@ -847,7 +846,7 @@
                 <span class="ident">slots</span>: <span class="ident">VecDeque</span>::<span class="ident">new</span>(),
                 <span class="ident">inserted</span>: <span class="number">0</span>,
                 <span class="ident">size</span>: <span class="number">0</span>,
-                <span class="ident">max_size</span>: <span class="ident">max_size</span>,
+                <span class="ident">max_size</span>,
             }
         } <span class="kw">else</span> {
             <span class="kw">let</span> <span class="ident">capacity</span> <span class="op">=</span> <span class="ident">cmp</span>::<span class="ident">max</span>(<span class="ident">to_raw_capacity</span>(<span class="ident">capacity</span>).<span class="ident">next_power_of_two</span>(), <span class="number">8</span>);
@@ -858,7 +857,7 @@
                 <span class="ident">slots</span>: <span class="ident">VecDeque</span>::<span class="ident">with_capacity</span>(<span class="ident">usable_capacity</span>(<span class="ident">capacity</span>)),
                 <span class="ident">inserted</span>: <span class="number">0</span>,
                 <span class="ident">size</span>: <span class="number">0</span>,
-                <span class="ident">max_size</span>: <span class="ident">max_size</span>,
+                <span class="ident">max_size</span>,
             }
         }
     }
@@ -907,10 +906,7 @@
             <span class="comment">// Right now, if this is true, the header name is always in the</span>
             <span class="comment">// static table. At some point in the future, this might not be true</span>
             <span class="comment">// and this logic will need to be updated.</span>
-            <span class="macro">debug_assert</span><span class="macro">!</span>(
-                <span class="ident">statik</span>.<span class="ident">is_some</span>(),
-                <span class="string">&quot;skip_value_index requires a static name&quot;</span>,
-            );
+            <span class="macro">debug_assert</span><span class="macro">!</span>(<span class="ident">statik</span>.<span class="ident">is_some</span>(), <span class="string">&quot;skip_value_index requires a static name&quot;</span>,);
             <span class="kw">return</span> <span class="ident">Index</span>::<span class="ident">new</span>(<span class="ident">statik</span>, <span class="ident">header</span>);
         }
 
@@ -1080,7 +1076,7 @@
             <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">indices</span>[<span class="ident">probe</span>],
             <span class="prelude-val">Some</span>(<span class="ident">Pos</span> {
                 <span class="ident">index</span>: <span class="ident">pos_idx</span>,
-                <span class="ident">hash</span>: <span class="ident">hash</span>,
+                <span class="ident">hash</span>,
             }),
         );
 
@@ -1111,8 +1107,8 @@
         <span class="self">self</span>.<span class="ident">inserted</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inserted</span>.<span class="ident">wrapping_add</span>(<span class="number">1</span>);
 
         <span class="self">self</span>.<span class="ident">slots</span>.<span class="ident">push_front</span>(<span class="ident">Slot</span> {
-            <span class="ident">hash</span>: <span class="ident">hash</span>,
-            <span class="ident">header</span>: <span class="ident">header</span>,
+            <span class="ident">hash</span>,
+            <span class="ident">header</span>,
             <span class="ident">next</span>: <span class="prelude-val">None</span>,
         });
     }
@@ -1301,89 +1297,89 @@
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
     <span class="kw">fn</span> <span class="ident">assert_valid_state</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_msg</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="comment">/*
-        // Checks that the internal map structure is valid
-        //
-        // Ensure all hash codes in indices match the associated slot
-        for pos in &amp;self.indices {
-            if let Some(pos) = *pos {
-                let real_idx = pos.index.wrapping_add(self.inserted);
-
-                if real_idx.wrapping_add(1) != 0 {
-                    assert!(real_idx &lt; self.slots.len(),
-                            &quot;out of index; real={}; len={}, msg={}&quot;,
-                            real_idx, self.slots.len(), msg);
-
-                    assert_eq!(pos.hash, self.slots[real_idx].hash,
-                               &quot;index hash does not match slot; msg={}&quot;, msg);
-                }
-            }
-        }
-
-        // Every index is only available once
-        for i in 0..self.indices.len() {
-            if self.indices[i].is_none() {
-                continue;
-            }
-
-            for j in i+1..self.indices.len() {
-                assert_ne!(self.indices[i], self.indices[j],
-                            &quot;duplicate indices; msg={}&quot;, msg);
-            }
-        }
-
-        for (index, slot) in self.slots.iter().enumerate() {
-            let mut indexed = None;
-
-            // First, see if the slot is indexed
-            for (i, pos) in self.indices.iter().enumerate() {
+            // Checks that the internal map structure is valid
+            //
+            // Ensure all hash codes in indices match the associated slot
+            for pos in &amp;self.indices {
                 if let Some(pos) = *pos {
                     let real_idx = pos.index.wrapping_add(self.inserted);
-                    if real_idx == index {
-                        indexed = Some(i);
-                        // Already know that there is no dup, so break
-                        break;
+
+                    if real_idx.wrapping_add(1) != 0 {
+                        assert!(real_idx &lt; self.slots.len(),
+                                &quot;out of index; real={}; len={}, msg={}&quot;,
+                                real_idx, self.slots.len(), msg);
+
+                        assert_eq!(pos.hash, self.slots[real_idx].hash,
+                                   &quot;index hash does not match slot; msg={}&quot;, msg);
                     }
                 }
             }
 
-            if let Some(actual) = indexed {
-                // Ensure that it is accessible..
-                let desired = desired_pos(self.mask, slot.hash);
-                let mut probe = desired;
-                let mut dist = 0;
+            // Every index is only available once
+            for i in 0..self.indices.len() {
+                if self.indices[i].is_none() {
+                    continue;
+                }
 
-                probe_loop!(probe &lt; self.indices.len(), {
-                    assert!(self.indices[probe].is_some(),
-                            &quot;unexpected empty slot; probe={}; hash={:?}; msg={}&quot;,
-                            probe, slot.hash, msg);
-
-                    let pos = self.indices[probe].unwrap();
-
-                    let their_dist = probe_distance(self.mask, pos.hash, probe);
-                    let real_idx = pos.index.wrapping_add(self.inserted);
-
-                    if real_idx == index {
-                        break;
-                    }
-
-                    assert!(dist &lt;= their_dist,
-                            &quot;could not find entry; actual={}; desired={};&quot; +
-                            &quot;probe={}, dist={}; their_dist={}; index={}; msg={}&quot;,
-                            actual, desired, probe, dist, their_dist,
-                            index.wrapping_sub(self.inserted), msg);
-
-                    dist += 1;
-                });
-            } else {
-                // There is exactly one next link
-                let cnt = self.slots.iter().map(|s| s.next)
-                    .filter(|n| *n == Some(index.wrapping_sub(self.inserted)))
-                    .count();
-
-                assert_eq!(1, cnt, &quot;more than one node pointing here; msg={}&quot;, msg);
+                for j in i+1..self.indices.len() {
+                    assert_ne!(self.indices[i], self.indices[j],
+                                &quot;duplicate indices; msg={}&quot;, msg);
+                }
             }
-        }
-    */</span>
+
+            for (index, slot) in self.slots.iter().enumerate() {
+                let mut indexed = None;
+
+                // First, see if the slot is indexed
+                for (i, pos) in self.indices.iter().enumerate() {
+                    if let Some(pos) = *pos {
+                        let real_idx = pos.index.wrapping_add(self.inserted);
+                        if real_idx == index {
+                            indexed = Some(i);
+                            // Already know that there is no dup, so break
+                            break;
+                        }
+                    }
+                }
+
+                if let Some(actual) = indexed {
+                    // Ensure that it is accessible..
+                    let desired = desired_pos(self.mask, slot.hash);
+                    let mut probe = desired;
+                    let mut dist = 0;
+
+                    probe_loop!(probe &lt; self.indices.len(), {
+                        assert!(self.indices[probe].is_some(),
+                                &quot;unexpected empty slot; probe={}; hash={:?}; msg={}&quot;,
+                                probe, slot.hash, msg);
+
+                        let pos = self.indices[probe].unwrap();
+
+                        let their_dist = probe_distance(self.mask, pos.hash, probe);
+                        let real_idx = pos.index.wrapping_add(self.inserted);
+
+                        if real_idx == index {
+                            break;
+                        }
+
+                        assert!(dist &lt;= their_dist,
+                                &quot;could not find entry; actual={}; desired={}&quot; +
+                                &quot;probe={}, dist={}; their_dist={}; index={}; msg={}&quot;,
+                                actual, desired, probe, dist, their_dist,
+                                index.wrapping_sub(self.inserted), msg);
+
+                        dist += 1;
+                    });
+                } else {
+                    // There is exactly one next link
+                    let cnt = self.slots.iter().map(|s| s.next)
+                        .filter(|n| *n == Some(index.wrapping_sub(self.inserted)))
+                        .count();
+
+                    assert_eq!(1, cnt, &quot;more than one node pointing here; msg={}&quot;, msg);
+                }
+            }
+        */</span>
 
         <span class="comment">// TODO: Ensure linked lists are correct: no cycles, etc...</span>
 
@@ -1451,11 +1447,13 @@
             <span class="kw-2">ref</span> <span class="ident">value</span>,
         } <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">name</span> {
             <span class="ident">header</span>::<span class="ident">ACCEPT_CHARSET</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>((<span class="number">15</span>, <span class="bool-val">false</span>)),
-            <span class="ident">header</span>::<span class="ident">ACCEPT_ENCODING</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">if</span> <span class="ident">value</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;gzip, deflate&quot;</span> {
-                <span class="prelude-val">Some</span>((<span class="number">16</span>, <span class="bool-val">true</span>))
-            } <span class="kw">else</span> {
-                <span class="prelude-val">Some</span>((<span class="number">16</span>, <span class="bool-val">false</span>))
-            },
+            <span class="ident">header</span>::<span class="ident">ACCEPT_ENCODING</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">if</span> <span class="ident">value</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;gzip, deflate&quot;</span> {
+                    <span class="prelude-val">Some</span>((<span class="number">16</span>, <span class="bool-val">true</span>))
+                } <span class="kw">else</span> {
+                    <span class="prelude-val">Some</span>((<span class="number">16</span>, <span class="bool-val">false</span>))
+                }
+            }
             <span class="ident">header</span>::<span class="ident">ACCEPT_LANGUAGE</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>((<span class="number">17</span>, <span class="bool-val">false</span>)),
             <span class="ident">header</span>::<span class="ident">ACCEPT_RANGES</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>((<span class="number">18</span>, <span class="bool-val">false</span>)),
             <span class="ident">header</span>::<span class="ident">ACCEPT</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>((<span class="number">19</span>, <span class="bool-val">false</span>)),
@@ -1532,4 +1530,4 @@
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "h2";</script><script src="../../../aliases.js"></script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "h2";</script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>

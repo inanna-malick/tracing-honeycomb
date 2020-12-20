@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/base64-0.10.1/src/decode.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>decode.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../base64/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/base64-0.13.0/src/decode.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>decode.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../base64/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -836,11 +836,51 @@
 <span id="836">836</span>
 <span id="837">837</span>
 <span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
+<span id="868">868</span>
+<span id="869">869</span>
+<span id="870">870</span>
+<span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">use</span> <span class="ident">byteorder</span>::{<span class="ident">BigEndian</span>, <span class="ident">ByteOrder</span>};
-<span class="kw">use</span> {<span class="ident">tables</span>, <span class="ident">Config</span>, <span class="ident">STANDARD</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">tables</span>, <span class="ident">Config</span>, <span class="ident">PAD_BYTE</span>};
 
-<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">error</span>, <span class="ident">fmt</span>, <span class="ident">str</span>};
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">test</span>))]</span>
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">STANDARD</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">test</span>))]</span>
+<span class="kw">use</span> <span class="ident">alloc</span>::<span class="ident">vec</span>::<span class="ident">Vec</span>;
+<span class="kw">use</span> <span class="ident">core</span>::<span class="ident">fmt</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">test</span>))]</span>
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">error</span>;
 
 <span class="comment">// decode logic operates on chunks of 8 input bytes without padding</span>
 <span class="kw">const</span> <span class="ident">INPUT_CHUNK_LEN</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">8</span>;
@@ -863,6 +903,10 @@
     <span class="doccomment">/// An invalid byte was found in the input. The offset and offending byte are provided.</span>
     <span class="ident">InvalidByte</span>(<span class="ident">usize</span>, <span class="ident">u8</span>),
     <span class="doccomment">/// The length of the input is invalid.</span>
+    <span class="doccomment">/// A typical cause of this is stray trailing whitespace or other separator bytes.</span>
+    <span class="doccomment">/// In the case where excess trailing bytes have produced an invalid length *and* the last byte</span>
+    <span class="doccomment">/// is also an invalid base64 symbol (as would be the case for whitespace, etc), `InvalidByte`</span>
+    <span class="doccomment">/// will be emitted instead of `InvalidLength` to make the issue easier to debug.</span>
     <span class="ident">InvalidLength</span>,
     <span class="doccomment">/// The last non-padding input symbol&#39;s encoded 6 bits have nonzero bits that will be discarded.</span>
     <span class="doccomment">/// This is indicative of corrupted or truncated Base64.</span>
@@ -885,6 +929,7 @@
     }
 }
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">test</span>))]</span>
 <span class="kw">impl</span> <span class="ident">error</span>::<span class="ident">Error</span> <span class="kw">for</span> <span class="ident">DecodeError</span> {
     <span class="kw">fn</span> <span class="ident">description</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">str</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
@@ -894,7 +939,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">cause</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">cause</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">error</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="prelude-val">None</span>
     }
 }
@@ -913,7 +958,8 @@
 <span class="doccomment">///    println!(&quot;{:?}&quot;, bytes);</span>
 <span class="doccomment">///}</span>
 <span class="doccomment">///```</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">DecodeError</span><span class="op">&gt;</span> {
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">test</span>))]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">input</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">DecodeError</span><span class="op">&gt;</span> {
     <span class="ident">decode_config</span>(<span class="ident">input</span>, <span class="ident">STANDARD</span>)
 }
 
@@ -933,10 +979,8 @@
 <span class="doccomment">///    println!(&quot;{:?}&quot;, bytes_url);</span>
 <span class="doccomment">///}</span>
 <span class="doccomment">///```</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode_config</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(
-    <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
-    <span class="ident">config</span>: <span class="ident">Config</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">DecodeError</span><span class="op">&gt;</span> {
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">test</span>))]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode_config</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">input</span>: <span class="ident">T</span>, <span class="ident">config</span>: <span class="ident">Config</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">DecodeError</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>::<span class="ident">with_capacity</span>(<span class="ident">input</span>.<span class="ident">as_ref</span>().<span class="ident">len</span>() <span class="op">*</span> <span class="number">4</span> <span class="op">/</span> <span class="number">3</span>);
 
     <span class="ident">decode_config_buf</span>(<span class="ident">input</span>, <span class="ident">config</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buffer</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">buffer</span>)
@@ -963,8 +1007,9 @@
 <span class="doccomment">///    println!(&quot;{:?}&quot;, buffer);</span>
 <span class="doccomment">///}</span>
 <span class="doccomment">///```</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode_config_buf</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(
-    <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">test</span>))]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode_config_buf</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(
+    <span class="ident">input</span>: <span class="ident">T</span>,
     <span class="ident">config</span>: <span class="ident">Config</span>,
     <span class="ident">buffer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DecodeError</span><span class="op">&gt;</span> {
@@ -999,19 +1044,14 @@
 <span class="doccomment">/// input, rounded up, or in other words `(input_len + 3) / 4 * 3`.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// If the slice is not large enough, this will panic.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode_config_slice</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(
-    <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode_config_slice</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(
+    <span class="ident">input</span>: <span class="ident">T</span>,
     <span class="ident">config</span>: <span class="ident">Config</span>,
     <span class="ident">output</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>],
 ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">DecodeError</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">input_bytes</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">as_ref</span>();
 
-    <span class="ident">decode_helper</span>(
-        <span class="ident">input_bytes</span>,
-        <span class="ident">num_chunks</span>(<span class="ident">input_bytes</span>),
-        <span class="ident">config</span>,
-        <span class="ident">output</span>,
-    )
+    <span class="ident">decode_helper</span>(<span class="ident">input_bytes</span>, <span class="ident">num_chunks</span>(<span class="ident">input_bytes</span>), <span class="ident">config</span>, <span class="ident">output</span>)
 }
 
 <span class="doccomment">/// Return the number of input chunks (including a possibly partial final chunk) in the input</span>
@@ -1049,7 +1089,17 @@
         <span class="comment">// and the fast decode logic cannot handle padding</span>
         <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">INPUT_CHUNK_LEN</span>,
         <span class="comment">// 1 and 5 trailing bytes are illegal: can&#39;t decode 6 bits of input into a byte</span>
-        <span class="number">1</span> <span class="op">|</span> <span class="number">5</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecodeError</span>::<span class="ident">InvalidLength</span>),
+        <span class="number">1</span> <span class="op">|</span> <span class="number">5</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="comment">// trailing whitespace is so common that it&#39;s worth it to check the last byte to</span>
+            <span class="comment">// possibly return a better error message</span>
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">b</span>) <span class="op">=</span> <span class="ident">input</span>.<span class="ident">last</span>() {
+                <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">b</span> <span class="op">!</span><span class="op">=</span> <span class="ident">PAD_BYTE</span> <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">decode_table</span>[<span class="kw-2">*</span><span class="ident">b</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span><span class="op">=</span> <span class="ident">tables</span>::<span class="ident">INVALID_VALUE</span> {
+                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecodeError</span>::<span class="ident">InvalidByte</span>(<span class="ident">input</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>, <span class="kw-2">*</span><span class="ident">b</span>));
+                }
+            }
+
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecodeError</span>::<span class="ident">InvalidLength</span>);
+        }
         <span class="comment">// This will decode to one output byte, which isn&#39;t enough to overwrite the 2 extra bytes</span>
         <span class="comment">// written by the fast decode loop. So, we have to ignore both these 2 bytes and the</span>
         <span class="comment">// previous chunk.</span>
@@ -1167,7 +1217,7 @@
     <span class="kw">let</span> <span class="ident">start_of_leftovers</span> <span class="op">=</span> <span class="ident">input_index</span>;
     <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">b</span>) <span class="kw">in</span> <span class="ident">input</span>[<span class="ident">start_of_leftovers</span>..].<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
         <span class="comment">// &#39;=&#39; padding</span>
-        <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">b</span> <span class="op">=</span><span class="op">=</span> <span class="number">0x3D</span> {
+        <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">b</span> <span class="op">=</span><span class="op">=</span> <span class="ident">PAD_BYTE</span> {
             <span class="comment">// There can be bad padding in a few ways:</span>
             <span class="comment">// 1 - Padding with non-padding characters after it</span>
             <span class="comment">// 2 - Padding after zero or one non-padding characters before it</span>
@@ -1179,16 +1229,17 @@
 
             <span class="kw">if</span> <span class="ident">i</span> <span class="op">%</span> <span class="number">4</span> <span class="op">&lt;</span> <span class="number">2</span> {
                 <span class="comment">// Check for case #2.</span>
-                <span class="kw">let</span> <span class="ident">bad_padding_index</span> <span class="op">=</span> <span class="ident">start_of_leftovers</span> <span class="op">+</span> <span class="kw">if</span> <span class="ident">padding_bytes</span> <span class="op">&gt;</span> <span class="number">0</span> {
-                    <span class="comment">// If we&#39;ve already seen padding, report the first padding index.</span>
-                    <span class="comment">// This is to be consistent with the faster logic above: it will report an</span>
-                    <span class="comment">// error on the first padding character (since it doesn&#39;t expect to see</span>
-                    <span class="comment">// anything but actual encoded data).</span>
-                    <span class="ident">first_padding_index</span>
-                } <span class="kw">else</span> {
-                    <span class="comment">// haven&#39;t seen padding before, just use where we are now</span>
-                    <span class="ident">i</span>
-                };
+                <span class="kw">let</span> <span class="ident">bad_padding_index</span> <span class="op">=</span> <span class="ident">start_of_leftovers</span>
+                    <span class="op">+</span> <span class="kw">if</span> <span class="ident">padding_bytes</span> <span class="op">&gt;</span> <span class="number">0</span> {
+                        <span class="comment">// If we&#39;ve already seen padding, report the first padding index.</span>
+                        <span class="comment">// This is to be consistent with the faster logic above: it will report an</span>
+                        <span class="comment">// error on the first padding character (since it doesn&#39;t expect to see</span>
+                        <span class="comment">// anything but actual encoded data).</span>
+                        <span class="ident">first_padding_index</span>
+                    } <span class="kw">else</span> {
+                        <span class="comment">// haven&#39;t seen padding before, just use where we are now</span>
+                        <span class="ident">i</span>
+                    };
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecodeError</span>::<span class="ident">InvalidByte</span>(<span class="ident">bad_padding_index</span>, <span class="kw-2">*</span><span class="ident">b</span>));
             }
 
@@ -1207,7 +1258,7 @@
         <span class="kw">if</span> <span class="ident">padding_bytes</span> <span class="op">&gt;</span> <span class="number">0</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecodeError</span>::<span class="ident">InvalidByte</span>(
                 <span class="ident">start_of_leftovers</span> <span class="op">+</span> <span class="ident">first_padding_index</span>,
-                <span class="number">0x3D</span>,
+                <span class="ident">PAD_BYTE</span>,
             ));
         }
         <span class="ident">last_symbol</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">b</span>;
@@ -1260,6 +1311,11 @@
     }
 
     <span class="prelude-val">Ok</span>(<span class="ident">output_index</span>)
+}
+
+<span class="attribute">#[<span class="ident">inline</span>]</span>
+<span class="kw">fn</span> <span class="ident">write_u64</span>(<span class="ident">output</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>], <span class="ident">value</span>: <span class="ident">u64</span>) {
+    <span class="ident">output</span>[..<span class="number">8</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">value</span>.<span class="ident">to_be_bytes</span>());
 }
 
 <span class="doccomment">/// Decode 8 bytes of input into 6 bytes of output. 8 bytes of output will be written, but only the</span>
@@ -1350,7 +1406,7 @@
     }
     <span class="ident">accum</span> <span class="op">|</span><span class="op">=</span> (<span class="ident">morsel</span> <span class="kw">as</span> <span class="ident">u64</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span>;
 
-    <span class="ident">BigEndian</span>::<span class="ident">write_u64</span>(<span class="ident">output</span>, <span class="ident">accum</span>);
+    <span class="ident">write_u64</span>(<span class="ident">output</span>, <span class="ident">accum</span>);
 
     <span class="prelude-val">Ok</span>(())
 }
@@ -1380,14 +1436,17 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">rand</span>;
-
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident">encode</span>::<span class="ident">encode_config_buf</span>;
-    <span class="kw">use</span> <span class="ident">tests</span>::{<span class="ident">assert_encode_sanity</span>, <span class="ident">random_config</span>};
+    <span class="kw">use</span> <span class="kw">crate</span>::{
+        <span class="ident">encode</span>::<span class="ident">encode_config_buf</span>,
+        <span class="ident">encode</span>::<span class="ident">encode_config_slice</span>,
+        <span class="ident">tests</span>::{<span class="ident">assert_encode_sanity</span>, <span class="ident">random_config</span>},
+    };
 
-    <span class="kw">use</span> <span class="self">self</span>::<span class="ident">rand</span>::<span class="ident">distributions</span>::{<span class="ident">Distribution</span>, <span class="ident">Uniform</span>};
-    <span class="kw">use</span> <span class="self">self</span>::<span class="ident">rand</span>::{<span class="ident">FromEntropy</span>, <span class="ident">Rng</span>};
+    <span class="kw">use</span> <span class="ident">rand</span>::{
+        <span class="ident">distributions</span>::{<span class="ident">Distribution</span>, <span class="ident">Uniform</span>},
+        <span class="ident">FromEntropy</span>, <span class="ident">Rng</span>,
+    };
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">decode_chunk_precise_writes_only_6_bytes</span>() {
@@ -1555,24 +1614,35 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">detect_invalid_last_symbol_two_bytes</span>() {
-        <span class="kw">let</span> <span class="ident">decode</span> <span class="op">=</span> <span class="op">|</span><span class="ident">input</span>, <span class="ident">forgiving</span><span class="op">|</span> {
-            <span class="ident">decode_config</span>(<span class="ident">input</span>, <span class="ident">STANDARD</span>.<span class="ident">decode_allow_trailing_bits</span>(<span class="ident">forgiving</span>))
-        };
+        <span class="kw">let</span> <span class="ident">decode</span> <span class="op">=</span>
+            <span class="op">|</span><span class="ident">input</span>, <span class="ident">forgiving</span><span class="op">|</span> <span class="ident">decode_config</span>(<span class="ident">input</span>, <span class="ident">STANDARD</span>.<span class="ident">decode_allow_trailing_bits</span>(<span class="ident">forgiving</span>));
 
-        <span class="comment">// example from https://github.com/alicemaz/rust-base64/issues/75</span>
+        <span class="comment">// example from https://github.com/marshallpierce/rust-base64/issues/75</span>
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">decode</span>(<span class="string">&quot;iYU=&quot;</span>, <span class="bool-val">false</span>).<span class="ident">is_ok</span>());
         <span class="comment">// trailing 01</span>
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">Err</span>(<span class="ident">DecodeError</span>::<span class="ident">InvalidLastSymbol</span>(<span class="number">2</span>, <span class="string">b&#39;V&#39;</span>)), <span class="ident">decode</span>(<span class="string">&quot;iYV=&quot;</span>, <span class="bool-val">false</span>));
+        <span class="macro">assert_eq</span><span class="macro">!</span>(
+            <span class="prelude-val">Err</span>(<span class="ident">DecodeError</span>::<span class="ident">InvalidLastSymbol</span>(<span class="number">2</span>, <span class="string">b&#39;V&#39;</span>)),
+            <span class="ident">decode</span>(<span class="string">&quot;iYV=&quot;</span>, <span class="bool-val">false</span>)
+        );
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">Ok</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">137</span>, <span class="number">133</span>]), <span class="ident">decode</span>(<span class="string">&quot;iYV=&quot;</span>, <span class="bool-val">true</span>));
         <span class="comment">// trailing 10</span>
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">Err</span>(<span class="ident">DecodeError</span>::<span class="ident">InvalidLastSymbol</span>(<span class="number">2</span>, <span class="string">b&#39;W&#39;</span>)), <span class="ident">decode</span>(<span class="string">&quot;iYW=&quot;</span>, <span class="bool-val">false</span>));
+        <span class="macro">assert_eq</span><span class="macro">!</span>(
+            <span class="prelude-val">Err</span>(<span class="ident">DecodeError</span>::<span class="ident">InvalidLastSymbol</span>(<span class="number">2</span>, <span class="string">b&#39;W&#39;</span>)),
+            <span class="ident">decode</span>(<span class="string">&quot;iYW=&quot;</span>, <span class="bool-val">false</span>)
+        );
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">Ok</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">137</span>, <span class="number">133</span>]), <span class="ident">decode</span>(<span class="string">&quot;iYV=&quot;</span>, <span class="bool-val">true</span>));
         <span class="comment">// trailing 11</span>
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">Err</span>(<span class="ident">DecodeError</span>::<span class="ident">InvalidLastSymbol</span>(<span class="number">2</span>, <span class="string">b&#39;X&#39;</span>)), <span class="ident">decode</span>(<span class="string">&quot;iYX=&quot;</span>, <span class="bool-val">false</span>));
+        <span class="macro">assert_eq</span><span class="macro">!</span>(
+            <span class="prelude-val">Err</span>(<span class="ident">DecodeError</span>::<span class="ident">InvalidLastSymbol</span>(<span class="number">2</span>, <span class="string">b&#39;X&#39;</span>)),
+            <span class="ident">decode</span>(<span class="string">&quot;iYX=&quot;</span>, <span class="bool-val">false</span>)
+        );
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">Ok</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">137</span>, <span class="number">133</span>]), <span class="ident">decode</span>(<span class="string">&quot;iYV=&quot;</span>, <span class="bool-val">true</span>));
 
         <span class="comment">// also works when there are 2 quads in the last block</span>
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">Err</span>(<span class="ident">DecodeError</span>::<span class="ident">InvalidLastSymbol</span>(<span class="number">6</span>, <span class="string">b&#39;X&#39;</span>)), <span class="ident">decode</span>(<span class="string">&quot;AAAAiYX=&quot;</span>, <span class="bool-val">false</span>));
+        <span class="macro">assert_eq</span><span class="macro">!</span>(
+            <span class="prelude-val">Err</span>(<span class="ident">DecodeError</span>::<span class="ident">InvalidLastSymbol</span>(<span class="number">6</span>, <span class="string">b&#39;X&#39;</span>)),
+            <span class="ident">decode</span>(<span class="string">&quot;AAAAiYX=&quot;</span>, <span class="bool-val">false</span>)
+        );
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">Ok</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">137</span>, <span class="number">133</span>]), <span class="ident">decode</span>(<span class="string">&quot;AAAAiYX=&quot;</span>, <span class="bool-val">true</span>));
     }
 
@@ -1606,7 +1676,7 @@
             <span class="kw">for</span> <span class="ident">b2</span> <span class="kw">in</span> <span class="number">0_u16</span>..<span class="number">256</span> {
                 <span class="ident">bytes</span>[<span class="number">1</span>] <span class="op">=</span> <span class="ident">b2</span> <span class="kw">as</span> <span class="ident">u8</span>;
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">b64</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0_u8</span>; <span class="number">4</span>];
-                <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="number">4</span>, ::<span class="ident">encode_config_slice</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>, <span class="ident">STANDARD</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">b64</span>[..]));
+                <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="number">4</span>, <span class="ident">encode_config_slice</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>, <span class="ident">STANDARD</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">b64</span>[..]));
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v</span> <span class="op">=</span> ::<span class="ident">std</span>::<span class="ident">vec</span>::<span class="ident">Vec</span>::<span class="ident">with_capacity</span>(<span class="number">2</span>);
                 <span class="ident">v</span>.<span class="ident">extend_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>[..]);
 
@@ -1623,7 +1693,7 @@
                 <span class="ident">symbols</span>[<span class="number">1</span>] <span class="op">=</span> <span class="ident">s2</span>;
                 <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">s3</span> <span class="kw">in</span> <span class="ident">STANDARD</span>.<span class="ident">char_set</span>.<span class="ident">encode_table</span>().<span class="ident">iter</span>() {
                     <span class="ident">symbols</span>[<span class="number">2</span>] <span class="op">=</span> <span class="ident">s3</span>;
-                    <span class="ident">symbols</span>[<span class="number">3</span>] <span class="op">=</span> <span class="string">b&#39;=&#39;</span>;
+                    <span class="ident">symbols</span>[<span class="number">3</span>] <span class="op">=</span> <span class="ident">PAD_BYTE</span>;
 
                     <span class="kw">match</span> <span class="ident">base64_to_bytes</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">symbols</span>[..]) {
                         <span class="prelude-val">Some</span>(<span class="ident">bytes</span>) <span class="op">=</span><span class="op">&gt;</span> {
@@ -1645,7 +1715,7 @@
 
         <span class="kw">for</span> <span class="ident">b</span> <span class="kw">in</span> <span class="number">0_u16</span>..<span class="number">256</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">b64</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0_u8</span>; <span class="number">4</span>];
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="number">4</span>, ::<span class="ident">encode_config_slice</span>(<span class="kw-2">&amp;</span>[<span class="ident">b</span> <span class="kw">as</span> <span class="ident">u8</span>], <span class="ident">STANDARD</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">b64</span>[..]));
+            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="number">4</span>, <span class="ident">encode_config_slice</span>(<span class="kw-2">&amp;</span>[<span class="ident">b</span> <span class="kw">as</span> <span class="ident">u8</span>], <span class="ident">STANDARD</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">b64</span>[..]));
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v</span> <span class="op">=</span> ::<span class="ident">std</span>::<span class="ident">vec</span>::<span class="ident">Vec</span>::<span class="ident">with_capacity</span>(<span class="number">1</span>);
             <span class="ident">v</span>.<span class="ident">push</span>(<span class="ident">b</span> <span class="kw">as</span> <span class="ident">u8</span>);
 
@@ -1659,8 +1729,8 @@
             <span class="ident">symbols</span>[<span class="number">0</span>] <span class="op">=</span> <span class="ident">s1</span>;
             <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">s2</span> <span class="kw">in</span> <span class="ident">STANDARD</span>.<span class="ident">char_set</span>.<span class="ident">encode_table</span>().<span class="ident">iter</span>() {
                 <span class="ident">symbols</span>[<span class="number">1</span>] <span class="op">=</span> <span class="ident">s2</span>;
-                <span class="ident">symbols</span>[<span class="number">2</span>] <span class="op">=</span> <span class="string">b&#39;=&#39;</span>;
-                <span class="ident">symbols</span>[<span class="number">3</span>] <span class="op">=</span> <span class="string">b&#39;=&#39;</span>;
+                <span class="ident">symbols</span>[<span class="number">2</span>] <span class="op">=</span> <span class="ident">PAD_BYTE</span>;
+                <span class="ident">symbols</span>[<span class="number">3</span>] <span class="op">=</span> <span class="ident">PAD_BYTE</span>;
 
                 <span class="kw">match</span> <span class="ident">base64_to_bytes</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">symbols</span>[..]) {
                     <span class="prelude-val">Some</span>(<span class="ident">bytes</span>) <span class="op">=</span><span class="op">&gt;</span> {
@@ -1676,4 +1746,4 @@
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "base64";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "base64";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

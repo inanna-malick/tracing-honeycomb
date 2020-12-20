@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-subscriber-0.2.5/src/filter/env/directive.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>directive.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script src="../../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../../tracing_subscriber/index.html'><div class='logo-container'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-subscriber-0.2.15/src/filter/env/directive.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>directive.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script src="../../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../../tracing_subscriber/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1010,22 +1010,41 @@
 <span id="1010">1010</span>
 <span id="1011">1011</span>
 <span id="1012">1012</span>
+<span id="1013">1013</span>
+<span id="1014">1014</span>
+<span id="1015">1015</span>
+<span id="1016">1016</span>
+<span id="1017">1017</span>
+<span id="1018">1018</span>
+<span id="1019">1019</span>
+<span id="1020">1020</span>
+<span id="1021">1021</span>
+<span id="1022">1022</span>
+<span id="1023">1023</span>
+<span id="1024">1024</span>
+<span id="1025">1025</span>
+<span id="1026">1026</span>
+<span id="1027">1027</span>
+<span id="1028">1028</span>
+<span id="1029">1029</span>
+<span id="1030">1030</span>
+<span id="1031">1031</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">super</span>::<span class="kw">super</span>::<span class="ident">level</span>::{<span class="self">self</span>, <span class="ident">LevelFilter</span>};
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">field</span>, <span class="ident">FieldMap</span>, <span class="ident">FilterVec</span>};
 <span class="kw">use</span> <span class="ident">lazy_static</span>::<span class="ident">lazy_static</span>;
 <span class="kw">use</span> <span class="ident">regex</span>::<span class="ident">Regex</span>;
 <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">cmp</span>::<span class="ident">Ordering</span>, <span class="ident">error</span>::<span class="ident">Error</span>, <span class="ident">fmt</span>, <span class="ident">iter</span>::<span class="ident">FromIterator</span>, <span class="ident">str</span>::<span class="ident">FromStr</span>};
-<span class="kw">use</span> <span class="ident">tracing_core</span>::{<span class="ident">span</span>, <span class="ident">Metadata</span>};
+<span class="kw">use</span> <span class="ident">tracing_core</span>::{<span class="ident">span</span>, <span class="ident">Level</span>, <span class="ident">Metadata</span>};
 
 <span class="doccomment">/// A single filtering directive.</span>
 <span class="comment">// TODO(eliza): add a builder for programmatically constructing directives?</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Directive</span> {
-    <span class="ident">target</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="ident">in_span</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
     <span class="ident">fields</span>: <span class="ident">FilterVec</span><span class="op">&lt;</span><span class="ident">field</span>::<span class="ident">Match</span><span class="op">&gt;</span>,
-    <span class="ident">level</span>: <span class="ident">LevelFilter</span>,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">target</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">level</span>: <span class="ident">LevelFilter</span>,
 }
 
 <span class="doccomment">/// A directive which will statically enable or disable a given callsite.</span>
@@ -1098,7 +1117,7 @@
         <span class="prelude-val">Some</span>(<span class="ident">StaticDirective</span> {
             <span class="ident">target</span>: <span class="self">self</span>.<span class="ident">target</span>.<span class="ident">clone</span>(),
             <span class="ident">field_names</span>,
-            <span class="ident">level</span>: <span class="self">self</span>.<span class="ident">level</span>.<span class="ident">clone</span>(),
+            <span class="ident">level</span>: <span class="self">self</span>.<span class="ident">level</span>,
         })
     }
 
@@ -1132,7 +1151,7 @@
             .<span class="ident">ok</span>()<span class="question-mark">?</span>;
         <span class="prelude-val">Some</span>(<span class="ident">field</span>::<span class="ident">CallsiteMatch</span> {
             <span class="ident">fields</span>,
-            <span class="ident">level</span>: <span class="self">self</span>.<span class="ident">level</span>.<span class="ident">clone</span>(),
+            <span class="ident">level</span>: <span class="self">self</span>.<span class="ident">level</span>,
         })
     }
 
@@ -1194,7 +1213,7 @@
                 ^(?P&lt;global_level&gt;trace|TRACE|debug|DEBUG|info|INFO|warn|WARN|error|ERROR|off|OFF|[0-5])$ |
                 ^
                 (?: # target name or span name
-                    (?P&lt;target&gt;[\w:]+)|(?P&lt;span&gt;\[[^\]]*\])
+                    (?P&lt;target&gt;[\w:-]+)|(?P&lt;span&gt;\[[^\]]*\])
                 ){1,2}
                 (?: # level or nothing
                     =(?P&lt;level&gt;trace|TRACE|debug|DEBUG|info|INFO|warn|WARN|error|ERROR|off|OFF|[0-5])?
@@ -1288,6 +1307,12 @@
 
 <span class="kw">impl</span> <span class="ident">PartialOrd</span> <span class="kw">for</span> <span class="ident">Directive</span> {
     <span class="kw">fn</span> <span class="ident">partial_cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">Directive</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ordering</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">cmp</span>(<span class="ident">other</span>))
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">Ord</span> <span class="kw">for</span> <span class="ident">Directive</span> {
+    <span class="kw">fn</span> <span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">Directive</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ordering</span> {
         <span class="comment">// We attempt to order directives by how &quot;specific&quot; they are. This</span>
         <span class="comment">// ensures that we try the most specific directives first when</span>
         <span class="comment">// attempting to match a piece of metadata.</span>
@@ -1334,14 +1359,7 @@
             }
         }
 
-        <span class="prelude-val">Some</span>(<span class="ident">ordering</span>)
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">Ord</span> <span class="kw">for</span> <span class="ident">Directive</span> {
-    <span class="kw">fn</span> <span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ordering</span> {
-        <span class="self">self</span>.<span class="ident">partial_cmp</span>(<span class="ident">other</span>)
-            .<span class="ident">expect</span>(<span class="string">&quot;Directive::partial_cmp should define a total order&quot;</span>)
+        <span class="ident">ordering</span>
     }
 }
 
@@ -1390,6 +1408,12 @@
     }
 }
 
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Level</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Directive</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">level</span>: <span class="ident">Level</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">LevelFilter</span>::<span class="ident">from_level</span>(<span class="ident">level</span>).<span class="ident">into</span>()
+    }
+}
+
 <span class="comment">// === impl DirectiveSet ===</span>
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">DirectiveSet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
@@ -1424,9 +1448,9 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">add</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">directive</span>: <span class="ident">T</span>) {
         <span class="comment">// does this directive enable a more verbose level than the current</span>
         <span class="comment">// max? if so, update the max level.</span>
-        <span class="kw">let</span> <span class="ident">level</span> <span class="op">=</span> <span class="ident">directive</span>.<span class="ident">level</span>();
-        <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">level</span> <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">max_level</span> {
-            <span class="self">self</span>.<span class="ident">max_level</span> <span class="op">=</span> <span class="ident">level</span>.<span class="ident">clone</span>();
+        <span class="kw">let</span> <span class="ident">level</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">directive</span>.<span class="ident">level</span>();
+        <span class="kw">if</span> <span class="ident">level</span> <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">max_level</span> {
+            <span class="self">self</span>.<span class="ident">max_level</span> <span class="op">=</span> <span class="ident">level</span>;
         }
         <span class="comment">// insert the directive into the vec of directives, ordered by</span>
         <span class="comment">// specificity (length of target + number of field filters). this</span>
@@ -1467,8 +1491,8 @@
                     <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">f</span>);
                 }
                 <span class="kw">match</span> <span class="ident">base_level</span> {
-                    <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">b</span>) <span class="kw">if</span> <span class="ident">d</span>.<span class="ident">level</span> <span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">b</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">base_level</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">d</span>.<span class="ident">level</span>.<span class="ident">clone</span>()),
-                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">base_level</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">d</span>.<span class="ident">level</span>.<span class="ident">clone</span>()),
+                    <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">b</span>) <span class="kw">if</span> <span class="ident">d</span>.<span class="ident">level</span> <span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">b</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">base_level</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">d</span>.<span class="ident">level</span>),
+                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">base_level</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">d</span>.<span class="ident">level</span>),
                     <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
                 }
                 <span class="prelude-val">None</span>
@@ -1489,6 +1513,12 @@
             <span class="prelude-val">None</span>
         }
     }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">has_value_filters</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">directives</span>
+            .<span class="ident">iter</span>()
+            .<span class="ident">any</span>(<span class="op">|</span><span class="ident">d</span><span class="op">|</span> <span class="ident">d</span>.<span class="ident">fields</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="ident">f</span>.<span class="ident">value</span>.<span class="ident">is_some</span>()))
+    }
 }
 
 <span class="comment">// === impl Statics ===</span>
@@ -1503,8 +1533,8 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">PartialOrd</span> <span class="kw">for</span> <span class="ident">StaticDirective</span> {
-    <span class="kw">fn</span> <span class="ident">partial_cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">StaticDirective</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ordering</span><span class="op">&gt;</span> {
+<span class="kw">impl</span> <span class="ident">Ord</span> <span class="kw">for</span> <span class="ident">StaticDirective</span> {
+    <span class="kw">fn</span> <span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">StaticDirective</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ordering</span> {
         <span class="comment">// We attempt to order directives by how &quot;specific&quot; they are. This</span>
         <span class="comment">// ensures that we try the most specific directives first when</span>
         <span class="comment">// attempting to match a piece of metadata.</span>
@@ -1543,14 +1573,13 @@
             }
         }
 
-        <span class="prelude-val">Some</span>(<span class="ident">ordering</span>)
+        <span class="ident">ordering</span>
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Ord</span> <span class="kw">for</span> <span class="ident">StaticDirective</span> {
-    <span class="kw">fn</span> <span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ordering</span> {
-        <span class="self">self</span>.<span class="ident">partial_cmp</span>(<span class="ident">other</span>)
-            .<span class="ident">expect</span>(<span class="string">&quot;StaticDirective::partial_cmp should define a total order&quot;</span>)
+<span class="kw">impl</span> <span class="ident">PartialOrd</span> <span class="kw">for</span> <span class="ident">StaticDirective</span> {
+    <span class="kw">fn</span> <span class="ident">partial_cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ordering</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">cmp</span>(<span class="ident">other</span>))
     }
 }
 
@@ -1691,7 +1720,7 @@
             .<span class="ident">collect</span>();
         <span class="ident">SpanMatcher</span> {
             <span class="ident">field_matches</span>,
-            <span class="ident">base_level</span>: <span class="self">self</span>.<span class="ident">base_level</span>.<span class="ident">clone</span>(),
+            <span class="ident">base_level</span>: <span class="self">self</span>.<span class="ident">base_level</span>,
         }
     }
 }
@@ -1703,7 +1732,7 @@
             .<span class="ident">iter</span>()
             .<span class="ident">filter_map</span>(<span class="ident">field</span>::<span class="ident">SpanMatch</span>::<span class="ident">filter</span>)
             .<span class="ident">max</span>()
-            .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">base_level</span>.<span class="ident">clone</span>())
+            .<span class="ident">unwrap_or</span>(<span class="self">self</span>.<span class="ident">base_level</span>)
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">record_update</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">record</span>: <span class="kw-2">&amp;</span><span class="ident">span</span>::<span class="ident">Record</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) {
@@ -2022,6 +2051,15 @@
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">dirs</span>[<span class="number">2</span>].<span class="ident">level</span>, <span class="ident">LevelFilter</span>::<span class="ident">DEBUG</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">dirs</span>[<span class="number">2</span>].<span class="ident">in_span</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;baz&quot;</span>.<span class="ident">to_string</span>()));
     }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">parse_directives_with_dash_in_target_name</span>() {
+        <span class="kw">let</span> <span class="ident">dirs</span> <span class="op">=</span> <span class="ident">parse_directives</span>(<span class="string">&quot;target-name=info&quot;</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">dirs</span>.<span class="ident">len</span>(), <span class="number">1</span>, <span class="string">&quot;\nparsed: {:#?}&quot;</span>, <span class="ident">dirs</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">dirs</span>[<span class="number">0</span>].<span class="ident">target</span>, <span class="prelude-val">Some</span>(<span class="string">&quot;target-name&quot;</span>.<span class="ident">to_string</span>()));
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">dirs</span>[<span class="number">0</span>].<span class="ident">level</span>, <span class="ident">LevelFilter</span>::<span class="ident">INFO</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">dirs</span>[<span class="number">0</span>].<span class="ident">in_span</span>, <span class="prelude-val">None</span>);
+    }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../../";window.currentCrate = "tracing_subscriber";</script><script src="../../../../aliases.js"></script><script src="../../../../main.js"></script><script src="../../../../source-script.js"></script><script src="../../../../source-files.js"></script><script defer src="../../../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../../";window.currentCrate = "tracing_subscriber";</script><script src="../../../../main.js"></script><script src="../../../../source-script.js"></script><script src="../../../../source-files.js"></script><script defer src="../../../../search-index.js"></script></body></html>

@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["RecvError","Error produced when receiving a value fails."],["SendError","Error produced when sending a value fails."]]});
+initSidebarItems({"struct":[["SendError","Error produced when sending a value fails."]]});

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `tracing` crate."><meta name="keywords" content="rust, rustlang, rust-lang, tracing"><title>tracing - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../dark.css"><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="shortcut icon" href="../favicon.ico"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../tracing/index.html'><div class='logo-container'><img src='../rust-logo.png' alt='logo'></div></a><p class='location'>Crate tracing</p><div class="sidebar-elems"><a id='all-types' href='all.html'><p>See all tracing's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li></ul></div><p class='location'></p><script>window.sidebarCurrent = {name: 'tracing', ty: 'mod', relpath: '../'};</script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../src/tracing/lib.rs.html#1-841' title='goto source code'>[src]</a></span><span class='in-band'>Crate <a class="mod" href=''>tracing</a></span></h1><div class='docblock'><p>A scoped, structured logging and diagnostics system.</p>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `tracing` crate."><meta name="keywords" content="rust, rustlang, rust-lang, tracing"><title>tracing - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../dark.css"><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="shortcut icon" href="../favicon.ico"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../tracing/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png' alt='logo'></div></a><p class='location'>Crate tracing</p><div class="sidebar-elems"><a id='all-types' href='all.html'><p>See all tracing's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li></ul></div><p class='location'></p><script>window.sidebarCurrent = {name: 'tracing', ty: 'mod', relpath: '../'};</script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../src/tracing/lib.rs.html#1-1035' title='goto source code'>[src]</a></span><span class='in-band'>Crate <a class="mod" href=''>tracing</a></span></h1><div class='docblock'><p>A scoped, structured logging and diagnostics system.</p>
 <h1 id="overview" class="section-header"><a href="#overview">Overview</a></h1>
 <p><code>tracing</code> is a framework for instrumenting Rust programs to collect
 structured, event-based diagnostic information.</p>
@@ -14,12 +14,13 @@ addition, <code>tracing</code> spans are <em>structured</em>, with the ability t
 data as well as textual messages.</p>
 <p>The <code>tracing</code> crate provides the APIs necessary for instrumenting libraries
 and applications to emit trace data.</p>
+<p><em>Compiler support: <a href="#supported-rust-versions">requires <code>rustc</code> 1.42+</a></em></p>
 <h1 id="core-concepts" class="section-header"><a href="#core-concepts">Core Concepts</a></h1>
 <p>The core of <code>tracing</code>'s API is composed of <em>spans</em>, <em>events</em> and
 <em>subscribers</em>. We'll cover these in turn.</p>
 <h2 id="spans" class="section-header"><a href="#spans">Spans</a></h2>
 <p>To record the flow of execution through a program, <code>tracing</code> introduces the
-concept of <a href="span/index.html">spans</a>. Unlike a log line that represents a <em>moment in
+concept of <a href="mod@span">spans</a>. Unlike a log line that represents a <em>moment in
 time</em>, a span represents a <em>period of time</em> with a beginning and an end. When a
 program begins executing in a context or performing a unit of work, it
 <em>enters</em> that context's span, and when it stops executing in that context,
@@ -34,10 +35,19 @@ referred to as that thread's <em>current</em> span.</p>
 <span class="comment">// indicates that we are in the span for the current lexical scope.</span>
 <span class="kw">let</span> <span class="ident">_enter</span> <span class="op">=</span> <span class="ident">span</span>.<span class="ident">enter</span>();
 <span class="comment">// perform some work in the context of `my_span`...</span></pre></div>
-<p>The <a href="span/index.html"><code>span</code> module</a>'s documentation provides further details on how to
+<p>The <a href="mod@span"><code>span</code> module</a>'s documentation provides further details on how to
 use spans.</p>
+<div class="information">
+     <div class="tooltip compile_fail" style="">&#x26a0; &#xfe0f;<span class="tooltiptext">Warning</span></div>
+ </div><div class="example-wrap" style="display:inline-block"><pre class="compile_fail" style="white-space:normal;font:inherit;">
+     <strong>Warning</strong>: In asynchronous code that uses async/await syntax,
+     <code>Span::enter</code> may produce incorrect traces if the returned drop
+     guard is held across an await point. See
+     <a href="span/struct.Span.html#in-asynchronous-code">the method documentation</a>
+     for details.
+ </pre></div>
 <h2 id="events" class="section-header"><a href="#events">Events</a></h2>
-<p>An <a href="struct.Event.html"><code>Event</code></a> represents a <em>moment</em> in time. It signifies something that
+<p>An [<code>Event</code>] represents a <em>moment</em> in time. It signifies something that
 happened while a trace was being recorded. <code>Event</code>s are comparable to the log
 records emitted by unstructured logging code, but unlike a typical log line,
 an <code>Event</code> may occur within the context of a span.</p>
@@ -57,20 +67,20 @@ an <code>Event</code> may occur within the context of a span.</p>
 <p>In general, events should be used to represent points in time <em>within</em> a
 span — a request returned with a given status code, <em>n</em> new items were
 taken from a queue, and so on.</p>
-<p>The <a href="struct.Event.html"><code>Event</code> struct</a> documentation provides further details on using
+<p>The [<code>Event</code> struct][<code>Event</code>] documentation provides further details on using
 events.</p>
 <h2 id="subscribers" class="section-header"><a href="#subscribers">Subscribers</a></h2>
 <p>As <code>Span</code>s and <code>Event</code>s occur, they are recorded or aggregated by
-implementations of the <a href="subscriber/trait.Subscriber.html"><code>Subscriber</code></a> trait. <code>Subscriber</code>s are notified
+implementations of the <a href="subscriber::Subscriber"><code>Subscriber</code></a> trait. <code>Subscriber</code>s are notified
 when an <code>Event</code> takes place and when a <code>Span</code> is entered or exited. These
 notifications are represented by the following <code>Subscriber</code> trait methods:</p>
 <ul>
-<li><a href="subscriber/trait.Subscriber.html#tymethod.event"><code>event</code></a>, called when an <code>Event</code> takes place,</li>
-<li><a href="subscriber/trait.Subscriber.html#tymethod.enter"><code>enter</code></a>, called when execution enters a <code>Span</code>,</li>
-<li><a href="subscriber/trait.Subscriber.html#tymethod.exit"><code>exit</code></a>, called when execution exits a <code>Span</code></li>
+<li><a href="subscriber::Subscriber::event"><code>event</code></a>, called when an <code>Event</code> takes place,</li>
+<li><a href="subscriber::Subscriber::enter"><code>enter</code></a>, called when execution enters a <code>Span</code>,</li>
+<li><a href="subscriber::Subscriber::exit"><code>exit</code></a>, called when execution exits a <code>Span</code></li>
 </ul>
-<p>In addition, subscribers may implement the <a href="subscriber/trait.Subscriber.html#tymethod.enabled"><code>enabled</code></a> function to <em>filter</em>
-the notifications they receive based on <a href="struct.Metadata.html">metadata</a> describing each <code>Span</code>
+<p>In addition, subscribers may implement the <a href="subscriber::Subscriber::enabled"><code>enabled</code></a> function to <em>filter</em>
+the notifications they receive based on <a href="Metadata">metadata</a> describing each <code>Span</code>
 or <code>Event</code>. If a call to <code>Subscriber::enabled</code> returns <code>false</code> for a given
 set of metadata, that <code>Subscriber</code> will <em>not</em> be notified about the
 corresponding <code>Span</code> or <code>Event</code>. For performance reasons, if no currently
@@ -85,7 +95,7 @@ tracing = &quot;0.1&quot;
 <h2 id="recording-spans-and-events" class="section-header"><a href="#recording-spans-and-events">Recording Spans and Events</a></h2>
 <p>Spans and events are recorded using macros.</p>
 <h3 id="spans-1" class="section-header"><a href="#spans-1">Spans</a></h3>
-<p>The <a href="macro.span.html"><code>span!</code></a> macro expands to a <a href="span/struct.Span.html"><code>Span</code> struct</a> which is used to
+<p>The <a href="macro.span.html"><code>span!</code></a> macro expands to a <a href="span::Span"><code>Span</code> struct</a> which is used to
 record a span. The [<code>Span::enter</code>] method on that struct records that the
 span has been entered, and returns a <a href="https://github.com/rust-unofficial/patterns/blob/master/patterns/RAII.md">RAII</a> guard object, which will exit
 the span when dropped.</p>
@@ -120,11 +130,9 @@ fields using <code>fmt::Debug</code>.</p>
     <span class="macro">event</span><span class="macro">!</span>(<span class="ident">Level</span>::<span class="ident">INFO</span>, <span class="string">&quot;inside my_function!&quot;</span>);
     <span class="comment">// ...</span>
 }</pre></div>
-<p><strong>Note</strong>: using <code>#[instrument]</code> on <code>async fn</code>s requires the
-<a href="https://crates.io/crates/tracing-futures"><code>tracing-futures</code></a> crate as a dependency, as well.</p>
 <p>You can find more examples showing how to use this crate <a href="https://github.com/tokio-rs/tracing/tree/master/examples">here</a>.</p>
 <h3 id="events-1" class="section-header"><a href="#events-1">Events</a></h3>
-<p><a href="struct.Event.html"><code>Event</code></a>s are recorded using the <a href="macro.event.html"><code>event!</code></a> macro:</p>
+<p>[<code>Event</code>]s are recorded using the <a href="macro.event.html"><code>event!</code></a> macro:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered">
 <span class="kw">use</span> <span class="ident">tracing</span>::{<span class="ident">event</span>, <span class="ident">Level</span>};
@@ -184,6 +192,15 @@ using the local variable shorthand:</p>
 <span class="comment">// the span will have the fields `user.name = &quot;ferris&quot;` and</span>
 <span class="comment">// `user.email = &quot;ferris@rust-lang.org&quot;`.</span>
 <span class="macro">span</span><span class="macro">!</span>(<span class="ident">Level</span>::<span class="ident">TRACE</span>, <span class="string">&quot;login&quot;</span>, <span class="ident">user</span>.<span class="ident">name</span>, <span class="ident">user</span>.<span class="ident">email</span>);</pre></div>
+<p>Fields with names that are not Rust identifiers, or with names that are Rust reserved words,
+may be created using quoted string literals. However, this may not be used with the local
+variable shorthand.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="comment">// records an event with fields whose names are not Rust identifiers</span>
+<span class="comment">//  - &quot;guid:x-request-id&quot;, containing a `:`, with the value &quot;abcdef&quot;</span>
+<span class="comment">//  - &quot;type&quot;, which is a reserved word, with the value &quot;request&quot;</span>
+<span class="macro">span</span><span class="macro">!</span>(<span class="ident">Level</span>::<span class="ident">TRACE</span>, <span class="string">&quot;api&quot;</span>, <span class="string">&quot;guid:x-request-id&quot;</span> <span class="op">=</span> <span class="string">&quot;abcdef&quot;</span>, <span class="string">&quot;type&quot;</span> <span class="op">=</span> <span class="string">&quot;request&quot;</span>);</pre></div>
 <p>The <code>?</code> sigil is shorthand that specifies a field should be recorded using
 its <a href="https://doc.rust-lang.org/std/fmt/trait.Debug.html"><code>fmt::Debug</code></a> implementation:</p>
 
@@ -285,7 +302,7 @@ use <code>tracing</code> can begin with a simple drop-in replacement.</p>
 
 <span class="comment">// the `#[tracing::instrument]` attribute creates and enters a span</span>
 <span class="comment">// every time the instrumented function is called. The span is named after the</span>
-<span class="comment">// the function or method. Paramaters passed to the function are recorded as fields.</span>
+<span class="comment">// the function or method. Parameters passed to the function are recorded as fields.</span>
 <span class="attribute">#[<span class="ident">tracing</span>::<span class="ident">instrument</span>]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">shave</span>(<span class="ident">yak</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Error</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="comment">// this creates an event at the DEBUG level with two fields:</span>
@@ -346,7 +363,7 @@ implementation compatible with <code>tracing</code>. A <code>Subscriber</code> i
 way of collecting trace data, such as by logging it to standard output.</p>
 <p>This library does not contain any <code>Subscriber</code> implementations; these are
 provided by <a href="#related-crates">other crates</a>.</p>
-<p>The simplest way to use a subscriber is to call the <a href="subscriber/fn.set_global_default.html"><code>set_global_default</code></a>
+<p>The simplest way to use a subscriber is to call the <a href="subscriber::set_global_default"><code>set_global_default</code></a>
 function:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered">
@@ -355,13 +372,18 @@ function:</p>
 <span class="kw">let</span> <span class="ident">my_subscriber</span> <span class="op">=</span> <span class="ident">FooSubscriber</span>::<span class="ident">new</span>();
 <span class="ident">tracing</span>::<span class="ident">subscriber</span>::<span class="ident">set_global_default</span>(<span class="ident">my_subscriber</span>)
     .<span class="ident">expect</span>(<span class="string">&quot;setting tracing default failed&quot;</span>);</pre></div>
-<p><strong>Note:</strong> Libraries should <em>NOT</em> call <code>set_global_default()</code>! That will
-cause conflicts when executables try to set the default later.</p>
+<div class="information">
+     <div class="tooltip compile_fail" style="">&#x26a0; &#xfe0f;<span class="tooltiptext">Warning</span></div>
+ </div><div class="example-wrap" style="display:inline-block"><pre class="compile_fail" style="white-space:normal;font:inherit;">
+ <strong>Warning</strong>: In general, libraries should <em>not</em> call
+ <code>set_global_default()</code>! Doing so will cause conflicts when
+ executables that depend on the library try to set the default later.
+ </pre></div>
 <p>This subscriber will be used as the default in all threads for the
 remainder of the duration of the program, similar to setting the logger
 in the <code>log</code> crate.</p>
 <p>In addition, the default subscriber can be set through using the
-<a href="subscriber/fn.with_default.html"><code>with_default</code></a> function. This follows the <code>tokio</code> pattern of using
+<a href="subscriber::with_default"><code>with_default</code></a> function. This follows the <code>tokio</code> pattern of using
 closures to represent executing code in a context that is exited at the end
 of the closure. For example:</p>
 
@@ -386,10 +408,10 @@ denominator&quot; for text-based logging in Rust — a vast majority of Rust
 libraries and applications either emit or consume <code>log</code> records. Therefore,
 <code>tracing</code> provides multiple forms of interoperability with <code>log</code>: <code>tracing</code>
 instrumentation can emit <code>log</code> records, and a compatibility layer enables
-<code>tracing</code> <a href="subscriber/trait.Subscriber.html"><code>Subscriber</code></a>s to consume <code>log</code> records as <code>tracing</code> <a href="struct.Event.html"><code>Event</code></a>s.</p>
+<code>tracing</code> <a href="subscriber::Subscriber"><code>Subscriber</code></a>s to consume <code>log</code> records as <code>tracing</code> [<code>Event</code>]s.</p>
 <h3 id="emitting-log-records" class="section-header"><a href="#emitting-log-records">Emitting <code>log</code> Records</a></h3>
 <p>This crate provides two feature flags, &quot;log&quot; and &quot;log-always&quot;, which will
-cause [spans] and [events] to emit <code>log</code> records. When the &quot;log&quot; feature is
+cause <a href="mod@span">spans</a> and <a href="Event">events</a> to emit <code>log</code> records. When the &quot;log&quot; feature is
 enabled, if no <code>tracing</code> <code>Subscriber</code> is active, invoking an event macro or
 creating a span with fields will emit a <code>log</code> record. This is intended
 primarily for use in libraries which wish to emit diagnostics that can be
@@ -410,12 +432,16 @@ span or event's fields, and all additional information recorded by <code>log</co
 populated. Additionally, <code>log</code> records are also generated when spans are
 entered, exited, and closed. Since these additional span lifecycle logs have
 the potential to be very verbose, and don't include additional fields, they
-are categorized under a separate <code>log</code> target, &quot;tracing::span&quot;, which may be
-enabled or disabled separately from other <code>log</code> records emitted by <code>tracing</code>.</p>
+will always be emitted at the <code>Trace</code> level, rather than inheriting the
+level of the span that generated them. Furthermore, they are are categorized
+under a separate <code>log</code> target, &quot;tracing::span&quot; (and its sub-target,
+&quot;tracing::span::active&quot;, for the logs on entering and exiting a span), which
+may be enabled or disabled separately from other <code>log</code> records emitted by
+<code>tracing</code>.</p>
 <h3 id="consuming-log-records" class="section-header"><a href="#consuming-log-records">Consuming <code>log</code> Records</a></h3>
 <p>The <a href="https://crates.io/crates/tracing-log"><code>tracing-log</code></a> crate provides a compatibility layer which
-allows a <code>tracing</code> <a href="subscriber/trait.Subscriber.html"><code>Subscriber</code></a> to consume <code>log</code> records as though they
-were <code>tracing</code> [events]. This allows applications using <code>tracing</code> to record
+allows a <code>tracing</code> <a href="subscriber::Subscriber"><code>Subscriber</code></a> to consume <code>log</code> records as though they
+were <code>tracing</code> <a href="Event">events</a>. This allows applications using <code>tracing</code> to record
 the logs emitted by dependencies using <code>log</code> as events within the context of
 the application's trace tree. See <a href="https://docs.rs/tracing-log/latest/tracing_log/#convert-log-records-to-tracing-events">that crate's documentation</a>
 for details.</p>
@@ -458,12 +484,30 @@ framework.</li>
 GELF format.</li>
 <li><a href="https://crates.io/crates/tracing-coz"><code>tracing-coz</code></a> provides integration with the <a href="https://github.com/plasma-umass/coz">coz</a> causal profiler
 (Linux-only).</li>
+<li><a href="https://crates.io/crates/tracing-bunyan-formatter"><code>tracing-bunyan-formatter</code></a> provides a layer implementation that reports events and spans
+in <a href="https://github.com/trentm/node-bunyan">bunyan</a> format, enriched with timing information.</li>
+<li><a href="https://docs.rs/tracing-wasm"><code>tracing-wasm</code></a> provides a <code>Subscriber</code>/<code>Layer</code> implementation that reports
+events and spans via browser <code>console.log</code> and <a href="https://developer.mozilla.org/en-US/docs/Web/API/User_Timing_API">User Timing API (<code>window.performance</code>)</a>.</li>
+<li><a href="https://crates.io/crates/tide-tracing"><code>tide-tracing</code></a> provides a <a href="https://crates.io/crates/tide">tide</a> middleware to trace all incoming requests and responses.</li>
+<li><a href="https://crates.io/crates/test-env-log"><code>test-env-log</code></a> takes care of initializing <code>tracing</code> for tests, based on
+environment variables with an <code>env_logger</code> compatible syntax.</li>
+<li><a href="https://docs.rs/tracing-unwrap"><code>tracing-unwrap</code></a> provides convenience methods to report failed unwraps
+on <code>Result</code> or <code>Option</code> types to a <code>Subscriber</code>.</li>
+<li><a href="https://crates.io/crates/diesel-tracing"><code>diesel-tracing</code></a> provides integration with <a href="https://crates.io/crates/diesel"><code>diesel</code></a> database connections.</li>
+<li><a href="https://crates.io/crates/tracing-tracy"><code>tracing-tracy</code></a> provides a way to collect <a href="https://github.com/wolfpld/tracy">Tracy</a> profiles in instrumented
+applications.</li>
 </ul>
 <p>If you're the maintainer of a <code>tracing</code> ecosystem crate not listed above,
 please let us know! We'd love to add your project to the list!</p>
-<p><strong>Note:</strong> that some of the ecosystem crates are currently unreleased and
-undergoing active development. They may be less stable than <code>tracing</code> and
-<code>tracing-core</code>.</p>
+<div class="information">
+     <div class="tooltip ignore" style="">ⓘ<span class="tooltiptext">Note</span></div>
+ </div>
+ <div class="example-wrap" style="display:inline-block">
+ <pre class="ignore" style="white-space:normal;font:inherit;">
+ <strong>Note</strong>: Some of these ecosystem crates are currently
+ unreleased and/or in earlier stages of development. They may be less stable
+ than <code>tracing</code> and <code>tracing-core</code>.
+ </pre></div>
 <h2 id="crate-feature-flags" class="section-header"><a href="#crate-feature-flags">Crate Feature Flags</a></h2>
 <p>The following crate feature flags are available:</p>
 <ul>
@@ -474,13 +518,11 @@ undergoing active development. They may be less stable than <code>tracing</code>
 <p><code>log</code>: causes trace instrumentation points to emit <a href="https://docs.rs/log/0.4.6/log/"><code>log</code></a> records as well
 as trace events, if a default <code>tracing</code> subscriber has not been set. This
 is intended for use in libraries whose users may be using either <code>tracing</code>
-or <code>log</code>.
-<strong>Note:</strong> <code>log</code> support will not work when <code>tracing</code> is renamed in <code>Cargo.toml</code>,
-due to oddities in macro expansion.</p>
+or <code>log</code>.</p>
 </li>
 <li>
 <p><code>log-always</code>: Emit <code>log</code> records from all <code>tracing</code> spans and events, even
-a <code>tracing</code> subscriber has been set. This should be set only by
+if a <code>tracing</code> subscriber has been set. This should be set only by
 applications which intend to collect traces and logs separately; if an
 adapter is used to convert <code>log</code> records into <code>tracing</code> events, this will
 cause duplicate events to occur.</p>
@@ -494,16 +536,34 @@ which may add to the compile time of crates that do not already use it.</p>
 <p><code>std</code>: Depend on the Rust standard library (enabled by default).</p>
 <p><code>no_std</code> users may disable this feature with <code>default-features = false</code>:</p>
 <pre><code class="language-toml">[dependencies]
-tracing = { version = &quot;0.1.14&quot;, default-features = false }
+tracing = { version = &quot;0.1.22&quot;, default-features = false }
 </code></pre>
-<p><em>Compiler support: requires rustc 1.39+</em></p>
-<p><strong>Note</strong>:<code>tracing</code>'s <code>no_std</code> support requires <code>liballoc</code>.</p>
 </li>
 </ul>
+<div class="information">
+     <div class="tooltip ignore" style="">ⓘ<span class="tooltiptext">Note</span></div>
+ </div>
+ <div class="example-wrap" style="display:inline-block">
+ <pre class="ignore" style="white-space:normal;font:inherit;">
+ <strong>Note</strong>: <code>tracing</code>'s <code>no_std</code> support
+ requires <code>liballoc</code>.
+ </pre></div>
+<h2 id="supported-rust-versions" class="section-header"><a href="#supported-rust-versions">Supported Rust Versions</a></h2>
+<p>Tracing is built against the latest stable release. The minimum supported
+version is 1.42. The current Tracing version is not guaranteed to build on
+Rust versions earlier than the minimum supported version.</p>
+<p>Tracing follows the same compiler support policies as the rest of the Tokio
+project. The current stable Rust compiler and the three most recent minor
+versions before it will always be supported. For example, if the current
+stable compiler version is 1.45, the minimum supported version will not be
+increased past 1.42, three minor versions prior. Increasing the minimum
+supported compiler version is not considered a semver breaking change as
+long as doing so complies with this policy.</p>
 </div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
 <table><tr class='module-item'><td><a class="mod" href="dispatcher/index.html" title='tracing::dispatcher mod'>dispatcher</a></td><td class='docblock-short'><p>Dispatches trace events to <a href="struct.Subscriber.html"><code>Subscriber</code></a>s.</p>
 </td></tr><tr class='module-item'><td><a class="mod" href="event/index.html" title='tracing::event mod'>event</a></td><td class='docblock-short'><p>Events represent single points in time during the execution of a program.</p>
 </td></tr><tr class='module-item'><td><a class="mod" href="field/index.html" title='tracing::field mod'>field</a></td><td class='docblock-short'><p>Structured data associated with <code>Span</code>s and <code>Event</code>s.</p>
+</td></tr><tr class='module-item'><td><a class="mod" href="instrument/index.html" title='tracing::instrument mod'>instrument</a></td><td class='docblock-short'><p>Attach a span to a <code>std::future::Future</code>.</p>
 </td></tr><tr class='module-item'><td><a class="mod" href="level_filters/index.html" title='tracing::level_filters mod'>level_filters</a></td><td class='docblock-short'><p>Trace verbosity level filtering.</p>
 </td></tr><tr class='module-item'><td><a class="mod" href="span/index.html" title='tracing::span mod'>span</a></td><td class='docblock-short'><p>Spans represent periods of time in which a program was executing in a
 particular context.</p>
@@ -530,9 +590,10 @@ execution of a program.</p>
 </td></tr><tr class='module-item'><td><a class="struct" href="struct.Span.html" title='tracing::Span struct'>Span</a></td><td class='docblock-short'><p>A handle representing a span, with the capability to enter the span if it
 exists.</p>
 </td></tr></table><h2 id='traits' class='section-header'><a href="#traits">Traits</a></h2>
-<table><tr class='module-item'><td><a class="trait" href="trait.Subscriber.html" title='tracing::Subscriber trait'>Subscriber</a></td><td class='docblock-short'><p>Trait representing the functions required to collect trace data.</p>
+<table><tr class='module-item'><td><a class="trait" href="trait.Instrument.html" title='tracing::Instrument trait'>Instrument</a></td><td class='docblock-short'><p>Attaches spans to a <code>std::future::Future</code>.</p>
+</td></tr><tr class='module-item'><td><a class="trait" href="trait.Subscriber.html" title='tracing::Subscriber trait'>Subscriber</a></td><td class='docblock-short'><p>Trait representing the functions required to collect trace data.</p>
 </td></tr><tr class='module-item'><td><a class="trait" href="trait.Value.html" title='tracing::Value trait'>Value</a></td><td class='docblock-short'><p>A field value of an erased type.</p>
 </td></tr></table><h2 id='attributes' class='section-header'><a href="#attributes">Attribute Macros</a></h2>
 <table><tr class='module-item'><td><a class="attr" href="attr.instrument.html" title='tracing::instrument attr'>instrument</a></td><td class='docblock-short'><p>Instruments a function to create and enter a <code>tracing</code> <a href="https://docs.rs/tracing/latest/tracing/span/index.html">span</a> every time
 the function is called.</p>
-</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../";window.currentCrate = "tracing";</script><script src="../aliases.js"></script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../";window.currentCrate = "tracing";</script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>

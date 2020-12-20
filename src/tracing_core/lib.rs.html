@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-core-0.1.10/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing_core/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-core-0.1.17/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing_core/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -253,6 +253,30 @@
 <span id="253">253</span>
 <span id="254">254</span>
 <span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Core primitives for `tracing`.</span>
 <span class="doccomment">//!</span>
@@ -278,6 +302,10 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! In addition, it defines the global callsite registry and per-thread current</span>
 <span class="doccomment">//! dispatcher which other components of the tracing system rely on.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! *Compiler support: [requires `rustc` 1.40+][msrv]*</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! [msrv]: #supported-rust-versions</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ## Usage</span>
 <span class="doccomment">//!</span>
@@ -305,12 +333,25 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//!   ```toml</span>
 <span class="doccomment">//!   [dependencies]</span>
-<span class="doccomment">//!   tracing-core = { version = &quot;0.1.10&quot;, default-features = false }</span>
+<span class="doccomment">//!   tracing-core = { version = &quot;0.1.17&quot;, default-features = false }</span>
 <span class="doccomment">//!   ```</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//!   *Compiler support: requires rustc 1.39+*</span>
-<span class="doccomment">//!</span>
 <span class="doccomment">//!   **Note**:`tracing-core`&#39;s `no_std` support requires `liballoc`.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Supported Rust Versions</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Tracing is built against the latest stable release. The minimum supported</span>
+<span class="doccomment">//! version is 1.40. The current Tracing version is not guaranteed to build on</span>
+<span class="doccomment">//! Rust versions earlier than the minimum supported version.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Tracing follows the same compiler support policies as the rest of the Tokio</span>
+<span class="doccomment">//! project. The current stable Rust compiler and the three most recent minor</span>
+<span class="doccomment">//! versions before it will always be supported. For example, if the current</span>
+<span class="doccomment">//! stable compiler version is 1.45, the minimum supported version will not be</span>
+<span class="doccomment">//! increased past 1.42, three minor versions prior. Increasing the minimum</span>
+<span class="doccomment">//! supported compiler version is not considered a semver breaking change as</span>
+<span class="doccomment">//! long as doing so complies with this policy.</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [`span::Id`]: span/struct.Id.html</span>
 <span class="doccomment">//! [`Event`]: event/struct.Event.html</span>
@@ -324,9 +365,13 @@
 <span class="doccomment">//! [`Dispatch`]: dispatcher/struct.Dispatch.html</span>
 <span class="doccomment">//! [`tokio-rs/tracing`]: https://github.com/tokio-rs/tracing</span>
 <span class="doccomment">//! [`tracing`]: https://crates.io/crates/tracing</span>
-<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/tracing-core/0.1.10&quot;</span>)]</span>
+<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/tracing-core/0.1.17&quot;</span>)]</span>
+<span class="attribute">#![<span class="ident">doc</span>(
+    <span class="ident">html_logo_url</span> <span class="op">=</span> <span class="string">&quot;https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png&quot;</span>,
+    <span class="ident">issue_tracker_base_url</span> <span class="op">=</span> <span class="string">&quot;https://github.com/tokio-rs/tracing/issues/&quot;</span>
+)]</span>
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>), <span class="ident">no_std</span>)]</span>
-<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">feature</span>(<span class="ident">doc_cfg</span>))]</span>
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">feature</span>(<span class="ident">doc_cfg</span>), <span class="ident">deny</span>(<span class="ident">broken_intra_doc_links</span>))]</span>
 <span class="attribute">#![<span class="ident">warn</span>(
     <span class="ident">missing_debug_implementations</span>,
     <span class="ident">missing_docs</span>,
@@ -433,7 +478,7 @@
         <span class="ident">callsite</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">callsite</span>:<span class="ident">expr</span>,
         <span class="ident">kind</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">kind</span>:<span class="ident">expr</span>
     ) <span class="op">=</span><span class="op">&gt;</span> {
-        <span class="macro">metadata</span><span class="macro">!</span> {
+        <span class="macro-nonterminal">$</span><span class="kw">crate</span>::<span class="macro-nonterminal">metadata</span><span class="op">!</span> {
             <span class="ident">name</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>,
             <span class="ident">target</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">target</span>,
             <span class="ident">level</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">level</span>,
@@ -482,7 +527,10 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">spin</span>::<span class="ident">Once</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Once</span> <span class="op">=</span> <span class="self">self</span>::<span class="ident">spin</span>::<span class="ident">Once</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">stdlib</span>::<span class="ident">sync</span>::<span class="ident">Once</span>;
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">callsite</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">dispatcher</span>;
@@ -500,7 +548,7 @@
     <span class="ident">dispatcher</span>::<span class="ident">Dispatch</span>,
     <span class="ident">event</span>::<span class="ident">Event</span>,
     <span class="ident">field</span>::<span class="ident">Field</span>,
-    <span class="ident">metadata</span>::{<span class="ident">Level</span>, <span class="ident">Metadata</span>},
+    <span class="ident">metadata</span>::{<span class="ident">Level</span>, <span class="ident">LevelFilter</span>, <span class="ident">Metadata</span>},
     <span class="ident">subscriber</span>::<span class="ident">Subscriber</span>,
 };
 
@@ -510,4 +558,4 @@
     <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Sealed</span> {}
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "tracing_core";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "tracing_core";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

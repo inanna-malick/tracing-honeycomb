@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/reqwest-0.9.17/src/redirect.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>redirect.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../reqwest/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/reqwest-0.10.10/src/redirect.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>redirect.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../reqwest/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -327,32 +327,20 @@
 <span id="327">327</span>
 <span id="328">328</span>
 <span id="329">329</span>
-<span id="330">330</span>
-<span id="331">331</span>
-<span id="332">332</span>
-<span id="333">333</span>
-<span id="334">334</span>
-<span id="335">335</span>
-<span id="336">336</span>
-<span id="337">337</span>
-<span id="338">338</span>
-<span id="339">339</span>
-<span id="340">340</span>
-<span id="341">341</span>
 </pre><div class="example-wrap"><pre class="rust ">
+<span class="doccomment">//! Redirect Handling</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! By default, a `Client` will automatically handle HTTP redirects, having a</span>
+<span class="doccomment">//! maximum redirect chain of 10 hops. To customize this behavior, a</span>
+<span class="doccomment">//! `redirect::Policy` can be used with a `ClientBuilder`.</span>
+
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">StdError</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
 
-<span class="kw">use</span> <span class="ident">header</span>::{
-    <span class="ident">HeaderMap</span>,
-    <span class="ident">AUTHORIZATION</span>,
-    <span class="ident">COOKIE</span>,
-    <span class="ident">PROXY_AUTHORIZATION</span>,
-    <span class="ident">WWW_AUTHENTICATE</span>,
-
-};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">header</span>::{<span class="ident">HeaderMap</span>, <span class="ident">AUTHORIZATION</span>, <span class="ident">COOKIE</span>, <span class="ident">PROXY_AUTHORIZATION</span>, <span class="ident">WWW_AUTHENTICATE</span>};
 <span class="kw">use</span> <span class="ident">hyper</span>::<span class="ident">StatusCode</span>;
 
-<span class="kw">use</span> <span class="ident">Url</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">Url</span>;
 
 <span class="doccomment">/// A type that controls the policy on how to handle the following of redirects.</span>
 <span class="doccomment">///</span>
@@ -363,15 +351,14 @@
 <span class="doccomment">///   the allowed maximum redirect hops in a chain.</span>
 <span class="doccomment">/// - `none` can be used to disable all redirect behavior.</span>
 <span class="doccomment">/// - `custom` can be used to create a customized policy.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RedirectPolicy</span> {
-    <span class="ident">inner</span>: <span class="ident">Policy</span>,
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Policy</span> {
+    <span class="ident">inner</span>: <span class="ident">PolicyKind</span>,
 }
 
 <span class="doccomment">/// A type that holds information on the next request and previous requests</span>
 <span class="doccomment">/// in redirect chain.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RedirectAttempt</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Attempt</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="ident">status</span>: <span class="ident">StatusCode</span>,
     <span class="ident">next</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Url</span>,
     <span class="ident">previous</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">Url</span>],
@@ -379,50 +366,50 @@
 
 <span class="doccomment">/// An action to perform when a redirect status code is found.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RedirectAction</span> {
-    <span class="ident">inner</span>: <span class="ident">Action</span>,
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Action</span> {
+    <span class="ident">inner</span>: <span class="ident">ActionKind</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">RedirectPolicy</span> {
-    <span class="doccomment">/// Create a RedirectPolicy with a maximum number of redirects.</span>
+<span class="kw">impl</span> <span class="ident">Policy</span> {
+    <span class="doccomment">/// Create a `Policy` with a maximum number of redirects.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// An `Error` will be returned if the max is reached.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">limited</span>(<span class="ident">max</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RedirectPolicy</span> {
-        <span class="ident">RedirectPolicy</span> {
-            <span class="ident">inner</span>: <span class="ident">Policy</span>::<span class="ident">Limit</span>(<span class="ident">max</span>),
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">limited</span>(<span class="ident">max</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">inner</span>: <span class="ident">PolicyKind</span>::<span class="ident">Limit</span>(<span class="ident">max</span>),
         }
     }
 
-    <span class="doccomment">/// Create a RedirectPolicy that does not follow any redirect.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">none</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RedirectPolicy</span> {
-        <span class="ident">RedirectPolicy</span> {
-            <span class="ident">inner</span>: <span class="ident">Policy</span>::<span class="prelude-val">None</span>,
+    <span class="doccomment">/// Create a `Policy` that does not follow any redirect.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">none</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">Self</span> {
+            <span class="ident">inner</span>: <span class="ident">PolicyKind</span>::<span class="prelude-val">None</span>,
         }
     }
 
-    <span class="doccomment">/// Create a custom RedirectPolicy using the passed function.</span>
+    <span class="doccomment">/// Create a custom `Policy` using the passed function.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Note</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// The default RedirectPolicy handles redirect loops and a maximum loop</span>
+    <span class="doccomment">/// The default `Policy` handles a maximum loop</span>
     <span class="doccomment">/// chain, but the custom variant does not do that for you automatically.</span>
     <span class="doccomment">/// The custom policy should have some way of handling those.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Information on the next request and previous requests can be found</span>
-    <span class="doccomment">/// on the [`RedirectAttempt`] argument passed to the closure.</span>
+    <span class="doccomment">/// on the [`Attempt`] argument passed to the closure.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Actions can be conveniently created from methods on the</span>
-    <span class="doccomment">/// [`RedirectAttempt`].</span>
+    <span class="doccomment">/// [`Attempt`].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// # use reqwest::{Error, RedirectPolicy};</span>
+    <span class="doccomment">/// # use reqwest::{Error, redirect};</span>
     <span class="doccomment">/// #</span>
     <span class="doccomment">/// # fn run() -&gt; Result&lt;(), Error&gt; {</span>
-    <span class="doccomment">/// let custom = RedirectPolicy::custom(|attempt| {</span>
+    <span class="doccomment">/// let custom = redirect::Policy::custom(|attempt| {</span>
     <span class="doccomment">///     if attempt.previous().len() &gt; 5 {</span>
-    <span class="doccomment">///         attempt.too_many_redirects()</span>
+    <span class="doccomment">///         attempt.error(&quot;too many redirects&quot;)</span>
     <span class="doccomment">///     } else if attempt.url().host_str() == Some(&quot;example.domain&quot;) {</span>
     <span class="doccomment">///         // prevent redirects to &#39;example.domain&#39;</span>
     <span class="doccomment">///         attempt.stop()</span>
@@ -437,75 +424,75 @@
     <span class="doccomment">/// # }</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// [`RedirectAttempt`]: struct.RedirectAttempt.html</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">custom</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">policy</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RedirectPolicy</span>
+    <span class="doccomment">/// [`Attempt`]: struct.Attempt.html</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">custom</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">policy</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
     <span class="kw">where</span>
-        <span class="ident">T</span>: <span class="ident">Fn</span>(<span class="ident">RedirectAttempt</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RedirectAction</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+        <span class="ident">T</span>: <span class="ident">Fn</span>(<span class="ident">Attempt</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Action</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
     {
-        <span class="ident">RedirectPolicy</span> {
-            <span class="ident">inner</span>: <span class="ident">Policy</span>::<span class="ident">Custom</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">policy</span>)),
+        <span class="self">Self</span> {
+            <span class="ident">inner</span>: <span class="ident">PolicyKind</span>::<span class="ident">Custom</span>(<span class="ident">Box</span>::<span class="ident">new</span>(<span class="ident">policy</span>)),
         }
     }
 
-    <span class="doccomment">/// Apply this policy to a given [`RedirectAttempt`] to produce a [`RedirectAction`].</span>
+    <span class="doccomment">/// Apply this policy to a given [`Attempt`] to produce a [`Action`].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Note</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// This method can be used together with RedirectPolicy::custom()</span>
-    <span class="doccomment">/// to construct one RedirectPolicy that wraps another.</span>
+    <span class="doccomment">/// This method can be used together with `Policy::custom()`</span>
+    <span class="doccomment">/// to construct one `Policy` that wraps another.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// # use reqwest::{Error, RedirectPolicy};</span>
+    <span class="doccomment">/// # use reqwest::{Error, redirect};</span>
     <span class="doccomment">/// #</span>
     <span class="doccomment">/// # fn run() -&gt; Result&lt;(), Error&gt; {</span>
-    <span class="doccomment">/// let custom = RedirectPolicy::custom(|attempt| {</span>
+    <span class="doccomment">/// let custom = redirect::Policy::custom(|attempt| {</span>
     <span class="doccomment">///     eprintln!(&quot;{}, Location: {:?}&quot;, attempt.status(), attempt.url());</span>
-    <span class="doccomment">///     RedirectPolicy::default().redirect(attempt)</span>
+    <span class="doccomment">///     redirect::Policy::default().redirect(attempt)</span>
     <span class="doccomment">/// });</span>
     <span class="doccomment">/// # Ok(())</span>
     <span class="doccomment">/// # }</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">redirect</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">attempt</span>: <span class="ident">RedirectAttempt</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RedirectAction</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">redirect</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">attempt</span>: <span class="ident">Attempt</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Action</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">inner</span> {
-            <span class="ident">Policy</span>::<span class="ident">Custom</span>(<span class="kw-2">ref</span> <span class="ident">custom</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">custom</span>(<span class="ident">attempt</span>),
-            <span class="ident">Policy</span>::<span class="ident">Limit</span>(<span class="ident">max</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">PolicyKind</span>::<span class="ident">Custom</span>(<span class="kw-2">ref</span> <span class="ident">custom</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">custom</span>(<span class="ident">attempt</span>),
+            <span class="ident">PolicyKind</span>::<span class="ident">Limit</span>(<span class="ident">max</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="kw">if</span> <span class="ident">attempt</span>.<span class="ident">previous</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">max</span> {
-                    <span class="ident">attempt</span>.<span class="ident">too_many_redirects</span>()
-                } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">attempt</span>.<span class="ident">previous</span>.<span class="ident">contains</span>(<span class="ident">attempt</span>.<span class="ident">next</span>) {
-                    <span class="ident">attempt</span>.<span class="ident">loop_detected</span>()
+                    <span class="ident">attempt</span>.<span class="ident">error</span>(<span class="ident">TooManyRedirects</span>)
                 } <span class="kw">else</span> {
                     <span class="ident">attempt</span>.<span class="ident">follow</span>()
                 }
             }
-            <span class="ident">Policy</span>::<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">attempt</span>.<span class="ident">stop</span>(),
+            <span class="ident">PolicyKind</span>::<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">attempt</span>.<span class="ident">stop</span>(),
         }
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">check</span>(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">status</span>: <span class="ident">StatusCode</span>,
-        <span class="ident">next</span>: <span class="kw-2">&amp;</span><span class="ident">Url</span>,
-        <span class="ident">previous</span>: <span class="kw-2">&amp;</span>[<span class="ident">Url</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Action</span> {
-        <span class="self">self</span>
-            .<span class="ident">redirect</span>(<span class="ident">RedirectAttempt</span> {
-                <span class="ident">status</span>: <span class="ident">status</span>,
-                <span class="ident">next</span>: <span class="ident">next</span>,
-                <span class="ident">previous</span>: <span class="ident">previous</span>,
-            })
-            .<span class="ident">inner</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">check</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">status</span>: <span class="ident">StatusCode</span>, <span class="ident">next</span>: <span class="kw-2">&amp;</span><span class="ident">Url</span>, <span class="ident">previous</span>: <span class="kw-2">&amp;</span>[<span class="ident">Url</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ActionKind</span> {
+        <span class="self">self</span>.<span class="ident">redirect</span>(<span class="ident">Attempt</span> {
+            <span class="ident">status</span>,
+            <span class="ident">next</span>,
+            <span class="ident">previous</span>,
+        })
+        .<span class="ident">inner</span>
+    }
+
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">is_default</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">inner</span> {
+            <span class="ident">PolicyKind</span>::<span class="ident">Limit</span>(<span class="number">10</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+        }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">RedirectPolicy</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RedirectPolicy</span> {
-        <span class="ident">RedirectPolicy</span>::<span class="ident">limited</span>(<span class="number">10</span>)
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Policy</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Policy</span> {
+        <span class="comment">// Keep `is_default` in sync</span>
+        <span class="ident">Policy</span>::<span class="ident">limited</span>(<span class="number">10</span>)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">RedirectAttempt</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Attempt</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Get the type of redirect.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">status</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">StatusCode</span> {
         <span class="self">self</span>.<span class="ident">status</span>
@@ -521,71 +508,66 @@
         <span class="self">self</span>.<span class="ident">previous</span>
     }
     <span class="doccomment">/// Returns an action meaning reqwest should follow the next URL.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">follow</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RedirectAction</span> {
-        <span class="ident">RedirectAction</span> {
-            <span class="ident">inner</span>: <span class="ident">Action</span>::<span class="ident">Follow</span>,
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">follow</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Action</span> {
+        <span class="ident">Action</span> {
+            <span class="ident">inner</span>: <span class="ident">ActionKind</span>::<span class="ident">Follow</span>,
         }
     }
 
     <span class="doccomment">/// Returns an action meaning reqwest should not follow the next URL.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// The 30x response will be returned as the `Ok` result.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">stop</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RedirectAction</span> {
-        <span class="ident">RedirectAction</span> {
-            <span class="ident">inner</span>: <span class="ident">Action</span>::<span class="ident">Stop</span>,
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">stop</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Action</span> {
+        <span class="ident">Action</span> {
+            <span class="ident">inner</span>: <span class="ident">ActionKind</span>::<span class="ident">Stop</span>,
         }
     }
 
-    <span class="doccomment">/// Returns an action meaning there was a loop of redirects found.</span>
+    <span class="doccomment">/// Returns an action failing the redirect with an error.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// An `Error` will be returned for the result of the sent request.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">loop_detected</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RedirectAction</span> {
-        <span class="ident">RedirectAction</span> {
-            <span class="ident">inner</span>: <span class="ident">Action</span>::<span class="ident">LoopDetected</span>,
-        }
-    }
-
-    <span class="doccomment">/// Returns an action meaning there was a loop of redirects found.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// An `Error` will be returned for the result of the sent request.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">too_many_redirects</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RedirectAction</span> {
-        <span class="ident">RedirectAction</span> {
-            <span class="ident">inner</span>: <span class="ident">Action</span>::<span class="ident">TooManyRedirects</span>,
+    <span class="doccomment">/// The `Error` will be returned for the result of the sent request.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">error</span><span class="op">&lt;</span><span class="ident">E</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">error</span>: <span class="ident">E</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Action</span> {
+        <span class="ident">Action</span> {
+            <span class="ident">inner</span>: <span class="ident">ActionKind</span>::<span class="ident">Error</span>(<span class="ident">error</span>.<span class="ident">into</span>()),
         }
     }
 }
 
-<span class="kw">enum</span> <span class="ident">Policy</span> {
-    <span class="ident">Custom</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Fn</span>(<span class="ident">RedirectAttempt</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RedirectAction</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>),
+<span class="kw">enum</span> <span class="ident">PolicyKind</span> {
+    <span class="ident">Custom</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="ident">Attempt</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Action</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>),
     <span class="ident">Limit</span>(<span class="ident">usize</span>),
     <span class="prelude-val">None</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">Policy</span> {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
+        <span class="ident">f</span>.<span class="ident">debug_tuple</span>(<span class="string">&quot;Policy&quot;</span>).<span class="ident">field</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">inner</span>).<span class="ident">finish</span>()
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">PolicyKind</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="ident">Policy</span>::<span class="ident">Custom</span>(..) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">pad</span>(<span class="string">&quot;Custom&quot;</span>),
-            <span class="ident">Policy</span>::<span class="ident">Limit</span>(<span class="ident">max</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">debug_tuple</span>(<span class="string">&quot;Limit&quot;</span>).<span class="ident">field</span>(<span class="kw-2">&amp;</span><span class="ident">max</span>).<span class="ident">finish</span>(),
-            <span class="ident">Policy</span>::<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">pad</span>(<span class="string">&quot;None&quot;</span>),
+            <span class="ident">PolicyKind</span>::<span class="ident">Custom</span>(..) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">pad</span>(<span class="string">&quot;Custom&quot;</span>),
+            <span class="ident">PolicyKind</span>::<span class="ident">Limit</span>(<span class="ident">max</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">debug_tuple</span>(<span class="string">&quot;Limit&quot;</span>).<span class="ident">field</span>(<span class="kw-2">&amp;</span><span class="ident">max</span>).<span class="ident">finish</span>(),
+            <span class="ident">PolicyKind</span>::<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">pad</span>(<span class="string">&quot;None&quot;</span>),
         }
     }
 }
 
 <span class="comment">// pub(crate)</span>
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum</span> <span class="ident">Action</span> {
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">enum</span> <span class="ident">ActionKind</span> {
     <span class="ident">Follow</span>,
     <span class="ident">Stop</span>,
-    <span class="ident">LoopDetected</span>,
-    <span class="ident">TooManyRedirects</span>,
+    <span class="ident">Error</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>),
 }
-
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">remove_sensitive_headers</span>(<span class="ident">headers</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">HeaderMap</span>, <span class="ident">next</span>: <span class="kw-2">&amp;</span><span class="ident">Url</span>, <span class="ident">previous</span>: <span class="kw-2">&amp;</span>[<span class="ident">Url</span>]) {
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">previous</span>) <span class="op">=</span> <span class="ident">previous</span>.<span class="ident">last</span>() {
-        <span class="kw">let</span> <span class="ident">cross_host</span> <span class="op">=</span> <span class="ident">next</span>.<span class="ident">host_str</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">previous</span>.<span class="ident">host_str</span>() <span class="op">|</span><span class="op">|</span>
-                         <span class="ident">next</span>.<span class="ident">port_or_known_default</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">previous</span>.<span class="ident">port_or_known_default</span>();
+        <span class="kw">let</span> <span class="ident">cross_host</span> <span class="op">=</span> <span class="ident">next</span>.<span class="ident">host_str</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">previous</span>.<span class="ident">host_str</span>()
+            <span class="op">|</span><span class="op">|</span> <span class="ident">next</span>.<span class="ident">port_or_known_default</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">previous</span>.<span class="ident">port_or_known_default</span>();
         <span class="kw">if</span> <span class="ident">cross_host</span> {
             <span class="ident">headers</span>.<span class="ident">remove</span>(<span class="ident">AUTHORIZATION</span>);
             <span class="ident">headers</span>.<span class="ident">remove</span>(<span class="ident">COOKIE</span>);
@@ -596,48 +578,42 @@
     }
 }
 
-<span class="comment">/*
-This was the desired way of doing it, but ran in to inference issues when
-using closures, since the arguments received are references (&amp;Url and &amp;[Url]),
-and the compiler could not infer the lifetimes of those references. That means
-people would need to annotate the closure&#39;s argument types, which is garbase.
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">struct</span> <span class="ident">TooManyRedirects</span>;
 
-pub trait Redirect {
-    fn redirect(&amp;self, next: &amp;Url, previous: &amp;[Url]) -&gt; ::Result&lt;bool&gt;;
-}
-
-impl&lt;F&gt; Redirect for F
-where F: Fn(&amp;Url, &amp;[Url]) -&gt; ::Result&lt;bool&gt; {
-    fn redirect(&amp;self, next: &amp;Url, previous: &amp;[Url]) -&gt; ::Result&lt;bool&gt; {
-        self(next, previous)
+<span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Display</span> <span class="kw">for</span> <span class="ident">TooManyRedirects</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
+        <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;too many redirects&quot;</span>)
     }
 }
-*/</span>
+
+<span class="kw">impl</span> <span class="ident">StdError</span> <span class="kw">for</span> <span class="ident">TooManyRedirects</span> {}
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
 <span class="kw">fn</span> <span class="ident">test_redirect_policy_limit</span>() {
-    <span class="kw">let</span> <span class="ident">policy</span> <span class="op">=</span> <span class="ident">RedirectPolicy</span>::<span class="ident">default</span>();
+    <span class="kw">let</span> <span class="ident">policy</span> <span class="op">=</span> <span class="ident">Policy</span>::<span class="ident">default</span>();
     <span class="kw">let</span> <span class="ident">next</span> <span class="op">=</span> <span class="ident">Url</span>::<span class="ident">parse</span>(<span class="string">&quot;http://x.y/z&quot;</span>).<span class="ident">unwrap</span>();
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">previous</span> <span class="op">=</span> (<span class="number">0</span>..<span class="number">9</span>)
         .<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">Url</span>::<span class="ident">parse</span>(<span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;http://a.b/c/{}&quot;</span>, <span class="ident">i</span>)).<span class="ident">unwrap</span>())
         .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 
-    <span class="macro">assert_eq</span><span class="macro">!</span>(
-        <span class="ident">policy</span>.<span class="ident">check</span>(<span class="ident">StatusCode</span>::<span class="ident">FOUND</span>, <span class="kw-2">&amp;</span><span class="ident">next</span>, <span class="kw-2">&amp;</span><span class="ident">previous</span>),
-        <span class="ident">Action</span>::<span class="ident">Follow</span>
-    );
+
+    <span class="kw">match</span> <span class="ident">policy</span>.<span class="ident">check</span>(<span class="ident">StatusCode</span>::<span class="ident">FOUND</span>, <span class="kw-2">&amp;</span><span class="ident">next</span>, <span class="kw-2">&amp;</span><span class="ident">previous</span>) {
+        <span class="ident">ActionKind</span>::<span class="ident">Follow</span> <span class="op">=</span><span class="op">&gt;</span> (),
+        <span class="ident">other</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected {:?}&quot;</span>, <span class="ident">other</span>),
+    }
 
     <span class="ident">previous</span>.<span class="ident">push</span>(<span class="ident">Url</span>::<span class="ident">parse</span>(<span class="string">&quot;http://a.b.d/e/33&quot;</span>).<span class="ident">unwrap</span>());
 
-    <span class="macro">assert_eq</span><span class="macro">!</span>(
-        <span class="ident">policy</span>.<span class="ident">check</span>(<span class="ident">StatusCode</span>::<span class="ident">FOUND</span>, <span class="kw-2">&amp;</span><span class="ident">next</span>, <span class="kw-2">&amp;</span><span class="ident">previous</span>),
-        <span class="ident">Action</span>::<span class="ident">TooManyRedirects</span>
-    );
+    <span class="kw">match</span> <span class="ident">policy</span>.<span class="ident">check</span>(<span class="ident">StatusCode</span>::<span class="ident">FOUND</span>, <span class="kw-2">&amp;</span><span class="ident">next</span>, <span class="kw-2">&amp;</span><span class="ident">previous</span>) {
+        <span class="ident">ActionKind</span>::<span class="ident">Error</span>(<span class="ident">err</span>) <span class="kw">if</span> <span class="ident">err</span>.<span class="ident">is</span>::<span class="op">&lt;</span><span class="ident">TooManyRedirects</span><span class="op">&gt;</span>() <span class="op">=</span><span class="op">&gt;</span> (),
+        <span class="ident">other</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected {:?}&quot;</span>, <span class="ident">other</span>),
+    }
 }
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
 <span class="kw">fn</span> <span class="ident">test_redirect_policy_custom</span>() {
-    <span class="kw">let</span> <span class="ident">policy</span> <span class="op">=</span> <span class="ident">RedirectPolicy</span>::<span class="ident">custom</span>(<span class="op">|</span><span class="ident">attempt</span><span class="op">|</span> {
+    <span class="kw">let</span> <span class="ident">policy</span> <span class="op">=</span> <span class="ident">Policy</span>::<span class="ident">custom</span>(<span class="op">|</span><span class="ident">attempt</span><span class="op">|</span> {
         <span class="kw">if</span> <span class="ident">attempt</span>.<span class="ident">url</span>().<span class="ident">host_str</span>() <span class="op">=</span><span class="op">=</span> <span class="prelude-val">Some</span>(<span class="string">&quot;foo&quot;</span>) {
             <span class="ident">attempt</span>.<span class="ident">stop</span>()
         } <span class="kw">else</span> {
@@ -646,21 +622,21 @@ where F: Fn(&amp;Url, &amp;[Url]) -&gt; ::Result&lt;bool&gt; {
     });
 
     <span class="kw">let</span> <span class="ident">next</span> <span class="op">=</span> <span class="ident">Url</span>::<span class="ident">parse</span>(<span class="string">&quot;http://bar/baz&quot;</span>).<span class="ident">unwrap</span>();
-    <span class="macro">assert_eq</span><span class="macro">!</span>(
-        <span class="ident">policy</span>.<span class="ident">check</span>(<span class="ident">StatusCode</span>::<span class="ident">FOUND</span>, <span class="kw-2">&amp;</span><span class="ident">next</span>, <span class="kw-2">&amp;</span>[]),
-        <span class="ident">Action</span>::<span class="ident">Follow</span>
-    );
+    <span class="kw">match</span> <span class="ident">policy</span>.<span class="ident">check</span>(<span class="ident">StatusCode</span>::<span class="ident">FOUND</span>, <span class="kw-2">&amp;</span><span class="ident">next</span>, <span class="kw-2">&amp;</span>[]) {
+        <span class="ident">ActionKind</span>::<span class="ident">Follow</span> <span class="op">=</span><span class="op">&gt;</span> (),
+        <span class="ident">other</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected {:?}&quot;</span>, <span class="ident">other</span>),
+    }
 
     <span class="kw">let</span> <span class="ident">next</span> <span class="op">=</span> <span class="ident">Url</span>::<span class="ident">parse</span>(<span class="string">&quot;http://foo/baz&quot;</span>).<span class="ident">unwrap</span>();
-    <span class="macro">assert_eq</span><span class="macro">!</span>(
-        <span class="ident">policy</span>.<span class="ident">check</span>(<span class="ident">StatusCode</span>::<span class="ident">FOUND</span>, <span class="kw-2">&amp;</span><span class="ident">next</span>, <span class="kw-2">&amp;</span>[]),
-        <span class="ident">Action</span>::<span class="ident">Stop</span>
-    );
+     <span class="kw">match</span> <span class="ident">policy</span>.<span class="ident">check</span>(<span class="ident">StatusCode</span>::<span class="ident">FOUND</span>, <span class="kw-2">&amp;</span><span class="ident">next</span>, <span class="kw-2">&amp;</span>[]) {
+        <span class="ident">ActionKind</span>::<span class="ident">Stop</span> <span class="op">=</span><span class="op">&gt;</span> (),
+        <span class="ident">other</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;unexpected {:?}&quot;</span>, <span class="ident">other</span>),
+    }
 }
 
 <span class="attribute">#[<span class="ident">test</span>]</span>
 <span class="kw">fn</span> <span class="ident">test_remove_sensitive_headers</span>() {
-    <span class="kw">use</span> <span class="ident">hyper</span>::<span class="ident">header</span>::{<span class="ident">ACCEPT</span>, <span class="ident">AUTHORIZATION</span>, <span class="ident">COOKIE</span>, <span class="ident">HeaderValue</span>};
+    <span class="kw">use</span> <span class="ident">hyper</span>::<span class="ident">header</span>::{<span class="ident">HeaderValue</span>, <span class="ident">ACCEPT</span>, <span class="ident">AUTHORIZATION</span>, <span class="ident">COOKIE</span>};
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">headers</span> <span class="op">=</span> <span class="ident">HeaderMap</span>::<span class="ident">new</span>();
     <span class="ident">headers</span>.<span class="ident">insert</span>(<span class="ident">ACCEPT</span>, <span class="ident">HeaderValue</span>::<span class="ident">from_static</span>(<span class="string">&quot;*/*&quot;</span>));
@@ -682,4 +658,4 @@ where F: Fn(&amp;Url, &amp;[Url]) -&gt; ::Result&lt;bool&gt; {
     <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">headers</span>, <span class="ident">filtered_headers</span>);
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "reqwest";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "reqwest";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

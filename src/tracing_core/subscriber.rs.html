@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-core-0.1.10/src/subscriber.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>subscriber.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing_core/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-core-0.1.17/src/subscriber.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>subscriber.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing_core/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -550,9 +550,27 @@
 <span id="550">550</span>
 <span id="551">551</span>
 <span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Subscribers collect and record trace data.</span>
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">span</span>, <span class="ident">Event</span>, <span class="ident">Metadata</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">span</span>, <span class="ident">Event</span>, <span class="ident">LevelFilter</span>, <span class="ident">Metadata</span>};
 
 <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">stdlib</span>::<span class="ident">any</span>::{<span class="ident">Any</span>, <span class="ident">TypeId</span>};
 
@@ -719,6 +737,33 @@
     <span class="doccomment">/// [`Interest::sometimes`]: struct.Interest.html#method.sometimes</span>
     <span class="doccomment">/// [`register_callsite`]: #method.register_callsite</span>
     <span class="kw">fn</span> <span class="ident">enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">metadata</span>: <span class="kw-2">&amp;</span><span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
+
+    <span class="doccomment">/// Returns the highest [verbosity level][level] that this `Subscriber` will</span>
+    <span class="doccomment">/// enable, or `None`, if the subscriber does not implement level-based</span>
+    <span class="doccomment">/// filtering or chooses not to implement this method.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If this method returns a [`Level`][level], it will be used as a hint to</span>
+    <span class="doccomment">/// determine the most verbose level that will be enabled. This will allow</span>
+    <span class="doccomment">/// spans and events which are more verbose than that level to be skipped</span>
+    <span class="doccomment">/// more efficiently. Subscribers which perform filtering are strongly</span>
+    <span class="doccomment">/// encouraged to provide an implementation of this method.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If the maximum level the subscriber will enable can change over the</span>
+    <span class="doccomment">/// course of its lifetime, it is free to return a different value from</span>
+    <span class="doccomment">/// multiple invocations of this method. However, note that changes in the</span>
+    <span class="doccomment">/// maximum level will **only** be reflected after the callsite [`Interest`]</span>
+    <span class="doccomment">/// cache is rebuilt, by calling the [`callsite::rebuild_interest_cache`][rebuild]</span>
+    <span class="doccomment">/// function. Therefore, if the subscriber will change the value returned by</span>
+    <span class="doccomment">/// this method, it is responsible for ensuring that</span>
+    <span class="doccomment">/// [`rebuild_interest_cache`][rebuild] is called after the value of the max</span>
+    <span class="doccomment">/// level changes.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// [level]: ../struct.Level.html</span>
+    <span class="doccomment">/// [`Interest`]: struct.Interest.html</span>
+    <span class="doccomment">/// [rebuild]: ../callsite/fn.rebuild_interest_cache.html</span>
+    <span class="kw">fn</span> <span class="ident">max_level_hint</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">LevelFilter</span><span class="op">&gt;</span> {
+        <span class="prelude-val">None</span>
+    }
 
     <span class="doccomment">/// Visit the construction of a new span, returning a new [span ID] for the</span>
     <span class="doccomment">/// span being constructed.</span>
@@ -905,12 +950,12 @@
     <span class="doccomment">/// It&#39;s guaranteed that if this function has been called once more than the</span>
     <span class="doccomment">/// number of times `clone_span` was called with the same `id`, then no more</span>
     <span class="doccomment">/// handles that can enter the span with that `id` exist. This means that it</span>
-    <span class="doccomment">/// can be used in  conjunction with [`clone_span`] to track the number of</span>
+    <span class="doccomment">/// can be used in conjunction with [`clone_span`] to track the number of</span>
     <span class="doccomment">/// handles capable of `enter`ing a span. When all the handles have been</span>
     <span class="doccomment">/// dropped (i.e., `try_close` has been called one more time than</span>
     <span class="doccomment">/// `clone_span` for a given ID), the subscriber may assume that the span</span>
     <span class="doccomment">/// will not be entered again, and should return `true`. It is then free to</span>
-    <span class="doccomment">/// deallocate storage for data associated with  that span, write data from</span>
+    <span class="doccomment">/// deallocate storage for data associated with that span, write data from</span>
     <span class="doccomment">/// that span to IO, and so on.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// **Note**: since this function is called when spans are dropped,</span>
@@ -1028,7 +1073,7 @@
         <span class="ident">Interest</span>(<span class="ident">InterestKind</span>::<span class="ident">Never</span>)
     }
 
-    <span class="doccomment">/// Returns an `Interest` indicating  the subscriber is sometimes interested</span>
+    <span class="doccomment">/// Returns an `Interest` indicating the subscriber is sometimes interested</span>
     <span class="doccomment">/// in being notified about a callsite.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// If all active subscribers are `sometimes` or `never` interested in a</span>
@@ -1040,7 +1085,7 @@
         <span class="ident">Interest</span>(<span class="ident">InterestKind</span>::<span class="ident">Sometimes</span>)
     }
 
-    <span class="doccomment">/// Returns an `Interest` indicating  the subscriber is always interested in</span>
+    <span class="doccomment">/// Returns an `Interest` indicating the subscriber is always interested in</span>
     <span class="doccomment">/// being notified about a callsite.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// If any subscriber expresses that it is `always()` interested in a given</span>
@@ -1082,26 +1127,17 @@
 
     <span class="doccomment">/// Returns the common interest between these two Interests.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// The common interest is defined as the least restrictive, so if one</span>
-    <span class="doccomment">/// interest is `never` and the other is `always` the common interest is</span>
-    <span class="doccomment">/// `always`.</span>
+    <span class="doccomment">/// If both interests are the same, this propagates that interest.</span>
+    <span class="doccomment">/// Otherwise, if they differ, the result must always be</span>
+    <span class="doccomment">/// `Interest::sometimes` --- if the two subscribers differ in opinion, we</span>
+    <span class="doccomment">/// will have to ask the current subscriber what it thinks, no matter what.</span>
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">and</span>(<span class="self">self</span>, <span class="ident">rhs</span>: <span class="ident">Interest</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">match</span> <span class="ident">rhs</span>.<span class="number">0</span> {
-            <span class="comment">// If the added interest is `never()`, don&#39;t change anything —</span>
-            <span class="comment">// either a different subscriber added a higher interest, which we</span>
-            <span class="comment">// want to preserve, or the interest is 0 anyway (as it&#39;s</span>
-            <span class="comment">// initialized to 0).</span>
-            <span class="ident">InterestKind</span>::<span class="ident">Never</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>,
-            <span class="comment">// If the interest is `sometimes()`, that overwrites a `never()`</span>
-            <span class="comment">// interest, but doesn&#39;t downgrade an `always()` interest.</span>
-            <span class="ident">InterestKind</span>::<span class="ident">Sometimes</span> <span class="kw">if</span> <span class="self">self</span>.<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="ident">InterestKind</span>::<span class="ident">Never</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">rhs</span>,
-            <span class="comment">// If the interest is `always()`, we overwrite the current interest,</span>
-            <span class="comment">// as always() is the highest interest level and should take</span>
-            <span class="comment">// precedent.</span>
-            <span class="ident">InterestKind</span>::<span class="ident">Always</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">rhs</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>,
+        <span class="kw">if</span> <span class="self">self</span>.<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="ident">rhs</span>.<span class="number">0</span> {
+            <span class="self">self</span>
+        } <span class="kw">else</span> {
+            <span class="ident">Interest</span>::<span class="ident">sometimes</span>()
         }
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "tracing_core";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "tracing_core";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/hyper-0.12.35/src/server/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../hyper/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/hyper-0.13.9/src/server/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../hyper/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -455,6 +455,46 @@
 <span id="455">455</span>
 <span id="456">456</span>
 <span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! HTTP Server</span>
 <span class="doccomment">//!</span>
@@ -464,12 +504,12 @@
 <span class="doccomment">//! There are two levels of APIs provide for constructing HTTP servers:</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! - The higher-level [`Server`](Server) type.</span>
-<span class="doccomment">//! - The lower-level [`conn`](server::conn) module.</span>
+<span class="doccomment">//! - The lower-level [`conn`](conn) module.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Server</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! The [`Server`](Server) is main way to start listening for HTTP requests.</span>
-<span class="doccomment">//! It wraps a listener with a [`MakeService`](::service), and then should</span>
+<span class="doccomment">//! It wraps a listener with a [`MakeService`](crate::service), and then should</span>
 <span class="doccomment">//! be executed to start serving requests.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [`Server`](Server) accepts connections in both HTTP1 and HTTP2 by default.</span>
@@ -477,59 +517,66 @@
 <span class="doccomment">//! ## Example</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```no_run</span>
-<span class="doccomment">//! extern crate hyper;</span>
+<span class="doccomment">//! use std::convert::Infallible;</span>
+<span class="doccomment">//! use std::net::SocketAddr;</span>
+<span class="doccomment">//! use hyper::{Body, Request, Response, Server};</span>
+<span class="doccomment">//! use hyper::service::{make_service_fn, service_fn};</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! use hyper::{Body, Response, Server};</span>
-<span class="doccomment">//! use hyper::service::service_fn_ok;</span>
+<span class="doccomment">//! async fn handle(_req: Request&lt;Body&gt;) -&gt; Result&lt;Response&lt;Body&gt;, Infallible&gt; {</span>
+<span class="doccomment">//!     Ok(Response::new(Body::from(&quot;Hello World&quot;)))</span>
+<span class="doccomment">//! }</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # #[cfg(feature = &quot;runtime&quot;)]</span>
-<span class="doccomment">//! fn main() {</span>
-<span class="doccomment">//! # use hyper::rt::Future;</span>
+<span class="doccomment">//! #[tokio::main]</span>
+<span class="doccomment">//! async fn main() {</span>
 <span class="doccomment">//!     // Construct our SocketAddr to listen on...</span>
-<span class="doccomment">//!     let addr = ([127, 0, 0, 1], 3000).into();</span>
+<span class="doccomment">//!     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//!     // And a MakeService to handle each connection...</span>
-<span class="doccomment">//!     let make_service = || {</span>
-<span class="doccomment">//!         service_fn_ok(|_req| {</span>
-<span class="doccomment">//!             Response::new(Body::from(&quot;Hello World&quot;))</span>
-<span class="doccomment">//!         })</span>
-<span class="doccomment">//!     };</span>
+<span class="doccomment">//!     let make_service = make_service_fn(|_conn| async {</span>
+<span class="doccomment">//!         Ok::&lt;_, Infallible&gt;(service_fn(handle))</span>
+<span class="doccomment">//!     });</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//!     // Then bind and serve...</span>
-<span class="doccomment">//!     let server = Server::bind(&amp;addr)</span>
-<span class="doccomment">//!         .serve(make_service);</span>
+<span class="doccomment">//!     let server = Server::bind(&amp;addr).serve(make_service);</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//!     // Finally, spawn `server` onto an Executor...</span>
-<span class="doccomment">//!     hyper::rt::run(server.map_err(|e| {</span>
+<span class="doccomment">//!     // And run forever...</span>
+<span class="doccomment">//!     if let Err(e) = server.await {</span>
 <span class="doccomment">//!         eprintln!(&quot;server error: {}&quot;, e);</span>
-<span class="doccomment">//!     }));</span>
+<span class="doccomment">//!     }</span>
 <span class="doccomment">//! }</span>
 <span class="doccomment">//! # #[cfg(not(feature = &quot;runtime&quot;))]</span>
 <span class="doccomment">//! # fn main() {}</span>
 <span class="doccomment">//! ```</span>
 
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">accept</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">conn</span>;
 <span class="kw">mod</span> <span class="ident">shutdown</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span> <span class="kw">mod</span> <span class="ident">tcp</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tcp&quot;</span>)]</span>
+<span class="kw">mod</span> <span class="ident">tcp</span>;
 
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">StdError</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span> <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">net</span>::{<span class="ident">SocketAddr</span>, <span class="ident">TcpListener</span> <span class="kw">as</span> <span class="ident">StdTcpListener</span>};
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tcp&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">net</span>::{<span class="ident">SocketAddr</span>, <span class="ident">TcpListener</span> <span class="kw">as</span> <span class="ident">StdTcpListener</span>};
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span> <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">Duration</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tcp&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">Duration</span>;
 
-<span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">Future</span>, <span class="ident">Stream</span>, <span class="ident">Poll</span>};
-<span class="kw">use</span> <span class="ident">tokio_io</span>::{<span class="ident">AsyncRead</span>, <span class="ident">AsyncWrite</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span> <span class="kw">use</span> <span class="ident">tokio_reactor</span>;
+<span class="kw">use</span> <span class="ident">pin_project</span>::<span class="ident">pin_project</span>;
+<span class="kw">use</span> <span class="ident">tokio</span>::<span class="ident">io</span>::{<span class="ident">AsyncRead</span>, <span class="ident">AsyncWrite</span>};
 
-<span class="kw">use</span> <span class="ident">body</span>::{<span class="ident">Body</span>, <span class="ident">Payload</span>};
-<span class="kw">use</span> <span class="ident">common</span>::<span class="ident">exec</span>::{<span class="ident">Exec</span>, <span class="ident">H2Exec</span>, <span class="ident">NewSvcExec</span>};
-<span class="kw">use</span> <span class="ident">service</span>::{<span class="ident">MakeServiceRef</span>, <span class="ident">Service</span>};
+<span class="kw">use</span> <span class="self">self</span>::<span class="ident">accept</span>::<span class="ident">Accept</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">body</span>::{<span class="ident">Body</span>, <span class="ident">HttpBody</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">common</span>::<span class="ident">exec</span>::{<span class="ident">Exec</span>, <span class="ident">H2Exec</span>, <span class="ident">NewSvcExec</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">common</span>::{<span class="ident">task</span>, <span class="ident">Future</span>, <span class="ident">Pin</span>, <span class="ident">Poll</span>, <span class="ident">Unpin</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">service</span>::{<span class="ident">HttpService</span>, <span class="ident">MakeServiceRef</span>};
 <span class="comment">// Renamed `Http` as `Http_` for now so that people upgrading don&#39;t see an</span>
 <span class="comment">// error that `hyper::server::Http` is private...</span>
 <span class="kw">use</span> <span class="self">self</span>::<span class="ident">conn</span>::{<span class="ident">Http</span> <span class="kw">as</span> <span class="ident">Http_</span>, <span class="ident">NoopWatcher</span>, <span class="ident">SpawnAll</span>};
 <span class="kw">use</span> <span class="self">self</span>::<span class="ident">shutdown</span>::{<span class="ident">Graceful</span>, <span class="ident">GracefulWatcher</span>};
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">tcp</span>::<span class="ident">AddrIncoming</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tcp&quot;</span>)]</span>
+<span class="kw">use</span> <span class="self">self</span>::<span class="ident">tcp</span>::<span class="ident">AddrIncoming</span>;
 
 <span class="doccomment">/// A listening HTTP server that accepts connections in both HTTP1 and HTTP2 by default.</span>
 <span class="doccomment">///</span>
@@ -537,7 +584,9 @@
 <span class="doccomment">/// handlers. It is built using the [`Builder`](Builder), and the future</span>
 <span class="doccomment">/// completes when the server has been shutdown. It should be run by an</span>
 <span class="doccomment">/// `Executor`.</span>
+<span class="attribute">#[<span class="ident">pin_project</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Server</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span> <span class="op">=</span> <span class="ident">Exec</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">pin</span>]</span>
     <span class="ident">spawn_all</span>: <span class="ident">SpawnAll</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>,
 }
 
@@ -560,7 +609,7 @@
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tcp&quot;</span>)]</span>
 <span class="kw">impl</span> <span class="ident">Server</span><span class="op">&lt;</span><span class="ident">AddrIncoming</span>, ()<span class="op">&gt;</span> {
     <span class="doccomment">/// Binds to the provided address, and returns a [`Builder`](Builder).</span>
     <span class="doccomment">///</span>
@@ -569,46 +618,42 @@
     <span class="doccomment">/// This method will panic if binding to the address fails. For a method</span>
     <span class="doccomment">/// to bind to an address and return a `Result`, see `Server::try_bind`.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bind</span>(<span class="ident">addr</span>: <span class="kw-2">&amp;</span><span class="ident">SocketAddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Builder</span><span class="op">&lt;</span><span class="ident">AddrIncoming</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">incoming</span> <span class="op">=</span> <span class="ident">AddrIncoming</span>::<span class="ident">new</span>(<span class="ident">addr</span>, <span class="prelude-val">None</span>)
-            .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
-                <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;error binding to {}: {}&quot;</span>, <span class="ident">addr</span>, <span class="ident">e</span>);
-            });
+        <span class="kw">let</span> <span class="ident">incoming</span> <span class="op">=</span> <span class="ident">AddrIncoming</span>::<span class="ident">new</span>(<span class="ident">addr</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
+            <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;error binding to {}: {}&quot;</span>, <span class="ident">addr</span>, <span class="ident">e</span>);
+        });
         <span class="ident">Server</span>::<span class="ident">builder</span>(<span class="ident">incoming</span>)
     }
 
     <span class="doccomment">/// Tries to bind to the provided address, and returns a [`Builder`](Builder).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_bind</span>(<span class="ident">addr</span>: <span class="kw-2">&amp;</span><span class="ident">SocketAddr</span>) <span class="op">-</span><span class="op">&gt;</span> ::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Builder</span><span class="op">&lt;</span><span class="ident">AddrIncoming</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="ident">AddrIncoming</span>::<span class="ident">new</span>(<span class="ident">addr</span>, <span class="prelude-val">None</span>)
-            .<span class="ident">map</span>(<span class="ident">Server</span>::<span class="ident">builder</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_bind</span>(<span class="ident">addr</span>: <span class="kw-2">&amp;</span><span class="ident">SocketAddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Builder</span><span class="op">&lt;</span><span class="ident">AddrIncoming</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="ident">AddrIncoming</span>::<span class="ident">new</span>(<span class="ident">addr</span>).<span class="ident">map</span>(<span class="ident">Server</span>::<span class="ident">builder</span>)
     }
 
     <span class="doccomment">/// Create a new instance from a `std::net::TcpListener` instance.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_tcp</span>(<span class="ident">listener</span>: <span class="ident">StdTcpListener</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Builder</span><span class="op">&lt;</span><span class="ident">AddrIncoming</span><span class="op">&gt;</span>, ::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="ident">tokio_reactor</span>::<span class="ident">Handle</span>::<span class="ident">default</span>();
-        <span class="ident">AddrIncoming</span>::<span class="ident">from_std</span>(<span class="ident">listener</span>, <span class="kw-2">&amp;</span><span class="ident">handle</span>)
-            .<span class="ident">map</span>(<span class="ident">Server</span>::<span class="ident">builder</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_tcp</span>(<span class="ident">listener</span>: <span class="ident">StdTcpListener</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Builder</span><span class="op">&lt;</span><span class="ident">AddrIncoming</span><span class="op">&gt;</span>, <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="ident">AddrIncoming</span>::<span class="ident">from_std</span>(<span class="ident">listener</span>).<span class="ident">map</span>(<span class="ident">Server</span>::<span class="ident">builder</span>)
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Server</span><span class="op">&lt;</span><span class="ident">AddrIncoming</span>, <span class="ident">S</span><span class="op">&gt;</span> {
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tcp&quot;</span>)]</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span> <span class="ident">Server</span><span class="op">&lt;</span><span class="ident">AddrIncoming</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Returns the local address that this server is bound to.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">local_addr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SocketAddr</span> {
         <span class="self">self</span>.<span class="ident">spawn_all</span>.<span class="ident">local_addr</span>()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span>, <span class="ident">B</span><span class="op">&gt;</span> <span class="ident">Server</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">IO</span>, <span class="ident">IE</span>, <span class="ident">S</span>, <span class="ident">E</span>, <span class="ident">B</span><span class="op">&gt;</span> <span class="ident">Server</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">I</span>: <span class="ident">Stream</span>,
-    <span class="ident">I</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">I</span>::<span class="ident">Item</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-    <span class="ident">S</span>: <span class="ident">MakeServiceRef</span><span class="op">&lt;</span><span class="ident">I</span>::<span class="ident">Item</span>, <span class="ident">ReqBody</span><span class="op">=</span><span class="ident">Body</span>, <span class="ident">ResBody</span><span class="op">=</span><span class="ident">B</span><span class="op">&gt;</span>,
-    <span class="ident">S</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">S</span>::<span class="ident">Service</span>: <span class="lifetime">&#39;static</span>,
-    <span class="ident">B</span>: <span class="ident">Payload</span>,
-    <span class="ident">E</span>: <span class="ident">H2Exec</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">S</span>::<span class="ident">Service</span> <span class="kw">as</span> <span class="ident">Service</span><span class="op">&gt;</span>::<span class="ident">Future</span>, <span class="ident">B</span><span class="op">&gt;</span>,
-    <span class="ident">E</span>: <span class="ident">NewSvcExec</span><span class="op">&lt;</span><span class="ident">I</span>::<span class="ident">Item</span>, <span class="ident">S</span>::<span class="ident">Future</span>, <span class="ident">S</span>::<span class="ident">Service</span>, <span class="ident">E</span>, <span class="ident">GracefulWatcher</span><span class="op">&gt;</span>,
+    <span class="ident">I</span>: <span class="ident">Accept</span><span class="op">&lt;</span><span class="ident">Conn</span> <span class="op">=</span> <span class="ident">IO</span>, <span class="ident">Error</span> <span class="op">=</span> <span class="ident">IE</span><span class="op">&gt;</span>,
+    <span class="ident">IE</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">IO</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span> <span class="op">+</span> <span class="ident">Unpin</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">S</span>: <span class="ident">MakeServiceRef</span><span class="op">&lt;</span><span class="ident">IO</span>, <span class="ident">Body</span>, <span class="ident">ResBody</span> <span class="op">=</span> <span class="ident">B</span><span class="op">&gt;</span>,
+    <span class="ident">S</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">B</span>: <span class="ident">HttpBody</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">B</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">E</span>: <span class="ident">H2Exec</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">S</span>::<span class="ident">Service</span> <span class="kw">as</span> <span class="ident">HttpService</span><span class="op">&lt;</span><span class="ident">Body</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Future</span>, <span class="ident">B</span><span class="op">&gt;</span>,
+    <span class="ident">E</span>: <span class="ident">NewSvcExec</span><span class="op">&lt;</span><span class="ident">IO</span>, <span class="ident">S</span>::<span class="ident">Future</span>, <span class="ident">S</span>::<span class="ident">Service</span>, <span class="ident">E</span>, <span class="ident">GracefulWatcher</span><span class="op">&gt;</span>,
 {
     <span class="doccomment">/// Prepares a server to handle graceful shutdown when the provided future</span>
     <span class="doccomment">/// completes.</span>
@@ -616,34 +661,31 @@
     <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// # extern crate hyper;</span>
-    <span class="doccomment">/// # extern crate futures;</span>
-    <span class="doccomment">/// # use futures::Future;</span>
     <span class="doccomment">/// # fn main() {}</span>
-    <span class="doccomment">/// # #[cfg(feature = &quot;runtime&quot;)]</span>
-    <span class="doccomment">/// # fn run() {</span>
-    <span class="doccomment">/// # use hyper::{Body, Response, Server};</span>
-    <span class="doccomment">/// # use hyper::service::service_fn_ok;</span>
-    <span class="doccomment">/// # let new_service = || {</span>
-    <span class="doccomment">/// #     service_fn_ok(|_req| {</span>
-    <span class="doccomment">/// #         Response::new(Body::from(&quot;Hello World&quot;))</span>
-    <span class="doccomment">/// #     })</span>
-    <span class="doccomment">/// # };</span>
-    <span class="doccomment">///</span>
+    <span class="doccomment">/// # #[cfg(feature = &quot;tcp&quot;)]</span>
+    <span class="doccomment">/// # async fn run() {</span>
+    <span class="doccomment">/// # use hyper::{Body, Response, Server, Error};</span>
+    <span class="doccomment">/// # use hyper::service::{make_service_fn, service_fn};</span>
+    <span class="doccomment">/// # let make_service = make_service_fn(|_| async {</span>
+    <span class="doccomment">/// #     Ok::&lt;_, Error&gt;(service_fn(|_req| async {</span>
+    <span class="doccomment">/// #         Ok::&lt;_, Error&gt;(Response::new(Body::from(&quot;Hello World&quot;)))</span>
+    <span class="doccomment">/// #     }))</span>
+    <span class="doccomment">/// # });</span>
     <span class="doccomment">/// // Make a server from the previous examples...</span>
     <span class="doccomment">/// let server = Server::bind(&amp;([127, 0, 0, 1], 3000).into())</span>
-    <span class="doccomment">///     .serve(new_service);</span>
+    <span class="doccomment">///     .serve(make_service);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// // Prepare some signal for when the server should start</span>
-    <span class="doccomment">/// // shutting down...</span>
-    <span class="doccomment">/// let (tx, rx) = futures::sync::oneshot::channel::&lt;()&gt;();</span>
-    <span class="doccomment">///</span>
+    <span class="doccomment">/// // Prepare some signal for when the server should start shutting down...</span>
+    <span class="doccomment">/// let (tx, rx) = tokio::sync::oneshot::channel::&lt;()&gt;();</span>
     <span class="doccomment">/// let graceful = server</span>
-    <span class="doccomment">///     .with_graceful_shutdown(rx)</span>
-    <span class="doccomment">///     .map_err(|err| eprintln!(&quot;server error: {}&quot;, err));</span>
+    <span class="doccomment">///     .with_graceful_shutdown(async {</span>
+    <span class="doccomment">///         rx.await.ok();</span>
+    <span class="doccomment">///     });</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// // Spawn `server` onto an Executor...</span>
-    <span class="doccomment">/// hyper::rt::spawn(graceful);</span>
+    <span class="doccomment">/// // Await the `server` receiving the signal...</span>
+    <span class="doccomment">/// if let Err(e) = graceful.await {</span>
+    <span class="doccomment">///     eprintln!(&quot;server error: {}&quot;, e);</span>
+    <span class="doccomment">/// }</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // And later, trigger the signal by calling `tx.send(())`.</span>
     <span class="doccomment">/// let _ = tx.send(());</span>
@@ -651,34 +693,33 @@
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_graceful_shutdown</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">signal</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Graceful</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">F</span>, <span class="ident">E</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Item</span><span class="op">=</span>()<span class="op">&gt;</span>
+        <span class="ident">F</span>: <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span>,
     {
         <span class="ident">Graceful</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">spawn_all</span>, <span class="ident">signal</span>)
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">B</span>, <span class="ident">E</span><span class="op">&gt;</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">Server</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">IO</span>, <span class="ident">IE</span>, <span class="ident">S</span>, <span class="ident">B</span>, <span class="ident">E</span><span class="op">&gt;</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">Server</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">I</span>: <span class="ident">Stream</span>,
-    <span class="ident">I</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">I</span>::<span class="ident">Item</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-    <span class="ident">S</span>: <span class="ident">MakeServiceRef</span><span class="op">&lt;</span><span class="ident">I</span>::<span class="ident">Item</span>, <span class="ident">ReqBody</span><span class="op">=</span><span class="ident">Body</span>, <span class="ident">ResBody</span><span class="op">=</span><span class="ident">B</span><span class="op">&gt;</span>,
-    <span class="ident">S</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">S</span>::<span class="ident">Service</span>: <span class="lifetime">&#39;static</span>,
-    <span class="ident">B</span>: <span class="ident">Payload</span>,
-    <span class="ident">E</span>: <span class="ident">H2Exec</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">S</span>::<span class="ident">Service</span> <span class="kw">as</span> <span class="ident">Service</span><span class="op">&gt;</span>::<span class="ident">Future</span>, <span class="ident">B</span><span class="op">&gt;</span>,
-    <span class="ident">E</span>: <span class="ident">NewSvcExec</span><span class="op">&lt;</span><span class="ident">I</span>::<span class="ident">Item</span>, <span class="ident">S</span>::<span class="ident">Future</span>, <span class="ident">S</span>::<span class="ident">Service</span>, <span class="ident">E</span>, <span class="ident">NoopWatcher</span><span class="op">&gt;</span>,
+    <span class="ident">I</span>: <span class="ident">Accept</span><span class="op">&lt;</span><span class="ident">Conn</span> <span class="op">=</span> <span class="ident">IO</span>, <span class="ident">Error</span> <span class="op">=</span> <span class="ident">IE</span><span class="op">&gt;</span>,
+    <span class="ident">IE</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">IO</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span> <span class="op">+</span> <span class="ident">Unpin</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">S</span>: <span class="ident">MakeServiceRef</span><span class="op">&lt;</span><span class="ident">IO</span>, <span class="ident">Body</span>, <span class="ident">ResBody</span> <span class="op">=</span> <span class="ident">B</span><span class="op">&gt;</span>,
+    <span class="ident">S</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">B</span>: <span class="ident">HttpBody</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">B</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">E</span>: <span class="ident">H2Exec</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">S</span>::<span class="ident">Service</span> <span class="kw">as</span> <span class="ident">HttpService</span><span class="op">&lt;</span><span class="ident">Body</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Future</span>, <span class="ident">B</span><span class="op">&gt;</span>,
+    <span class="ident">E</span>: <span class="ident">NewSvcExec</span><span class="op">&lt;</span><span class="ident">IO</span>, <span class="ident">S</span>::<span class="ident">Future</span>, <span class="ident">S</span>::<span class="ident">Service</span>, <span class="ident">E</span>, <span class="ident">NoopWatcher</span><span class="op">&gt;</span>,
 {
-    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> ();
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> ::<span class="ident">Error</span>;
+    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span>, <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">spawn_all</span>.<span class="ident">poll_watch</span>(<span class="kw-2">&amp;</span><span class="ident">NoopWatcher</span>)
+    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task</span>::<span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Output</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">project</span>().<span class="ident">spawn_all</span>.<span class="ident">poll_watch</span>(<span class="ident">cx</span>, <span class="kw-2">&amp;</span><span class="ident">NoopWatcher</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">fmt</span>::<span class="ident">Debug</span>, <span class="ident">S</span>: <span class="ident">fmt</span>::<span class="ident">Debug</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">Server</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
         <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;Server&quot;</span>)
             .<span class="ident">field</span>(<span class="string">&quot;listener&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">spawn_all</span>.<span class="ident">incoming_ref</span>())
             .<span class="ident">finish</span>()
@@ -692,39 +733,35 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// For a more convenient constructor, see [`Server::bind`](Server::bind).</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">incoming</span>: <span class="ident">I</span>, <span class="ident">protocol</span>: <span class="ident">Http_</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">Builder</span> {
-            <span class="ident">incoming</span>,
-            <span class="ident">protocol</span>,
-        }
+        <span class="ident">Builder</span> { <span class="ident">incoming</span>, <span class="ident">protocol</span> }
     }
 
     <span class="doccomment">/// Sets whether to use keep-alive for HTTP/1 connections.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Default is `true`.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http1_keepalive</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">keep_alive</span>(<span class="ident">val</span>);
+        <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">http1_keep_alive</span>(<span class="ident">val</span>);
         <span class="self">self</span>
     }
-
 
     <span class="doccomment">/// Set whether HTTP/1 connections should support half-closures.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Clients can chose to shutdown their write-side while waiting</span>
-    <span class="doccomment">/// for the server to respond. Setting this to `false` will</span>
-    <span class="doccomment">/// automatically close any connection immediately if `read`</span>
-    <span class="doccomment">/// detects an EOF.</span>
+    <span class="doccomment">/// for the server to respond. Setting this to `true` will</span>
+    <span class="doccomment">/// prevent closing the connection immediately if `read`</span>
+    <span class="doccomment">/// detects an EOF in the middle of a request.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Default is `true`.</span>
+    <span class="doccomment">/// Default is `false`.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http1_half_close</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">http1_half_close</span>(<span class="ident">val</span>);
         <span class="self">self</span>
     }
 
-    <span class="doccomment">/// Sets whether HTTP/1 is required.</span>
+    <span class="doccomment">/// Set the maximum buffer size.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Default is `false`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http1_only</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">http1_only</span>(<span class="ident">val</span>);
+    <span class="doccomment">/// Default is ~ 400kb.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http1_max_buf_size</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">max_buf_size</span>(<span class="ident">val</span>);
         <span class="self">self</span>
     }
 
@@ -747,9 +784,21 @@
     <span class="doccomment">/// but may also improve performance when an IO transport doesn&#39;t</span>
     <span class="doccomment">/// support vectored writes well, such as most TLS implementations.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Default is `true`.</span>
+    <span class="doccomment">/// Setting this to true will force hyper to use queued strategy</span>
+    <span class="doccomment">/// which may eliminate unnecessary cloning on some TLS backends</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Default is `auto`. In this mode hyper will try to guess which</span>
+    <span class="doccomment">/// mode to use</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http1_writev</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">http1_writev</span>(<span class="ident">val</span>);
+        <span class="self">self</span>
+    }
+
+    <span class="doccomment">/// Sets whether HTTP/1 is required.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Default is `false`.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http1_only</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">http1_only</span>(<span class="ident">val</span>);
         <span class="self">self</span>
     }
 
@@ -761,45 +810,54 @@
         <span class="self">self</span>
     }
 
-    <span class="comment">// soft-deprecated? deprecation warning just seems annoying...</span>
-    <span class="comment">// reimplemented to take `self` instead of `&amp;mut self`</span>
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http2_initial_stream_window_size</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">sz</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">http2_initial_stream_window_size</span>(<span class="ident">sz</span>.<span class="ident">into</span>());
-        <span class="self">self</span>
-    }
-
-    <span class="comment">// soft-deprecated? deprecation warning just seems annoying...</span>
-    <span class="comment">// reimplemented to take `self` instead of `&amp;mut self`</span>
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http2_initial_connection_window_size</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">sz</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">http2_initial_connection_window_size</span>(<span class="ident">sz</span>.<span class="ident">into</span>());
-        <span class="self">self</span>
-    }
-
     <span class="doccomment">/// Sets the [`SETTINGS_INITIAL_WINDOW_SIZE`][spec] option for HTTP2</span>
     <span class="doccomment">/// stream-level flow control.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Default is 65,535</span>
+    <span class="doccomment">/// Passing `None` will do nothing.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If not set, hyper will use a default.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [spec]: https://http2.github.io/http2-spec/#SETTINGS_INITIAL_WINDOW_SIZE</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http2_initial_stream_window_size_</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">sz</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http2_initial_stream_window_size</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">sz</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">http2_initial_stream_window_size</span>(<span class="ident">sz</span>.<span class="ident">into</span>());
         <span class="self">self</span>
     }
 
     <span class="doccomment">/// Sets the max connection-level flow control for HTTP2</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Default is 65,535</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http2_initial_connection_window_size_</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">sz</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">http2_initial_connection_window_size</span>(<span class="ident">sz</span>.<span class="ident">into</span>());
+    <span class="doccomment">/// Passing `None` will do nothing.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If not set, hyper will use a default.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http2_initial_connection_window_size</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">sz</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">protocol</span>
+            .<span class="ident">http2_initial_connection_window_size</span>(<span class="ident">sz</span>.<span class="ident">into</span>());
+        <span class="self">self</span>
+    }
+
+    <span class="doccomment">/// Sets whether to use an adaptive flow control.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Enabling this will override the limits set in</span>
+    <span class="doccomment">/// `http2_initial_stream_window_size` and</span>
+    <span class="doccomment">/// `http2_initial_connection_window_size`.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http2_adaptive_window</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">enabled</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">http2_adaptive_window</span>(<span class="ident">enabled</span>);
+        <span class="self">self</span>
+    }
+
+    <span class="doccomment">/// Sets the maximum frame size to use for HTTP2.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Passing `None` will do nothing.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If not set, hyper will use a default.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http2_max_frame_size</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">sz</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">http2_max_frame_size</span>(<span class="ident">sz</span>);
         <span class="self">self</span>
     }
 
     <span class="doccomment">/// Sets the [`SETTINGS_MAX_CONCURRENT_STREAMS`][spec] option for HTTP2</span>
     <span class="doccomment">/// connections.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Default is no limit (`None`).</span>
+    <span class="doccomment">/// Default is no limit (`std::u32::MAX`). Passing `None` will do nothing.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [spec]: https://http2.github.io/http2-spec/#SETTINGS_MAX_CONCURRENT_STREAMS</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http2_max_concurrent_streams</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">max</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
@@ -807,11 +865,35 @@
         <span class="self">self</span>
     }
 
-    <span class="doccomment">/// Set the maximum buffer size.</span>
+    <span class="doccomment">/// Sets an interval for HTTP2 Ping frames should be sent to keep a</span>
+    <span class="doccomment">/// connection alive.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Default is ~ 400kb.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http1_max_buf_size</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">max_buf_size</span>(<span class="ident">val</span>);
+    <span class="doccomment">/// Pass `None` to disable HTTP2 keep-alive.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Default is currently disabled.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Cargo Feature</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Requires the `runtime` cargo feature to be enabled.</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http2_keep_alive_interval</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">interval</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">http2_keep_alive_interval</span>(<span class="ident">interval</span>);
+        <span class="self">self</span>
+    }
+
+    <span class="doccomment">/// Sets a timeout for receiving an acknowledgement of the keep-alive ping.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If the ping is not acknowledged within the timeout, the connection will</span>
+    <span class="doccomment">/// be closed. Does nothing if `http2_keep_alive_interval` is disabled.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Default is 20 seconds.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// # Cargo Feature</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Requires the `runtime` cargo feature to be enabled.</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http2_keep_alive_timeout</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">timeout</span>: <span class="ident">Duration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">http2_keep_alive_timeout</span>(<span class="ident">timeout</span>);
         <span class="self">self</span>
     }
 
@@ -830,51 +912,50 @@
     <span class="doccomment">/// # Example</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// # extern crate hyper;</span>
-    <span class="doccomment">/// # fn main() {}</span>
-    <span class="doccomment">/// # #[cfg(feature = &quot;runtime&quot;)]</span>
-    <span class="doccomment">/// # fn run() {</span>
-    <span class="doccomment">/// use hyper::{Body, Response, Server};</span>
-    <span class="doccomment">/// use hyper::service::service_fn_ok;</span>
+    <span class="doccomment">/// # #[cfg(feature = &quot;tcp&quot;)]</span>
+    <span class="doccomment">/// # async fn run() {</span>
+    <span class="doccomment">/// use hyper::{Body, Error, Response, Server};</span>
+    <span class="doccomment">/// use hyper::service::{make_service_fn, service_fn};</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // Construct our SocketAddr to listen on...</span>
     <span class="doccomment">/// let addr = ([127, 0, 0, 1], 3000).into();</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// // And a NewService to handle each connection...</span>
-    <span class="doccomment">/// let new_service = || {</span>
-    <span class="doccomment">///     service_fn_ok(|_req| {</span>
-    <span class="doccomment">///         Response::new(Body::from(&quot;Hello World&quot;))</span>
-    <span class="doccomment">///     })</span>
-    <span class="doccomment">/// };</span>
+    <span class="doccomment">/// // And a MakeService to handle each connection...</span>
+    <span class="doccomment">/// let make_svc = make_service_fn(|_| async {</span>
+    <span class="doccomment">///     Ok::&lt;_, Error&gt;(service_fn(|_req| async {</span>
+    <span class="doccomment">///         Ok::&lt;_, Error&gt;(Response::new(Body::from(&quot;Hello World&quot;)))</span>
+    <span class="doccomment">///     }))</span>
+    <span class="doccomment">/// });</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// // Then bind and serve...</span>
     <span class="doccomment">/// let server = Server::bind(&amp;addr)</span>
-    <span class="doccomment">///     .serve(new_service);</span>
+    <span class="doccomment">///     .serve(make_svc);</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// // Finally, spawn `server` onto an Executor...</span>
+    <span class="doccomment">/// // Run forever-ish...</span>
+    <span class="doccomment">/// if let Err(err) = server.await {</span>
+    <span class="doccomment">///     eprintln!(&quot;server error: {}&quot;, err);</span>
+    <span class="doccomment">/// }</span>
     <span class="doccomment">/// # }</span>
     <span class="doccomment">/// ```</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">serve</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">B</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">new_service</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Server</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">I</span>: <span class="ident">Stream</span>,
-        <span class="ident">I</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-        <span class="ident">I</span>::<span class="ident">Item</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-        <span class="ident">S</span>: <span class="ident">MakeServiceRef</span><span class="op">&lt;</span><span class="ident">I</span>::<span class="ident">Item</span>, <span class="ident">ReqBody</span><span class="op">=</span><span class="ident">Body</span>, <span class="ident">ResBody</span><span class="op">=</span><span class="ident">B</span><span class="op">&gt;</span>,
-        <span class="ident">S</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-        <span class="ident">S</span>::<span class="ident">Service</span>: <span class="lifetime">&#39;static</span>,
-        <span class="ident">B</span>: <span class="ident">Payload</span>,
-        <span class="ident">E</span>: <span class="ident">NewSvcExec</span><span class="op">&lt;</span><span class="ident">I</span>::<span class="ident">Item</span>, <span class="ident">S</span>::<span class="ident">Future</span>, <span class="ident">S</span>::<span class="ident">Service</span>, <span class="ident">E</span>, <span class="ident">NoopWatcher</span><span class="op">&gt;</span>,
-        <span class="ident">E</span>: <span class="ident">H2Exec</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">S</span>::<span class="ident">Service</span> <span class="kw">as</span> <span class="ident">Service</span><span class="op">&gt;</span>::<span class="ident">Future</span>, <span class="ident">B</span><span class="op">&gt;</span>,
+        <span class="ident">I</span>: <span class="ident">Accept</span>,
+        <span class="ident">I</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">I</span>::<span class="ident">Conn</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span> <span class="op">+</span> <span class="ident">Unpin</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+        <span class="ident">S</span>: <span class="ident">MakeServiceRef</span><span class="op">&lt;</span><span class="ident">I</span>::<span class="ident">Conn</span>, <span class="ident">Body</span>, <span class="ident">ResBody</span> <span class="op">=</span> <span class="ident">B</span><span class="op">&gt;</span>,
+        <span class="ident">S</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">B</span>: <span class="ident">HttpBody</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+        <span class="ident">B</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">E</span>: <span class="ident">NewSvcExec</span><span class="op">&lt;</span><span class="ident">I</span>::<span class="ident">Conn</span>, <span class="ident">S</span>::<span class="ident">Future</span>, <span class="ident">S</span>::<span class="ident">Service</span>, <span class="ident">E</span>, <span class="ident">NoopWatcher</span><span class="op">&gt;</span>,
+        <span class="ident">E</span>: <span class="ident">H2Exec</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">S</span>::<span class="ident">Service</span> <span class="kw">as</span> <span class="ident">HttpService</span><span class="op">&lt;</span><span class="ident">Body</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Future</span>, <span class="ident">B</span><span class="op">&gt;</span>,
     {
-        <span class="kw">let</span> <span class="ident">serve</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">serve_incoming</span>(<span class="self">self</span>.<span class="ident">incoming</span>, <span class="ident">new_service</span>);
+        <span class="kw">let</span> <span class="ident">serve</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">protocol</span>.<span class="ident">serve</span>(<span class="self">self</span>.<span class="ident">incoming</span>, <span class="ident">new_service</span>);
         <span class="kw">let</span> <span class="ident">spawn_all</span> <span class="op">=</span> <span class="ident">serve</span>.<span class="ident">spawn_all</span>();
-        <span class="ident">Server</span> {
-            <span class="ident">spawn_all</span>,
-        }
+        <span class="ident">Server</span> { <span class="ident">spawn_all</span> }
     }
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tcp&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span> <span class="ident">Builder</span><span class="op">&lt;</span><span class="ident">AddrIncoming</span>, <span class="ident">E</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Set whether TCP keepalive messages are enabled on accepted connections.</span>
     <span class="doccomment">///</span>
@@ -912,6 +993,5 @@
         <span class="self">self</span>
     }
 }
-
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "hyper";</script><script src="../../../aliases.js"></script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "hyper";</script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>

@@ -191,7 +191,7 @@
     <span class="comment">// TODO: examine use of is_remote</span>
     <span class="ident">SpanData</span> {
         <span class="ident">span_context</span>: <span class="ident">SpanContext</span>::<span class="ident">new</span>(<span class="ident">span</span>.<span class="ident">trace_id</span>, <span class="ident">span</span>.<span class="ident">id</span>, <span class="number">0</span>, <span class="bool-val">false</span>),
-        <span class="ident">parent_span_id</span>: <span class="ident">span</span>.<span class="ident">parent_id</span>.<span class="ident">unwrap_or</span>(<span class="ident">SpanId</span>::<span class="ident">invalid</span>()), <span class="comment">// idea: invalid == no parent, for root span</span>
+        <span class="ident">parent_span_id</span>: <span class="ident">span</span>.<span class="ident">parent_id</span>.<span class="ident">unwrap_or_else</span>(<span class="ident">SpanId</span>::<span class="ident">invalid</span>), <span class="comment">// idea: invalid == no parent, for root span</span>
         <span class="ident">span_kind</span>: <span class="ident">SpanKind</span>::<span class="ident">Internal</span>,
         <span class="ident">name</span>: <span class="ident">span</span>.<span class="ident">meta</span>.<span class="ident">name</span>().<span class="ident">to_string</span>(),
         <span class="ident">start_time</span>: <span class="ident">span</span>.<span class="ident">initialized_at</span>,
@@ -206,4 +206,4 @@
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "tracing_jaeger";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "tracing_jaeger";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

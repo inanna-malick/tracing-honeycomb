@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/hyper-0.12.35/src/client/pool.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>pool.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../hyper/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/hyper-0.13.9/src/client/pool.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>pool.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../hyper/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1004,20 +1004,28 @@
 <span id="1004">1004</span>
 <span id="1005">1005</span>
 <span id="1006">1006</span>
+<span id="1007">1007</span>
+<span id="1008">1008</span>
+<span id="1009">1009</span>
+<span id="1010">1010</span>
+<span id="1011">1011</span>
+<span id="1012">1012</span>
+<span id="1013">1013</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::{<span class="ident">HashMap</span>, <span class="ident">HashSet</span>, <span class="ident">VecDeque</span>};
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ops</span>::{<span class="ident">Deref</span>, <span class="ident">DerefMut</span>};
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::{<span class="ident">Arc</span>, <span class="ident">Mutex</span>, <span class="ident">Weak</span>};
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>))]</span>
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">time</span>::{<span class="ident">Duration</span>, <span class="ident">Instant</span>};
 
-<span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">Future</span>, <span class="ident">Async</span>, <span class="ident">Poll</span>};
-<span class="kw">use</span> <span class="ident">futures</span>::<span class="ident">sync</span>::<span class="ident">oneshot</span>;
+<span class="kw">use</span> <span class="ident">futures_channel</span>::<span class="ident">oneshot</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span>
-<span class="kw">use</span> <span class="ident">tokio_timer</span>::<span class="ident">Interval</span>;
+<span class="kw">use</span> <span class="ident">tokio</span>::<span class="ident">time</span>::{<span class="ident">Duration</span>, <span class="ident">Instant</span>, <span class="ident">Interval</span>};
 
-<span class="kw">use</span> <span class="ident">common</span>::<span class="ident">Exec</span>;
 <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">Ver</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">common</span>::{<span class="ident">task</span>, <span class="ident">Exec</span>, <span class="ident">Future</span>, <span class="ident">Pin</span>, <span class="ident">Poll</span>, <span class="ident">Unpin</span>};
 
 <span class="comment">// FIXME: allow() required due to `impl Trait` leaking types to this lint</span>
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_debug_implementations</span>)]</span>
@@ -1031,7 +1039,7 @@
 <span class="comment">// This is a trait to allow the `client::pool::tests` to work for `i32`.</span>
 <span class="comment">//</span>
 <span class="comment">// See https://github.com/hyperium/hyper/issues/1429</span>
-<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">trait</span> <span class="ident">Poolable</span>: <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sized</span> <span class="op">+</span> <span class="lifetime">&#39;static</span> {
+<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">trait</span> <span class="ident">Poolable</span>: <span class="ident">Unpin</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sized</span> <span class="op">+</span> <span class="lifetime">&#39;static</span> {
     <span class="kw">fn</span> <span class="ident">is_open</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
     <span class="doccomment">/// Reserve this connection.</span>
     <span class="doccomment">///</span>
@@ -1058,10 +1066,10 @@
 }
 
 <span class="doccomment">/// Simple type alias in case the key type needs to be adjusted.</span>
-<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">type</span> <span class="ident">Key</span> <span class="op">=</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>;
+<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">type</span> <span class="ident">Key</span> <span class="op">=</span> (<span class="ident">http</span>::<span class="ident">uri</span>::<span class="ident">Scheme</span>, <span class="ident">http</span>::<span class="ident">uri</span>::<span class="ident">Authority</span>); <span class="comment">//Arc&lt;String&gt;;</span>
 
 <span class="kw">struct</span> <span class="ident">PoolInner</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="comment">// A flag that a connection is being estabilished, and the connection</span>
+    <span class="comment">// A flag that a connection is being established, and the connection</span>
     <span class="comment">// should be shared. This prevents making multiple HTTP/2 connections</span>
     <span class="comment">// to the same host.</span>
     <span class="ident">connecting</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>,
@@ -1082,7 +1090,7 @@
     <span class="comment">// A oneshot channel is used to allow the interval to be notified when</span>
     <span class="comment">// the Pool completely drops. That way, the interval can cancel immediately.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span>
-    <span class="ident">idle_interval_ref</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">oneshot</span>::<span class="ident">Sender</span><span class="op">&lt;</span>::<span class="ident">common</span>::<span class="ident">Never</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">idle_interval_ref</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">oneshot</span>::<span class="ident">Sender</span><span class="op">&lt;</span><span class="kw">crate</span>::<span class="ident">common</span>::<span class="ident">Never</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span>
     <span class="ident">exec</span>: <span class="ident">Exec</span>,
     <span class="ident">timeout</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>,
@@ -1094,15 +1102,20 @@
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct</span> <span class="ident">Config</span> {
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">enabled</span>: <span class="ident">bool</span>,
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">keep_alive_timeout</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">idle_timeout</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>,
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="ident">max_idle_per_host</span>: <span class="ident">usize</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Config</span> {
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">is_enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">max_idle_per_host</span> <span class="op">&gt;</span> <span class="number">0</span>
+    }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Pool</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">config</span>: <span class="ident">Config</span>, <span class="ident">__exec</span>: <span class="kw-2">&amp;</span><span class="ident">Exec</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Pool</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">config</span>.<span class="ident">enabled</span> {
-             <span class="prelude-val">Some</span>(<span class="ident">Arc</span>::<span class="ident">new</span>(<span class="ident">Mutex</span>::<span class="ident">new</span>(<span class="ident">PoolInner</span> {
+        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">config</span>.<span class="ident">is_enabled</span>() {
+            <span class="prelude-val">Some</span>(<span class="ident">Arc</span>::<span class="ident">new</span>(<span class="ident">Mutex</span>::<span class="ident">new</span>(<span class="ident">PoolInner</span> {
                 <span class="ident">connecting</span>: <span class="ident">HashSet</span>::<span class="ident">new</span>(),
                 <span class="ident">idle</span>: <span class="ident">HashMap</span>::<span class="ident">new</span>(),
                 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span>
@@ -1111,15 +1124,13 @@
                 <span class="ident">waiters</span>: <span class="ident">HashMap</span>::<span class="ident">new</span>(),
                 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span>
                 <span class="ident">exec</span>: <span class="ident">__exec</span>.<span class="ident">clone</span>(),
-                <span class="ident">timeout</span>: <span class="ident">config</span>.<span class="ident">keep_alive_timeout</span>,
-             })))
+                <span class="ident">timeout</span>: <span class="ident">config</span>.<span class="ident">idle_timeout</span>,
+            })))
         } <span class="kw">else</span> {
             <span class="prelude-val">None</span>
         };
 
-        <span class="ident">Pool</span> {
-            <span class="ident">inner</span>,
-        }
+        <span class="ident">Pool</span> { <span class="ident">inner</span> }
     }
 
     <span class="kw">fn</span> <span class="ident">is_enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
@@ -1179,31 +1190,28 @@
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">locked</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> ::<span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">MutexGuard</span><span class="op">&lt;</span><span class="ident">PoolInner</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="self">self</span>
-            .<span class="ident">inner</span>
-            .<span class="ident">as_ref</span>()
-            .<span class="ident">expect</span>(<span class="string">&quot;enabled&quot;</span>)
-            .<span class="ident">lock</span>()
-            .<span class="ident">expect</span>(<span class="string">&quot;lock&quot;</span>)
+    <span class="kw">fn</span> <span class="ident">locked</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">MutexGuard</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">PoolInner</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">as_ref</span>().<span class="ident">expect</span>(<span class="string">&quot;enabled&quot;</span>).<span class="ident">lock</span>().<span class="ident">expect</span>(<span class="string">&quot;lock&quot;</span>)
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">h1_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Key</span> {
-        <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="ident">s</span>.<span class="ident">to_string</span>())
+    <span class="comment">/* Used in client/tests.rs...
+    #[cfg(feature = &quot;runtime&quot;)]
+    #[cfg(test)]
+    pub(super) fn h1_key(&amp;self, s: &amp;str) -&gt; Key {
+        Arc::new(s.to_string())
     }
 
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">idle_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">Key</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
-        <span class="self">self</span>
-            .<span class="ident">locked</span>()
-            .<span class="ident">idle</span>
-            .<span class="ident">get</span>(<span class="ident">key</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">list</span><span class="op">|</span> <span class="ident">list</span>.<span class="ident">len</span>())
-            .<span class="ident">unwrap_or</span>(<span class="number">0</span>)
+    #[cfg(feature = &quot;runtime&quot;)]
+    #[cfg(test)]
+    pub(super) fn idle_count(&amp;self, key: &amp;Key) -&gt; usize {
+        self
+            .locked()
+            .idle
+            .get(key)
+            .map(|list| list.len())
+            .unwrap_or(0)
     }
+    */</span>
 
     <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">pooled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">connecting</span>: <span class="ident">Connecting</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">value</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Pooled</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">value</span>, <span class="ident">pool_ref</span>) <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">enabled</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span> {
@@ -1220,13 +1228,13 @@
                     <span class="comment">// Shared reservations don&#39;t need a reference to the pool,</span>
                     <span class="comment">// since the pool always keeps a copy.</span>
                     (<span class="ident">to_return</span>, <span class="ident">WeakOpt</span>::<span class="ident">none</span>())
-                },
+                }
                 <span class="ident">Reservation</span>::<span class="ident">Unique</span>(<span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="comment">// Unique reservations must take a reference to the pool</span>
                     <span class="comment">// since they hope to reinsert once the reservation is</span>
                     <span class="comment">// completed</span>
                     (<span class="ident">value</span>, <span class="ident">WeakOpt</span>::<span class="ident">downgrade</span>(<span class="ident">enabled</span>))
-                },
+                }
             }
         } <span class="kw">else</span> {
             <span class="comment">// If pool is not enabled, skip all the things...</span>
@@ -1240,7 +1248,7 @@
             <span class="ident">key</span>: <span class="ident">connecting</span>.<span class="ident">key</span>.<span class="ident">clone</span>(),
             <span class="ident">is_reused</span>: <span class="bool-val">false</span>,
             <span class="ident">pool</span>: <span class="ident">pool_ref</span>,
-            <span class="ident">value</span>: <span class="prelude-val">Some</span>(<span class="ident">value</span>)
+            <span class="ident">value</span>: <span class="prelude-val">Some</span>(<span class="ident">value</span>),
         }
     }
 
@@ -1271,7 +1279,7 @@
 }
 
 <span class="doccomment">/// Pop off this list, looking for a usable connection that hasn&#39;t expired.</span>
-<span class="kw">struct</span> <span class="ident">IdlePopper</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+<span class="kw">struct</span> <span class="ident">IdlePopper</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Key</span>,
     <span class="ident">list</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Idle</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
@@ -1303,10 +1311,8 @@
                         <span class="ident">value</span>: <span class="ident">to_reinsert</span>,
                     });
                     <span class="ident">to_checkout</span>
-                },
-                <span class="ident">Reservation</span>::<span class="ident">Unique</span>(<span class="ident">unique</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="ident">unique</span>
                 }
+                <span class="ident">Reservation</span>::<span class="ident">Unique</span>(<span class="ident">unique</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">unique</span>,
             };
 
             <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">Idle</span> {
@@ -1336,7 +1342,7 @@
                         <span class="ident">Reservation</span>::<span class="ident">Shared</span>(<span class="ident">to_keep</span>, <span class="ident">to_send</span>) <span class="op">=</span><span class="op">&gt;</span> {
                             <span class="ident">value</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">to_keep</span>);
                             <span class="ident">to_send</span>
-                        },
+                        }
                         <span class="ident">Reservation</span>::<span class="ident">Unique</span>(<span class="ident">uniq</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">uniq</span>,
                     };
                     <span class="kw">match</span> <span class="ident">tx</span>.<span class="ident">send</span>(<span class="ident">reserved</span>) {
@@ -1346,7 +1352,7 @@
                             } <span class="kw">else</span> {
                                 <span class="kw">continue</span>;
                             }
-                        },
+                        }
                         <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
                             <span class="ident">value</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">e</span>);
                         }
@@ -1365,10 +1371,7 @@
             <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="comment">// borrow-check scope...</span>
                 {
-                    <span class="kw">let</span> <span class="ident">idle_list</span> <span class="op">=</span> <span class="self">self</span>
-                        .<span class="ident">idle</span>
-                        .<span class="ident">entry</span>(<span class="ident">key</span>.<span class="ident">clone</span>())
-                        .<span class="ident">or_insert</span>(<span class="ident">Vec</span>::<span class="ident">new</span>());
+                    <span class="kw">let</span> <span class="ident">idle_list</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">idle</span>.<span class="ident">entry</span>(<span class="ident">key</span>.<span class="ident">clone</span>()).<span class="ident">or_insert_with</span>(<span class="ident">Vec</span>::<span class="ident">new</span>);
                     <span class="kw">if</span> <span class="self">self</span>.<span class="ident">max_idle_per_host</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">idle_list</span>.<span class="ident">len</span>() {
                         <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;max idle per host for {:?}, dropping connection&quot;</span>, <span class="ident">key</span>);
                         <span class="kw">return</span>;
@@ -1376,7 +1379,7 @@
 
                     <span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;pooling idle connection for {:?}&quot;</span>, <span class="ident">key</span>);
                     <span class="ident">idle_list</span>.<span class="ident">push</span>(<span class="ident">Idle</span> {
-                        <span class="ident">value</span>: <span class="ident">value</span>,
+                        <span class="ident">value</span>,
                         <span class="ident">idle_at</span>: <span class="ident">Instant</span>::<span class="ident">now</span>(),
                     });
                 }
@@ -1394,10 +1397,7 @@
     <span class="doccomment">/// but the lock is going away, so clean up.</span>
     <span class="kw">fn</span> <span class="ident">connected</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">Key</span>) {
         <span class="kw">let</span> <span class="ident">existed</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">connecting</span>.<span class="ident">remove</span>(<span class="ident">key</span>);
-        <span class="macro">debug_assert</span><span class="macro">!</span>(
-            <span class="ident">existed</span>,
-            <span class="string">&quot;Connecting dropped, key not in pool.connecting&quot;</span>
-        );
+        <span class="macro">debug_assert</span><span class="macro">!</span>(<span class="ident">existed</span>, <span class="string">&quot;Connecting dropped, key not in pool.connecting&quot;</span>);
         <span class="comment">// cancel any waiters. if there are any, it&#39;s because</span>
         <span class="comment">// this Connecting task didn&#39;t complete successfully.</span>
         <span class="comment">// those waiters would never receive a connection.</span>
@@ -1416,22 +1416,17 @@
                 <span class="self">self</span>.<span class="ident">idle_interval_ref</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">tx</span>);
                 (<span class="ident">dur</span>, <span class="ident">rx</span>)
             } <span class="kw">else</span> {
-                <span class="kw">return</span>
+                <span class="kw">return</span>;
             }
         };
 
-        <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">Instant</span>::<span class="ident">now</span>() <span class="op">+</span> <span class="ident">dur</span>;
-
-        <span class="kw">let</span> <span class="ident">interval</span> <span class="op">=</span> <span class="ident">IdleInterval</span> {
-            <span class="ident">interval</span>: <span class="ident">Interval</span>::<span class="ident">new</span>(<span class="ident">start</span>, <span class="ident">dur</span>),
+        <span class="kw">let</span> <span class="ident">interval</span> <span class="op">=</span> <span class="ident">IdleTask</span> {
+            <span class="ident">interval</span>: <span class="ident">tokio</span>::<span class="ident">time</span>::<span class="ident">interval</span>(<span class="ident">dur</span>),
             <span class="ident">pool</span>: <span class="ident">WeakOpt</span>::<span class="ident">downgrade</span>(<span class="ident">pool_ref</span>),
             <span class="ident">pool_drop_notifier</span>: <span class="ident">rx</span>,
         };
 
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">exec</span>.<span class="ident">execute</span>(<span class="ident">interval</span>) {
-            <span class="comment">// This task isn&#39;t critical, so simply log and ignore.</span>
-            <span class="macro">warn</span><span class="macro">!</span>(<span class="string">&quot;error spawning connection pool idle interval: {}&quot;</span>, <span class="ident">err</span>);
-        }
+        <span class="self">self</span>.<span class="ident">exec</span>.<span class="ident">execute</span>(<span class="ident">interval</span>);
     }
 }
 
@@ -1443,9 +1438,7 @@
     <span class="kw">fn</span> <span class="ident">clean_waiters</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">Key</span>) {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">remove_waiters</span> <span class="op">=</span> <span class="bool-val">false</span>;
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">waiters</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">waiters</span>.<span class="ident">get_mut</span>(<span class="ident">key</span>) {
-            <span class="ident">waiters</span>.<span class="ident">retain</span>(<span class="op">|</span><span class="ident">tx</span><span class="op">|</span> {
-                <span class="op">!</span><span class="ident">tx</span>.<span class="ident">is_canceled</span>()
-            });
+            <span class="ident">waiters</span>.<span class="ident">retain</span>(<span class="op">|</span><span class="ident">tx</span><span class="op">|</span> <span class="op">!</span><span class="ident">tx</span>.<span class="ident">is_canceled</span>());
             <span class="ident">remove_waiters</span> <span class="op">=</span> <span class="ident">waiters</span>.<span class="ident">is_empty</span>();
         }
         <span class="kw">if</span> <span class="ident">remove_waiters</span> {
@@ -1456,7 +1449,7 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Poolable</span><span class="op">&gt;</span> <span class="ident">PoolInner</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// This should *only* be called by the IdleInterval.</span>
+    <span class="doccomment">/// This should *only* be called by the IdleTask</span>
     <span class="kw">fn</span> <span class="ident">clear_expired</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="kw">let</span> <span class="ident">dur</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">timeout</span>.<span class="ident">expect</span>(<span class="string">&quot;interval assumes timeout&quot;</span>);
 
@@ -1555,10 +1548,8 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Poolable</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">Pooled</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
-        <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;Pooled&quot;</span>)
-            .<span class="ident">field</span>(<span class="string">&quot;key&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">key</span>)
-            .<span class="ident">finish</span>()
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
+        <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;Pooled&quot;</span>).<span class="ident">field</span>(<span class="string">&quot;key&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">key</span>).<span class="ident">finish</span>()
     }
 }
 
@@ -1576,46 +1567,50 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Poolable</span><span class="op">&gt;</span> <span class="ident">Checkout</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">poll_waiter</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Pooled</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>, ::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">poll_waiter</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task</span>::<span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Pooled</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">static</span> <span class="ident">CANCELED</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;pool checkout failed&quot;</span>;
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">rx</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">waiter</span>.<span class="ident">take</span>() {
-            <span class="kw">match</span> <span class="ident">rx</span>.<span class="ident">poll</span>() {
-                <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="ident">value</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">match</span> <span class="ident">Pin</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">rx</span>).<span class="ident">poll</span>(<span class="ident">cx</span>) {
+                <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Ok</span>(<span class="ident">value</span>)) <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="kw">if</span> <span class="ident">value</span>.<span class="ident">is_open</span>() {
-                        <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">pool</span>.<span class="ident">reuse</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">key</span>, <span class="ident">value</span>))))
+                        <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">pool</span>.<span class="ident">reuse</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">key</span>, <span class="ident">value</span>))))
                     } <span class="kw">else</span> {
-                        <span class="prelude-val">Err</span>(::<span class="ident">Error</span>::<span class="ident">new_canceled</span>().<span class="ident">with</span>(<span class="ident">CANCELED</span>))
+                        <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="kw">crate</span>::<span class="ident">Error</span>::<span class="ident">new_canceled</span>().<span class="ident">with</span>(<span class="ident">CANCELED</span>))))
                     }
-                },
-                <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                }
+                <span class="ident">Poll</span>::<span class="ident">Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="self">self</span>.<span class="ident">waiter</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">rx</span>);
-                    <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>)
-                },
-                <span class="prelude-val">Err</span>(<span class="ident">_canceled</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(::<span class="ident">Error</span>::<span class="ident">new_canceled</span>().<span class="ident">with</span>(<span class="ident">CANCELED</span>)),
+                    <span class="ident">Poll</span>::<span class="ident">Pending</span>
+                }
+                <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">_canceled</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="kw">crate</span>::<span class="ident">Error</span>::<span class="ident">new_canceled</span>().<span class="ident">with</span>(<span class="ident">CANCELED</span>))))
+                }
             }
         } <span class="kw">else</span> {
-            <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="prelude-val">None</span>))
+            <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">None</span>)
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">checkout</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Pooled</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">checkout</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task</span>::<span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Pooled</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">entry</span> <span class="op">=</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">inner</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pool</span>.<span class="ident">inner</span>.<span class="ident">as_ref</span>()<span class="question-mark">?</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
             <span class="kw">let</span> <span class="ident">expiration</span> <span class="op">=</span> <span class="ident">Expiration</span>::<span class="ident">new</span>(<span class="ident">inner</span>.<span class="ident">timeout</span>);
-            <span class="kw">let</span> <span class="ident">maybe_entry</span> <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">idle</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">key</span>)
-                .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">list</span><span class="op">|</span> {
-                    <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;take? {:?}: expiration = {:?}&quot;</span>, <span class="self">self</span>.<span class="ident">key</span>, <span class="ident">expiration</span>.<span class="number">0</span>);
-                    <span class="comment">// A block to end the mutable borrow on list,</span>
-                    <span class="comment">// so the map below can check is_empty()</span>
-                    {
-                        <span class="kw">let</span> <span class="ident">popper</span> <span class="op">=</span> <span class="ident">IdlePopper</span> {
-                            <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">key</span>,
-                            <span class="ident">list</span>,
-                        };
-                        <span class="ident">popper</span>.<span class="ident">pop</span>(<span class="kw-2">&amp;</span><span class="ident">expiration</span>)
-                    }
-                        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>, <span class="ident">list</span>.<span class="ident">is_empty</span>()))
-                });
+            <span class="kw">let</span> <span class="ident">maybe_entry</span> <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">idle</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">key</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">list</span><span class="op">|</span> {
+                <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;take? {:?}: expiration = {:?}&quot;</span>, <span class="self">self</span>.<span class="ident">key</span>, <span class="ident">expiration</span>.<span class="number">0</span>);
+                <span class="comment">// A block to end the mutable borrow on list,</span>
+                <span class="comment">// so the map below can check is_empty()</span>
+                {
+                    <span class="kw">let</span> <span class="ident">popper</span> <span class="op">=</span> <span class="ident">IdlePopper</span> {
+                        <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">key</span>,
+                        <span class="ident">list</span>,
+                    };
+                    <span class="ident">popper</span>.<span class="ident">pop</span>(<span class="kw-2">&amp;</span><span class="ident">expiration</span>)
+                }
+                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>, <span class="ident">list</span>.<span class="ident">is_empty</span>()))
+            });
 
             <span class="kw">let</span> (<span class="ident">entry</span>, <span class="ident">empty</span>) <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">e</span>, <span class="ident">empty</span>)) <span class="op">=</span> <span class="ident">maybe_entry</span> {
                 (<span class="prelude-val">Some</span>(<span class="ident">e</span>), <span class="ident">empty</span>)
@@ -1630,15 +1625,15 @@
 
             <span class="kw">if</span> <span class="ident">entry</span>.<span class="ident">is_none</span>() <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="self">self</span>.<span class="ident">waiter</span>.<span class="ident">is_none</span>() {
                 <span class="kw">let</span> (<span class="ident">tx</span>, <span class="kw-2">mut</span> <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">oneshot</span>::<span class="ident">channel</span>();
-                <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">rx</span>.<span class="ident">poll</span>(); <span class="comment">// park this task</span>
-
                 <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;checkout waiting for idle connection: {:?}&quot;</span>, <span class="self">self</span>.<span class="ident">key</span>);
                 <span class="ident">inner</span>
                     .<span class="ident">waiters</span>
                     .<span class="ident">entry</span>(<span class="self">self</span>.<span class="ident">key</span>.<span class="ident">clone</span>())
-                    .<span class="ident">or_insert</span>(<span class="ident">VecDeque</span>::<span class="ident">new</span>())
+                    .<span class="ident">or_insert_with</span>(<span class="ident">VecDeque</span>::<span class="ident">new</span>)
                     .<span class="ident">push_back</span>(<span class="ident">tx</span>);
 
+                <span class="comment">// register the waker with this oneshot</span>
+                <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">Pin</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">rx</span>).<span class="ident">poll</span>(<span class="ident">cx</span>).<span class="ident">is_pending</span>());
                 <span class="self">self</span>.<span class="ident">waiter</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">rx</span>);
             }
 
@@ -1650,20 +1645,21 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Poolable</span><span class="op">&gt;</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">Checkout</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">Pooled</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> ::<span class="ident">Error</span>;
+    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Pooled</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span>, <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pooled</span>) <span class="op">=</span> <span class="macro">try_ready</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">poll_waiter</span>()) {
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="ident">pooled</span>));
+    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task</span>::<span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Output</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pooled</span>) <span class="op">=</span> <span class="macro">ready</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">poll_waiter</span>(<span class="ident">cx</span>)<span class="question-mark">?</span>) {
+            <span class="kw">return</span> <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Ok</span>(<span class="ident">pooled</span>));
         }
 
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pooled</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">checkout</span>() {
-            <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="ident">pooled</span>))
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pooled</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">checkout</span>(<span class="ident">cx</span>) {
+            <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Ok</span>(<span class="ident">pooled</span>))
         } <span class="kw">else</span> <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">pool</span>.<span class="ident">is_enabled</span>() {
-            <span class="prelude-val">Err</span>(::<span class="ident">Error</span>::<span class="ident">new_canceled</span>().<span class="ident">with</span>(<span class="string">&quot;pool is disabled&quot;</span>))
+            <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Err</span>(<span class="kw">crate</span>::<span class="ident">Error</span>::<span class="ident">new_canceled</span>().<span class="ident">with</span>(<span class="string">&quot;pool is disabled&quot;</span>)))
         } <span class="kw">else</span> {
-            <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>)
+            <span class="comment">// There&#39;s a new waiter, already registered in self.checkout()</span>
+            <span class="macro">debug_assert</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">waiter</span>.<span class="ident">is_some</span>());
+            <span class="ident">Poll</span>::<span class="ident">Pending</span>
         }
     }
 }
@@ -1724,37 +1720,31 @@
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span>
-<span class="kw">struct</span> <span class="ident">IdleInterval</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">struct</span> <span class="ident">IdleTask</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="ident">interval</span>: <span class="ident">Interval</span>,
     <span class="ident">pool</span>: <span class="ident">WeakOpt</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">PoolInner</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="comment">// This allows the IdleInterval to be notified as soon as the entire</span>
+    <span class="comment">// This allows the IdleTask to be notified as soon as the entire</span>
     <span class="comment">// Pool is fully dropped, and shutdown. This channel is never sent on,</span>
     <span class="comment">// but Err(Canceled) will be received when the Pool is dropped.</span>
-    <span class="ident">pool_drop_notifier</span>: <span class="ident">oneshot</span>::<span class="ident">Receiver</span><span class="op">&lt;</span>::<span class="ident">common</span>::<span class="ident">Never</span><span class="op">&gt;</span>,
+    <span class="ident">pool_drop_notifier</span>: <span class="ident">oneshot</span>::<span class="ident">Receiver</span><span class="op">&lt;</span><span class="kw">crate</span>::<span class="ident">common</span>::<span class="ident">Never</span><span class="op">&gt;</span>,
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span>
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Poolable</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">IdleInterval</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> ();
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> ();
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Poolable</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">IdleTask</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> ();
 
-    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span>, <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="comment">// Interval is a Stream</span>
-        <span class="kw">use</span> <span class="ident">futures</span>::<span class="ident">Stream</span>;
-
+    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task</span>::<span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Output</span><span class="op">&gt;</span> {
         <span class="kw">loop</span> {
-            <span class="kw">match</span> <span class="self">self</span>.<span class="ident">pool_drop_notifier</span>.<span class="ident">poll</span>() {
-                <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="ident">n</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">n</span> {},
-                <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>) <span class="op">=</span><span class="op">&gt;</span> (),
-                <span class="prelude-val">Err</span>(<span class="ident">_canceled</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">match</span> <span class="ident">Pin</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">pool_drop_notifier</span>).<span class="ident">poll</span>(<span class="ident">cx</span>) {
+                <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Ok</span>(<span class="ident">n</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">n</span> {},
+                <span class="ident">Poll</span>::<span class="ident">Pending</span> <span class="op">=</span><span class="op">&gt;</span> (),
+                <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">_canceled</span>)) <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;pool closed, canceling idle interval&quot;</span>);
-                    <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(()));
+                    <span class="kw">return</span> <span class="ident">Poll</span>::<span class="ident">Ready</span>(());
                 }
             }
 
-            <span class="macro">try_ready</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">interval</span>.<span class="ident">poll</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> {
-                <span class="macro">error</span><span class="macro">!</span>(<span class="string">&quot;idle interval timer error: {}&quot;</span>, <span class="ident">err</span>);
-            }));
+            <span class="macro">ready</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">interval</span>.<span class="ident">poll_tick</span>(<span class="ident">cx</span>));
 
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">inner</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">pool</span>.<span class="ident">upgrade</span>() {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="kw-2">mut</span> <span class="ident">inner</span>) <span class="op">=</span> <span class="ident">inner</span>.<span class="ident">lock</span>() {
@@ -1763,7 +1753,7 @@
                     <span class="kw">continue</span>;
                 }
             }
-            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(()));
+            <span class="kw">return</span> <span class="ident">Poll</span>::<span class="ident">Ready</span>(());
         }
     }
 }
@@ -1778,26 +1768,23 @@
     }
 
     <span class="kw">fn</span> <span class="ident">upgrade</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="number">0</span>
-            .<span class="ident">as_ref</span>()
-            .<span class="ident">and_then</span>(<span class="ident">Weak</span>::<span class="ident">upgrade</span>)
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>().<span class="ident">and_then</span>(<span class="ident">Weak</span>::<span class="ident">upgrade</span>)
     }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
-    <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">Arc</span>;
+    <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">task</span>::<span class="ident">Poll</span>;
     <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">Duration</span>;
-    <span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">Async</span>, <span class="ident">Future</span>};
-    <span class="kw">use</span> <span class="ident">futures</span>::<span class="ident">future</span>;
-    <span class="kw">use</span> <span class="ident">common</span>::<span class="ident">Exec</span>;
-    <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Connecting</span>, <span class="ident">Key</span>, <span class="ident">Poolable</span>, <span class="ident">Pool</span>, <span class="ident">Reservation</span>, <span class="ident">WeakOpt</span>};
+
+    <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Connecting</span>, <span class="ident">Key</span>, <span class="ident">Pool</span>, <span class="ident">Poolable</span>, <span class="ident">Reservation</span>, <span class="ident">WeakOpt</span>};
+    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">common</span>::{<span class="ident">task</span>, <span class="ident">Exec</span>, <span class="ident">Future</span>, <span class="ident">Pin</span>};
 
     <span class="doccomment">/// Test unique reservations.</span>
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
     <span class="kw">struct</span> <span class="ident">Uniq</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">T</span>);
 
-    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="ident">Poolable</span> <span class="kw">for</span> <span class="ident">Uniq</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">Unpin</span><span class="op">&gt;</span> <span class="ident">Poolable</span> <span class="kw">for</span> <span class="ident">Uniq</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="kw">fn</span> <span class="ident">is_open</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
             <span class="bool-val">true</span>
         }
@@ -1818,14 +1805,18 @@
         }
     }
 
+    <span class="kw">fn</span> <span class="ident">host_key</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Key</span> {
+        (<span class="ident">http</span>::<span class="ident">uri</span>::<span class="ident">Scheme</span>::<span class="ident">HTTP</span>, <span class="ident">s</span>.<span class="ident">parse</span>().<span class="ident">expect</span>(<span class="string">&quot;host key&quot;</span>))
+    }
+
     <span class="kw">fn</span> <span class="ident">pool_no_timer</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Pool</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">pool_max_idle_no_timer</span>(::<span class="ident">std</span>::<span class="ident">usize</span>::<span class="ident">MAX</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">pool_max_idle_no_timer</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">max_idle</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Pool</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">Pool</span>::<span class="ident">new</span>(<span class="kw">super</span>::<span class="ident">Config</span> {
-                <span class="ident">enabled</span>: <span class="bool-val">true</span>,
-                <span class="ident">keep_alive_timeout</span>: <span class="prelude-val">Some</span>(<span class="ident">Duration</span>::<span class="ident">from_millis</span>(<span class="number">100</span>)),
+        <span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">Pool</span>::<span class="ident">new</span>(
+            <span class="kw">super</span>::<span class="ident">Config</span> {
+                <span class="ident">idle_timeout</span>: <span class="prelude-val">Some</span>(<span class="ident">Duration</span>::<span class="ident">from_millis</span>(<span class="number">100</span>)),
                 <span class="ident">max_idle_per_host</span>: <span class="ident">max_idle</span>,
             },
             <span class="kw-2">&amp;</span><span class="ident">Exec</span>::<span class="ident">Default</span>,
@@ -1834,149 +1825,169 @@
         <span class="ident">pool</span>
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_pool_checkout_smoke</span>() {
+    <span class="attribute">#[<span class="ident">tokio</span>::<span class="ident">test</span>]</span>
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">test_pool_checkout_smoke</span>() {
         <span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">pool_no_timer</span>();
-        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>());
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">host_key</span>(<span class="string">&quot;foo&quot;</span>);
         <span class="kw">let</span> <span class="ident">pooled</span> <span class="op">=</span> <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">41</span>));
 
         <span class="ident">drop</span>(<span class="ident">pooled</span>);
 
-        <span class="kw">match</span> <span class="ident">pool</span>.<span class="ident">checkout</span>(<span class="ident">key</span>).<span class="ident">poll</span>().<span class="ident">unwrap</span>() {
-            <span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="ident">pooled</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="kw-2">*</span><span class="ident">pooled</span>, <span class="ident">Uniq</span>(<span class="number">41</span>)),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;not ready&quot;</span>),
+        <span class="kw">match</span> <span class="ident">pool</span>.<span class="ident">checkout</span>(<span class="ident">key</span>).<span class="kw">await</span> {
+            <span class="prelude-val">Ok</span>(<span class="ident">pooled</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="kw-2">*</span><span class="ident">pooled</span>, <span class="ident">Uniq</span>(<span class="number">41</span>)),
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;not ready&quot;</span>),
+        };
+    }
+
+    <span class="doccomment">/// Helper to check if the future is ready after polling once.</span>
+    <span class="kw">struct</span> <span class="ident">PollOnce</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">F</span>);
+
+    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">PollOnce</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">F</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">F</span>: <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Unpin</span>,
+    {
+        <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+
+        <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task</span>::<span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Output</span><span class="op">&gt;</span> {
+            <span class="kw">match</span> <span class="ident">Pin</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>).<span class="ident">poll</span>(<span class="ident">cx</span>) {
+                <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Ok</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Some</span>(())),
+                <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Some</span>(())),
+                <span class="ident">Poll</span>::<span class="ident">Pending</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">None</span>),
+            }
         }
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_pool_checkout_returns_none_if_expired</span>() {
-        <span class="ident">future</span>::<span class="ident">lazy</span>(<span class="op">|</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">pool_no_timer</span>();
-            <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>());
-            <span class="kw">let</span> <span class="ident">pooled</span> <span class="op">=</span> <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">41</span>));
-            <span class="ident">drop</span>(<span class="ident">pooled</span>);
-            ::<span class="ident">std</span>::<span class="ident">thread</span>::<span class="ident">sleep</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">timeout</span>.<span class="ident">unwrap</span>());
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">pool</span>.<span class="ident">checkout</span>(<span class="ident">key</span>).<span class="ident">poll</span>().<span class="ident">unwrap</span>().<span class="ident">is_not_ready</span>());
-            ::<span class="ident">futures</span>::<span class="ident">future</span>::<span class="ident">ok</span>::<span class="op">&lt;</span>(), ()<span class="op">&gt;</span>(())
-        }).<span class="ident">wait</span>().<span class="ident">unwrap</span>();
-    }
+    <span class="attribute">#[<span class="ident">tokio</span>::<span class="ident">test</span>]</span>
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">test_pool_checkout_returns_none_if_expired</span>() {
+        <span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">pool_no_timer</span>();
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">host_key</span>(<span class="string">&quot;foo&quot;</span>);
+        <span class="kw">let</span> <span class="ident">pooled</span> <span class="op">=</span> <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">41</span>));
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_pool_checkout_removes_expired</span>() {
-        <span class="ident">future</span>::<span class="ident">lazy</span>(<span class="op">|</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">pool_no_timer</span>();
-            <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>());
-
-            <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">41</span>));
-            <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">5</span>));
-            <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">99</span>));
-
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">idle</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">entries</span><span class="op">|</span> <span class="ident">entries</span>.<span class="ident">len</span>()), <span class="prelude-val">Some</span>(<span class="number">3</span>));
-            ::<span class="ident">std</span>::<span class="ident">thread</span>::<span class="ident">sleep</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">timeout</span>.<span class="ident">unwrap</span>());
-
-            <span class="comment">// checkout.poll() should clean out the expired</span>
-            <span class="ident">pool</span>.<span class="ident">checkout</span>(<span class="ident">key</span>.<span class="ident">clone</span>()).<span class="ident">poll</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">idle</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">is_none</span>());
-
-            <span class="prelude-val">Ok</span>::<span class="op">&lt;</span>(), ()<span class="op">&gt;</span>(())
-        }).<span class="ident">wait</span>().<span class="ident">unwrap</span>();
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_pool_max_idle_per_host</span>() {
-        <span class="ident">future</span>::<span class="ident">lazy</span>(<span class="op">|</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">pool_max_idle_no_timer</span>(<span class="number">2</span>);
-            <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>());
-
-            <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">41</span>));
-            <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">5</span>));
-            <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">99</span>));
-
-            <span class="comment">// pooled and dropped 3, max_idle should only allow 2</span>
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">idle</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">entries</span><span class="op">|</span> <span class="ident">entries</span>.<span class="ident">len</span>()), <span class="prelude-val">Some</span>(<span class="number">2</span>));
-
-            <span class="prelude-val">Ok</span>::<span class="op">&lt;</span>(), ()<span class="op">&gt;</span>(())
-        }).<span class="ident">wait</span>().<span class="ident">unwrap</span>();
+        <span class="ident">drop</span>(<span class="ident">pooled</span>);
+        <span class="ident">tokio</span>::<span class="ident">time</span>::<span class="ident">delay_for</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">timeout</span>.<span class="ident">unwrap</span>()).<span class="kw">await</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">checkout</span> <span class="op">=</span> <span class="ident">pool</span>.<span class="ident">checkout</span>(<span class="ident">key</span>);
+        <span class="kw">let</span> <span class="ident">poll_once</span> <span class="op">=</span> <span class="ident">PollOnce</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">checkout</span>);
+        <span class="kw">let</span> <span class="ident">is_not_ready</span> <span class="op">=</span> <span class="ident">poll_once</span>.<span class="kw">await</span>.<span class="ident">is_none</span>();
+        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">is_not_ready</span>);
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_pool_timer_removes_expired</span>() {
-        <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">Instant</span>;
-        <span class="kw">use</span> <span class="ident">tokio_timer</span>::<span class="ident">Delay</span>;
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rt</span> <span class="op">=</span> ::<span class="ident">tokio</span>::<span class="ident">runtime</span>::<span class="ident">current_thread</span>::<span class="ident">Runtime</span>::<span class="ident">new</span>().<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">Pool</span>::<span class="ident">new</span>(<span class="kw">super</span>::<span class="ident">Config</span> {
-                <span class="ident">enabled</span>: <span class="bool-val">true</span>,
-                <span class="ident">keep_alive_timeout</span>: <span class="prelude-val">Some</span>(<span class="ident">Duration</span>::<span class="ident">from_millis</span>(<span class="number">100</span>)),
-                <span class="ident">max_idle_per_host</span>: ::<span class="ident">std</span>::<span class="ident">usize</span>::<span class="ident">MAX</span>,
-            },
-            <span class="kw-2">&amp;</span><span class="ident">Exec</span>::<span class="ident">Default</span>,
+    <span class="attribute">#[<span class="ident">tokio</span>::<span class="ident">test</span>]</span>
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">test_pool_checkout_removes_expired</span>() {
+        <span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">pool_no_timer</span>();
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">host_key</span>(<span class="string">&quot;foo&quot;</span>);
+
+        <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">41</span>));
+        <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">5</span>));
+        <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">99</span>));
+
+        <span class="macro">assert_eq</span><span class="macro">!</span>(
+            <span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">idle</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">entries</span><span class="op">|</span> <span class="ident">entries</span>.<span class="ident">len</span>()),
+            <span class="prelude-val">Some</span>(<span class="number">3</span>)
         );
+        <span class="ident">tokio</span>::<span class="ident">time</span>::<span class="ident">delay_for</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">timeout</span>.<span class="ident">unwrap</span>()).<span class="kw">await</span>;
 
-        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>());
-
-        <span class="comment">// Since pool.pooled() will be calling spawn on drop, need to be sure</span>
-        <span class="comment">// those drops are called while `rt` is the current executor. To do so,</span>
-        <span class="comment">// call those inside a future.</span>
-        <span class="ident">rt</span>.<span class="ident">block_on</span>(::<span class="ident">futures</span>::<span class="ident">future</span>::<span class="ident">lazy</span>(<span class="op">|</span><span class="op">|</span> {
-            <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">41</span>));
-            <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">5</span>));
-            <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">99</span>));
-            <span class="prelude-val">Ok</span>::<span class="op">&lt;</span><span class="kw">_</span>, ()<span class="op">&gt;</span>(())
-        })).<span class="ident">unwrap</span>();
-
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">idle</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">entries</span><span class="op">|</span> <span class="ident">entries</span>.<span class="ident">len</span>()), <span class="prelude-val">Some</span>(<span class="number">3</span>));
-
-        <span class="comment">// Let the timer tick passed the expiration...</span>
-        <span class="ident">rt</span>
-            .<span class="ident">block_on</span>(<span class="ident">Delay</span>::<span class="ident">new</span>(<span class="ident">Instant</span>::<span class="ident">now</span>() <span class="op">+</span> <span class="ident">Duration</span>::<span class="ident">from_millis</span>(<span class="number">200</span>)))
-            .<span class="ident">expect</span>(<span class="string">&quot;rt block_on 200ms&quot;</span>);
-
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">checkout</span> <span class="op">=</span> <span class="ident">pool</span>.<span class="ident">checkout</span>(<span class="ident">key</span>.<span class="ident">clone</span>());
+        <span class="kw">let</span> <span class="ident">poll_once</span> <span class="op">=</span> <span class="ident">PollOnce</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">checkout</span>);
+        <span class="comment">// checkout.await should clean out the expired</span>
+        <span class="ident">poll_once</span>.<span class="kw">await</span>;
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">idle</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">is_none</span>());
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_pool_checkout_task_unparked</span>() {
+    <span class="kw">fn</span> <span class="ident">test_pool_max_idle_per_host</span>() {
+        <span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">pool_max_idle_no_timer</span>(<span class="number">2</span>);
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">host_key</span>(<span class="string">&quot;foo&quot;</span>);
+
+        <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">41</span>));
+        <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">5</span>));
+        <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">99</span>));
+
+        <span class="comment">// pooled and dropped 3, max_idle should only allow 2</span>
+        <span class="macro">assert_eq</span><span class="macro">!</span>(
+            <span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">idle</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">entries</span><span class="op">|</span> <span class="ident">entries</span>.<span class="ident">len</span>()),
+            <span class="prelude-val">Some</span>(<span class="number">2</span>)
+        );
+    }
+
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">tokio</span>::<span class="ident">test</span>]</span>
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">test_pool_timer_removes_expired</span>() {
+        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">pretty_env_logger</span>::<span class="ident">try_init</span>();
+        <span class="ident">tokio</span>::<span class="ident">time</span>::<span class="ident">pause</span>();
+
+        <span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">Pool</span>::<span class="ident">new</span>(
+            <span class="kw">super</span>::<span class="ident">Config</span> {
+                <span class="ident">idle_timeout</span>: <span class="prelude-val">Some</span>(<span class="ident">Duration</span>::<span class="ident">from_millis</span>(<span class="number">10</span>)),
+                <span class="ident">max_idle_per_host</span>: <span class="ident">std</span>::<span class="ident">usize</span>::<span class="ident">MAX</span>,
+            },
+            <span class="kw-2">&amp;</span><span class="ident">Exec</span>::<span class="ident">Default</span>,
+        );
+
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">host_key</span>(<span class="string">&quot;foo&quot;</span>);
+
+        <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">41</span>));
+        <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">5</span>));
+        <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">99</span>));
+
+        <span class="macro">assert_eq</span><span class="macro">!</span>(
+            <span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">idle</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">entries</span><span class="op">|</span> <span class="ident">entries</span>.<span class="ident">len</span>()),
+            <span class="prelude-val">Some</span>(<span class="number">3</span>)
+        );
+
+        <span class="comment">// Let the timer tick passed the expiration...</span>
+        <span class="ident">tokio</span>::<span class="ident">time</span>::<span class="ident">advance</span>(<span class="ident">Duration</span>::<span class="ident">from_millis</span>(<span class="number">30</span>)).<span class="kw">await</span>;
+        <span class="comment">// Yield so the Interval can reap...</span>
+        <span class="ident">tokio</span>::<span class="ident">task</span>::<span class="ident">yield_now</span>().<span class="kw">await</span>;
+
+        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">idle</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">is_none</span>());
+    }
+
+    <span class="attribute">#[<span class="ident">tokio</span>::<span class="ident">test</span>]</span>
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">test_pool_checkout_task_unparked</span>() {
+        <span class="kw">use</span> <span class="ident">futures_util</span>::<span class="ident">future</span>::<span class="ident">join</span>;
+        <span class="kw">use</span> <span class="ident">futures_util</span>::<span class="ident">FutureExt</span>;
+
         <span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">pool_no_timer</span>();
-        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>());
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">host_key</span>(<span class="string">&quot;foo&quot;</span>);
         <span class="kw">let</span> <span class="ident">pooled</span> <span class="op">=</span> <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">Uniq</span>(<span class="number">41</span>));
 
-        <span class="kw">let</span> <span class="ident">checkout</span> <span class="op">=</span> <span class="ident">pool</span>.<span class="ident">checkout</span>(<span class="ident">key</span>).<span class="ident">join</span>(<span class="ident">future</span>::<span class="ident">lazy</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
+        <span class="kw">let</span> <span class="ident">checkout</span> <span class="op">=</span> <span class="ident">join</span>(<span class="ident">pool</span>.<span class="ident">checkout</span>(<span class="ident">key</span>), <span class="kw">async</span> {
             <span class="comment">// the checkout future will park first,</span>
             <span class="comment">// and then this lazy future will be polled, which will insert</span>
             <span class="comment">// the pooled back into the pool</span>
             <span class="comment">//</span>
             <span class="comment">// this test makes sure that doing so will unpark the checkout</span>
             <span class="ident">drop</span>(<span class="ident">pooled</span>);
-            <span class="prelude-val">Ok</span>(())
-        })).<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">entry</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">entry</span>);
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="kw-2">*</span><span class="ident">checkout</span>.<span class="ident">wait</span>().<span class="ident">unwrap</span>(), <span class="ident">Uniq</span>(<span class="number">41</span>));
+        })
+        .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">entry</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">entry</span>);
+
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="kw-2">*</span><span class="ident">checkout</span>.<span class="kw">await</span>.<span class="ident">unwrap</span>(), <span class="ident">Uniq</span>(<span class="number">41</span>));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_pool_checkout_drop_cleans_up_waiters</span>() {
-        <span class="ident">future</span>::<span class="ident">lazy</span>(<span class="op">|</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">pool_no_timer</span>::<span class="op">&lt;</span><span class="ident">Uniq</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span><span class="op">&gt;</span>();
-            <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="string">&quot;localhost:12345&quot;</span>.<span class="ident">to_string</span>());
+    <span class="attribute">#[<span class="ident">tokio</span>::<span class="ident">test</span>]</span>
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">test_pool_checkout_drop_cleans_up_waiters</span>() {
+        <span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">pool_no_timer</span>::<span class="op">&lt;</span><span class="ident">Uniq</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">host_key</span>(<span class="string">&quot;foo&quot;</span>);
 
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">checkout1</span> <span class="op">=</span> <span class="ident">pool</span>.<span class="ident">checkout</span>(<span class="ident">key</span>.<span class="ident">clone</span>());
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">checkout2</span> <span class="op">=</span> <span class="ident">pool</span>.<span class="ident">checkout</span>(<span class="ident">key</span>.<span class="ident">clone</span>());
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">checkout1</span> <span class="op">=</span> <span class="ident">pool</span>.<span class="ident">checkout</span>(<span class="ident">key</span>.<span class="ident">clone</span>());
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">checkout2</span> <span class="op">=</span> <span class="ident">pool</span>.<span class="ident">checkout</span>(<span class="ident">key</span>.<span class="ident">clone</span>());
 
-            <span class="comment">// first poll needed to get into Pool&#39;s parked</span>
-            <span class="ident">checkout1</span>.<span class="ident">poll</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">waiters</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">unwrap</span>().<span class="ident">len</span>(), <span class="number">1</span>);
-            <span class="ident">checkout2</span>.<span class="ident">poll</span>().<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">waiters</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">unwrap</span>().<span class="ident">len</span>(), <span class="number">2</span>);
+        <span class="kw">let</span> <span class="ident">poll_once1</span> <span class="op">=</span> <span class="ident">PollOnce</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">checkout1</span>);
+        <span class="kw">let</span> <span class="ident">poll_once2</span> <span class="op">=</span> <span class="ident">PollOnce</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">checkout2</span>);
 
-            <span class="comment">// on drop, clean up Pool</span>
-            <span class="ident">drop</span>(<span class="ident">checkout1</span>);
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">waiters</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">unwrap</span>().<span class="ident">len</span>(), <span class="number">1</span>);
+        <span class="comment">// first poll needed to get into Pool&#39;s parked</span>
+        <span class="ident">poll_once1</span>.<span class="kw">await</span>;
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">waiters</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">unwrap</span>().<span class="ident">len</span>(), <span class="number">1</span>);
+        <span class="ident">poll_once2</span>.<span class="kw">await</span>;
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">waiters</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">unwrap</span>().<span class="ident">len</span>(), <span class="number">2</span>);
 
-            <span class="ident">drop</span>(<span class="ident">checkout2</span>);
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">waiters</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">is_none</span>());
+        <span class="comment">// on drop, clean up Pool</span>
+        <span class="ident">drop</span>(<span class="ident">checkout1</span>);
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">waiters</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">unwrap</span>().<span class="ident">len</span>(), <span class="number">1</span>);
 
-            ::<span class="ident">futures</span>::<span class="ident">future</span>::<span class="ident">ok</span>::<span class="op">&lt;</span>(), ()<span class="op">&gt;</span>(())
-        }).<span class="ident">wait</span>().<span class="ident">unwrap</span>();
+        <span class="ident">drop</span>(<span class="ident">checkout2</span>);
+        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">waiters</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>).<span class="ident">is_none</span>());
     }
 
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
@@ -2002,14 +2013,17 @@
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">pooled_drop_if_closed_doesnt_reinsert</span>() {
         <span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">pool_no_timer</span>();
-        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="string">&quot;localhost:12345&quot;</span>.<span class="ident">to_string</span>());
-        <span class="ident">pool</span>.<span class="ident">pooled</span>(<span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()), <span class="ident">CanClose</span> {
-            <span class="ident">val</span>: <span class="number">57</span>,
-            <span class="ident">closed</span>: <span class="bool-val">true</span>,
-        });
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">host_key</span>(<span class="string">&quot;foo&quot;</span>);
+        <span class="ident">pool</span>.<span class="ident">pooled</span>(
+            <span class="ident">c</span>(<span class="ident">key</span>.<span class="ident">clone</span>()),
+            <span class="ident">CanClose</span> {
+                <span class="ident">val</span>: <span class="number">57</span>,
+                <span class="ident">closed</span>: <span class="bool-val">true</span>,
+            },
+        );
 
         <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">pool</span>.<span class="ident">locked</span>().<span class="ident">idle</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>));
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "hyper";</script><script src="../../../aliases.js"></script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "hyper";</script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/h2-0.1.26/src/share.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>share.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../h2/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/h2-0.2.7/src/share.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>share.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../h2/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -592,42 +592,19 @@
 <span id="592">592</span>
 <span id="593">593</span>
 <span id="594">594</span>
-<span id="595">595</span>
-<span id="596">596</span>
-<span id="597">597</span>
-<span id="598">598</span>
-<span id="599">599</span>
-<span id="600">600</span>
-<span id="601">601</span>
-<span id="602">602</span>
-<span id="603">603</span>
-<span id="604">604</span>
-<span id="605">605</span>
-<span id="606">606</span>
-<span id="607">607</span>
-<span id="608">608</span>
-<span id="609">609</span>
-<span id="610">610</span>
-<span id="611">611</span>
-<span id="612">612</span>
-<span id="613">613</span>
-<span id="614">614</span>
-<span id="615">615</span>
-<span id="616">616</span>
-<span id="617">617</span>
-<span id="618">618</span>
-<span id="619">619</span>
-<span id="620">620</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">use</span> <span class="ident">codec</span>::<span class="ident">UserError</span>;
-<span class="kw">use</span> <span class="ident">frame</span>::<span class="ident">Reason</span>;
-<span class="kw">use</span> <span class="ident">proto</span>::{<span class="self">self</span>, <span class="ident">WindowSize</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">codec</span>::<span class="ident">UserError</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">frame</span>::<span class="ident">Reason</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">proto</span>::{<span class="self">self</span>, <span class="ident">WindowSize</span>};
 
-<span class="kw">use</span> <span class="ident">bytes</span>::{<span class="ident">Bytes</span>, <span class="ident">IntoBuf</span>};
-<span class="kw">use</span> <span class="ident">futures</span>::{<span class="self">self</span>, <span class="ident">Poll</span>, <span class="ident">Async</span>};
-<span class="kw">use</span> <span class="ident">http</span>::{<span class="ident">HeaderMap</span>};
+<span class="kw">use</span> <span class="ident">bytes</span>::{<span class="ident">Buf</span>, <span class="ident">Bytes</span>};
+<span class="kw">use</span> <span class="ident">http</span>::<span class="ident">HeaderMap</span>;
 
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">PollExt</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;stream&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">pin</span>::<span class="ident">Pin</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">task</span>::{<span class="ident">Context</span>, <span class="ident">Poll</span>};
 
 <span class="doccomment">/// Sends the body stream and trailers to the remote peer.</span>
 <span class="doccomment">///</span>
@@ -713,8 +690,8 @@
 <span class="doccomment">/// [`send_trailers`]: #method.send_trailers</span>
 <span class="doccomment">/// [`send_reset`]: #method.send_reset</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SendStream</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">IntoBuf</span><span class="op">&gt;</span> {
-    <span class="ident">inner</span>: <span class="ident">proto</span>::<span class="ident">StreamRef</span><span class="op">&lt;</span><span class="ident">B</span>::<span class="ident">Buf</span><span class="op">&gt;</span>,
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SendStream</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">Buf</span><span class="op">&gt;</span> {
+    <span class="ident">inner</span>: <span class="ident">proto</span>::<span class="ident">StreamRef</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
 }
 
 <span class="doccomment">/// A stream identifier, as described in [Section 5.1.1] of RFC 7540.</span>
@@ -741,7 +718,7 @@
 <span class="doccomment">/// control.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// See method level documentation for more details on receiving data. See</span>
-<span class="doccomment">/// [`ReleaseCapacity`] for more details on inbound flow control.</span>
+<span class="doccomment">/// [`FlowControl`] for more details on inbound flow control.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Note that this type implements [`Stream`], yielding the received data frames.</span>
 <span class="doccomment">/// When this implementation is used, the capacity is immediately released when</span>
@@ -750,11 +727,11 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`client::ResponseFuture`]: client/struct.ResponseFuture.html</span>
 <span class="doccomment">/// [`server::Connection`]: server/struct.Connection.html</span>
-<span class="doccomment">/// [`ReleaseCapacity`]: struct.ReleaseCapacity.html</span>
+<span class="doccomment">/// [`FlowControl`]: struct.FlowControl.html</span>
 <span class="doccomment">/// [`Stream`]: https://docs.rs/futures/0.1/futures/stream/trait.Stream.html</span>
 <span class="attribute">#[<span class="ident">must_use</span> <span class="op">=</span> <span class="string">&quot;streams do nothing unless polled&quot;</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RecvStream</span> {
-    <span class="ident">inner</span>: <span class="ident">ReleaseCapacity</span>,
+    <span class="ident">inner</span>: <span class="ident">FlowControl</span>,
 }
 
 <span class="doccomment">/// A handle to release window capacity to a remote stream.</span>
@@ -808,9 +785,9 @@
 <span class="doccomment">/// data.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [flow control]: ../index.html#flow-control</span>
-<span class="doccomment">/// [`release_capacity`]: struct.ReleaseCapacity.html#method.release_capacity</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ReleaseCapacity</span> {
+<span class="doccomment">/// [`release_capacity`]: struct.FlowControl.html#method.release_capacity</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FlowControl</span> {
     <span class="ident">inner</span>: <span class="ident">proto</span>::<span class="ident">OpaqueStreamRef</span>,
 }
 
@@ -837,8 +814,8 @@
 
 <span class="comment">// ===== impl SendStream =====</span>
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">IntoBuf</span><span class="op">&gt;</span> <span class="ident">SendStream</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">inner</span>: <span class="ident">proto</span>::<span class="ident">StreamRef</span><span class="op">&lt;</span><span class="ident">B</span>::<span class="ident">Buf</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">Buf</span><span class="op">&gt;</span> <span class="ident">SendStream</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">inner</span>: <span class="ident">proto</span>::<span class="ident">StreamRef</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">SendStream</span> { <span class="ident">inner</span> }
     }
 
@@ -886,11 +863,8 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// # use h2::*;</span>
-    <span class="doccomment">/// # fn doc(mut send_stream: SendStream&lt;&amp;&#39;static [u8]&gt;) {</span>
+    <span class="doccomment">/// # async fn doc(mut send_stream: SendStream&lt;&amp;&#39;static [u8]&gt;) {</span>
     <span class="doccomment">/// send_stream.reserve_capacity(100);</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let capacity = send_stream.poll_capacity();</span>
-    <span class="doccomment">/// // capacity == 5;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// send_stream.send_data(b&quot;hello&quot;, false).unwrap();</span>
     <span class="doccomment">/// // At this point, the total amount of requested capacity is 95 bytes.</span>
@@ -930,9 +904,11 @@
     <span class="doccomment">/// amount of assigned capacity at that point in time. It is also possible</span>
     <span class="doccomment">/// that `n` is lower than the previous call if, since then, the caller has</span>
     <span class="doccomment">/// sent data.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_capacity</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>, ::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="macro">try_ready</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">poll_capacity</span>());
-        <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="ident">res</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span> <span class="kw">as</span> <span class="ident">usize</span>)))
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_capacity</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">inner</span>
+            .<span class="ident">poll_capacity</span>(<span class="ident">cx</span>)
+            .<span class="ident">map_ok_</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="ident">w</span> <span class="kw">as</span> <span class="ident">usize</span>)
+            .<span class="ident">map_err_</span>(<span class="ident">Into</span>::<span class="ident">into</span>)
     }
 
     <span class="doccomment">/// Sends a single data frame to the remote peer.</span>
@@ -950,9 +926,9 @@
     <span class="doccomment">/// amounts of data being buffered in memory.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [`Error`]: struct.Error.html</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">send_data</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">data</span>: <span class="ident">B</span>, <span class="ident">end_of_stream</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">send_data</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">data</span>: <span class="ident">B</span>, <span class="ident">end_of_stream</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">inner</span>
-            .<span class="ident">send_data</span>(<span class="ident">data</span>.<span class="ident">into_buf</span>(), <span class="ident">end_of_stream</span>)
+            .<span class="ident">send_data</span>(<span class="ident">data</span>, <span class="ident">end_of_stream</span>)
             .<span class="ident">map_err</span>(<span class="ident">Into</span>::<span class="ident">into</span>)
     }
 
@@ -960,7 +936,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Sending trailers implicitly closes the send stream. Once the send stream</span>
     <span class="doccomment">/// is closed, no more data can be sent.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">send_trailers</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">trailers</span>: <span class="ident">HeaderMap</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">send_trailers</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">trailers</span>: <span class="ident">HeaderMap</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">send_trailers</span>(<span class="ident">trailers</span>).<span class="ident">map_err</span>(<span class="ident">Into</span>::<span class="ident">into</span>)
     }
 
@@ -977,7 +953,7 @@
 
     <span class="doccomment">/// Polls to be notified when the client resets this stream.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// If stream is still open, this returns `Ok(Async::NotReady)`, and</span>
+    <span class="doccomment">/// If stream is still open, this returns `Poll::Pending`, and</span>
     <span class="doccomment">/// registers the task to be notified if a `RST_STREAM` is received.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// If a `RST_STREAM` frame is received for this stream, calling this</span>
@@ -987,8 +963,8 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// If connection sees an error, this returns that error instead of a</span>
     <span class="doccomment">/// `Reason`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_reset</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident">Reason</span>, ::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">poll_reset</span>(<span class="ident">proto</span>::<span class="ident">PollReset</span>::<span class="ident">Streaming</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_reset</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Reason</span>, <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">poll_reset</span>(<span class="ident">cx</span>, <span class="ident">proto</span>::<span class="ident">PollReset</span>::<span class="ident">Streaming</span>)
     }
 
     <span class="doccomment">/// Returns the stream ID of this `SendStream`.</span>
@@ -1004,22 +980,42 @@
 <span class="comment">// ===== impl StreamId =====</span>
 
 <span class="kw">impl</span> <span class="ident">StreamId</span> {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">from_internal</span>(<span class="ident">id</span>: ::<span class="ident">frame</span>::<span class="ident">StreamId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">from_internal</span>(<span class="ident">id</span>: <span class="kw">crate</span>::<span class="ident">frame</span>::<span class="ident">StreamId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">StreamId</span>(<span class="ident">id</span>.<span class="ident">into</span>())
     }
 }
 <span class="comment">// ===== impl RecvStream =====</span>
 
 <span class="kw">impl</span> <span class="ident">RecvStream</span> {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">inner</span>: <span class="ident">ReleaseCapacity</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">inner</span>: <span class="ident">FlowControl</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">RecvStream</span> { <span class="ident">inner</span> }
     }
 
-    <span class="attribute">#[<span class="ident">deprecated</span>(<span class="ident">since</span> <span class="op">=</span> <span class="string">&quot;0.0.0&quot;</span>)]</span>
+    <span class="doccomment">/// Get the next data frame.</span>
+    <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">data</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Bytes</span>, <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="ident">futures_util</span>::<span class="ident">future</span>::<span class="ident">poll_fn</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">cx</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">poll_data</span>(<span class="ident">cx</span>)).<span class="kw">await</span>
+    }
+
+    <span class="doccomment">/// Get optional trailers for this stream.</span>
+    <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">trailers</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">HeaderMap</span><span class="op">&gt;</span>, <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="ident">futures_util</span>::<span class="ident">future</span>::<span class="ident">poll_fn</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">cx</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">poll_trailers</span>(<span class="ident">cx</span>)).<span class="kw">await</span>
+    }
+
     <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="comment">// If the recv side is closed and the receive queue is empty, the body is empty.</span>
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">inner</span>.<span class="ident">body_is_empty</span>()
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_data</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Bytes</span>, <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">inner</span>.<span class="ident">poll_data</span>(<span class="ident">cx</span>).<span class="ident">map_err_</span>(<span class="ident">Into</span>::<span class="ident">into</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_trailers</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">HeaderMap</span><span class="op">&gt;</span>, <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="macro">ready</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">inner</span>.<span class="ident">poll_trailers</span>(<span class="ident">cx</span>)) {
+            <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">map</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">map</span>))),
+            <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>.<span class="ident">into</span>())),
+            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)),
+        }
     }
 
     <span class="doccomment">/// Returns true if the receive half has reached the end of stream.</span>
@@ -1030,16 +1026,11 @@
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">inner</span>.<span class="ident">is_end_stream</span>()
     }
 
-    <span class="doccomment">/// Get a mutable reference to this streams `ReleaseCapacity`.</span>
+    <span class="doccomment">/// Get a mutable reference to this stream&#39;s `FlowControl`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// It can be used immediately, or cloned to be used later.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">release_capacity</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ReleaseCapacity</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">flow_control</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FlowControl</span> {
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">inner</span>
-    }
-
-    <span class="doccomment">/// Returns received trailers.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_trailers</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">HeaderMap</span><span class="op">&gt;</span>, ::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">inner</span>.<span class="ident">poll_trailers</span>().<span class="ident">map_err</span>(<span class="ident">Into</span>::<span class="ident">into</span>)
     }
 
     <span class="doccomment">/// Returns the stream ID of this stream.</span>
@@ -1052,12 +1043,12 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">futures</span>::<span class="ident">Stream</span> <span class="kw">for</span> <span class="ident">RecvStream</span> {
-    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">Bytes</span>;
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> ::<span class="ident">Error</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;stream&quot;</span>)]</span>
+<span class="kw">impl</span> <span class="ident">futures_core</span>::<span class="ident">Stream</span> <span class="kw">for</span> <span class="ident">RecvStream</span> {
+    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Bytes</span>, <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span><span class="op">&gt;</span>, <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">inner</span>.<span class="ident">poll_data</span>().<span class="ident">map_err</span>(<span class="ident">Into</span>::<span class="ident">into</span>)
+    <span class="kw">fn</span> <span class="ident">poll_next</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">poll_data</span>(<span class="ident">cx</span>)
     }
 }
 
@@ -1080,21 +1071,29 @@
     }
 }
 
-<span class="comment">// ===== impl ReleaseCapacity =====</span>
+<span class="comment">// ===== impl FlowControl =====</span>
 
-<span class="kw">impl</span> <span class="ident">ReleaseCapacity</span> {
+<span class="kw">impl</span> <span class="ident">FlowControl</span> {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">inner</span>: <span class="ident">proto</span>::<span class="ident">OpaqueStreamRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">ReleaseCapacity</span> { <span class="ident">inner</span> }
+        <span class="ident">FlowControl</span> { <span class="ident">inner</span> }
     }
 
     <span class="doccomment">/// Returns the stream ID of the stream whose capacity will</span>
-    <span class="doccomment">/// be released by this `ReleaseCapacity`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Panics</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// If the lock on the stream store has been poisoned.</span>
+    <span class="doccomment">/// be released by this `FlowControl`.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">stream_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">StreamId</span> {
         <span class="ident">StreamId</span>::<span class="ident">from_internal</span>(<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">stream_id</span>())
+    }
+
+    <span class="doccomment">/// Get the current available capacity of data this stream *could* receive.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">available_capacity</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">isize</span> {
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">available_recv_capacity</span>()
+    }
+
+    <span class="doccomment">/// Get the currently *used* capacity for this stream.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This is the amount of bytes that can be released back to the remote.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">used_capacity</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">used_recv_capacity</span>() <span class="kw">as</span> <span class="ident">usize</span>
     }
 
     <span class="doccomment">/// Release window capacity back to remote stream.</span>
@@ -1104,17 +1103,16 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// See [struct level] documentation for more details.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// # Panics</span>
+    <span class="doccomment">/// # Errors</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// This function panics if increasing the receive window size by `sz` would</span>
-    <span class="doccomment">/// result in a window size greater than the target window size set by</span>
-    <span class="doccomment">/// [`set_target_window_size`]. In other words, the caller cannot release</span>
-    <span class="doccomment">/// more capacity than data has been received. If 1024 bytes of data have</span>
-    <span class="doccomment">/// been received, at most 1024 bytes can be released.</span>
+    <span class="doccomment">/// This function errors if increasing the receive window size by `sz` would</span>
+    <span class="doccomment">/// result in a window size greater than the target window size. In other</span>
+    <span class="doccomment">/// words, the caller cannot release more capacity than data has been</span>
+    <span class="doccomment">/// received. If 1024 bytes of data have been received, at most 1024 bytes</span>
+    <span class="doccomment">/// can be released.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [struct level]: #</span>
-    <span class="doccomment">/// [`set_target_window_size`]: server/struct.Server.html#method.set_target_window_size</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">release_capacity</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">sz</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">release_capacity</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">sz</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">sz</span> <span class="op">&gt;</span> <span class="ident">proto</span>::<span class="ident">MAX_WINDOW_SIZE</span> <span class="kw">as</span> <span class="ident">usize</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">UserError</span>::<span class="ident">ReleaseCapacityTooBig</span>.<span class="ident">into</span>());
         }
@@ -1124,88 +1122,42 @@
     }
 }
 
-<span class="kw">impl</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">ReleaseCapacity</span> {
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">clone</span>();
-        <span class="ident">ReleaseCapacity</span> { <span class="ident">inner</span> }
-    }
-}
-
 <span class="comment">// ===== impl PingPong =====</span>
 
 <span class="kw">impl</span> <span class="ident">PingPong</span> {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">inner</span>: <span class="ident">proto</span>::<span class="ident">UserPings</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">PingPong</span> {
-            <span class="ident">inner</span>,
-        }
+        <span class="ident">PingPong</span> { <span class="ident">inner</span> }
     }
 
-    <span class="doccomment">/// Send a `PING` frame to the peer.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Only one ping can be pending at a time, so trying to send while</span>
-    <span class="doccomment">/// a pong has not be received means this will return a user error.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// # fn doc(mut ping_pong: h2::PingPong) {</span>
-    <span class="doccomment">/// // let mut ping_pong = ...</span>
-    <span class="doccomment">/// ping_pong</span>
-    <span class="doccomment">///     .send_ping(h2::Ping::opaque())</span>
-    <span class="doccomment">///     .unwrap();</span>
-    <span class="doccomment">/// # }</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">send_ping</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ping</span>: <span class="ident">Ping</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Send a PING frame and wait for the peer to send the pong.</span>
+    <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">ping</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ping</span>: <span class="ident">Ping</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Pong</span>, <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">send_ping</span>(<span class="ident">ping</span>)<span class="question-mark">?</span>;
+        <span class="ident">futures_util</span>::<span class="ident">future</span>::<span class="ident">poll_fn</span>(<span class="op">|</span><span class="ident">cx</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">poll_pong</span>(<span class="ident">cx</span>)).<span class="kw">await</span>
+    }
+
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">send_ping</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ping</span>: <span class="ident">Ping</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="comment">// Passing a `Ping` here is just to be forwards-compatible with</span>
         <span class="comment">// eventually allowing choosing a ping payload. For now, we can</span>
         <span class="comment">// just drop it.</span>
         <span class="ident">drop</span>(<span class="ident">ping</span>);
 
-        <span class="self">self</span>.<span class="ident">inner</span>
-            .<span class="ident">send_ping</span>()
-            .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">err</span> {
-                <span class="prelude-val">Some</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">err</span>.<span class="ident">into</span>(),
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UserError</span>::<span class="ident">SendPingWhilePending</span>.<span class="ident">into</span>()
-            })
+        <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">send_ping</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">err</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">err</span>.<span class="ident">into</span>(),
+            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UserError</span>::<span class="ident">SendPingWhilePending</span>.<span class="ident">into</span>(),
+        })
     }
 
-    <span class="doccomment">/// Polls for the acknowledgement of a previously [sent][] `PING` frame.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Example</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// # extern crate futures;</span>
-    <span class="doccomment">/// # extern crate h2;</span>
-    <span class="doccomment">/// # use futures::Future;</span>
-    <span class="doccomment">/// # fn doc(mut ping_pong: h2::PingPong) {</span>
-    <span class="doccomment">/// // let mut ping_pong = ...</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // First, send a PING.</span>
-    <span class="doccomment">/// ping_pong</span>
-    <span class="doccomment">///     .send_ping(h2::Ping::opaque())</span>
-    <span class="doccomment">///     .unwrap();</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// // And then wait for the PONG.</span>
-    <span class="doccomment">/// futures::future::poll_fn(move || {</span>
-    <span class="doccomment">///     ping_pong.poll_pong()</span>
-    <span class="doccomment">/// }).wait().unwrap();</span>
-    <span class="doccomment">/// # }</span>
-    <span class="doccomment">/// # fn main() {}</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// [sent]: struct.PingPong.html#method.send_ping</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_pong</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident">Pong</span>, ::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="macro">try_ready</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">poll_pong</span>());
-        <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="ident">Pong</span> {
-            <span class="ident">_p</span>: (),
-        }))
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_pong</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Pong</span>, <span class="kw">crate</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="macro">ready</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">poll_pong</span>(<span class="ident">cx</span>))<span class="question-mark">?</span>;
+        <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Ok</span>(<span class="ident">Pong</span> { <span class="ident">_p</span>: () }))
     }
 }
 
 <span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">PingPong</span> {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
-        <span class="ident">fmt</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;PingPong&quot;</span>)
-            .<span class="ident">finish</span>()
+        <span class="ident">fmt</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;PingPong&quot;</span>).<span class="ident">finish</span>()
     }
 }
 
@@ -1218,16 +1170,13 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// [`PingPong`]: struct.PingPong.html</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">opaque</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ping</span> {
-        <span class="ident">Ping</span> {
-            <span class="ident">_p</span>: (),
-        }
+        <span class="ident">Ping</span> { <span class="ident">_p</span>: () }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">Ping</span> {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
-        <span class="ident">fmt</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;Ping&quot;</span>)
-            .<span class="ident">finish</span>()
+        <span class="ident">fmt</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;Ping&quot;</span>).<span class="ident">finish</span>()
     }
 }
 
@@ -1235,9 +1184,8 @@
 
 <span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">Pong</span> {
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
-        <span class="ident">fmt</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;Pong&quot;</span>)
-            .<span class="ident">finish</span>()
+        <span class="ident">fmt</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;Pong&quot;</span>).<span class="ident">finish</span>()
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "h2";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "h2";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

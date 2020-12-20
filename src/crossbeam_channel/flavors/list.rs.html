@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/crossbeam-channel-0.3.9/src/flavors/list.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>list.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../crossbeam_channel/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/crossbeam-channel-0.5.0/src/flavors/list.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>list.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../crossbeam_channel/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -662,22 +662,27 @@
 <span id="662">662</span>
 <span id="663">663</span>
 <span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Unbounded channel implemented as a linked list.</span>
 
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">cell</span>::<span class="ident">UnsafeCell</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">marker</span>::<span class="ident">PhantomData</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">mem</span>::{<span class="self">self</span>, <span class="ident">ManuallyDrop</span>};
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">mem</span>::<span class="ident">MaybeUninit</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ptr</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">atomic</span>::{<span class="self">self</span>, <span class="ident">AtomicPtr</span>, <span class="ident">AtomicUsize</span>, <span class="ident">Ordering</span>};
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">Instant</span>;
 
 <span class="kw">use</span> <span class="ident">crossbeam_utils</span>::{<span class="ident">Backoff</span>, <span class="ident">CachePadded</span>};
 
-<span class="kw">use</span> <span class="ident">context</span>::<span class="ident">Context</span>;
-<span class="kw">use</span> <span class="ident">err</span>::{<span class="ident">RecvTimeoutError</span>, <span class="ident">SendTimeoutError</span>, <span class="ident">TryRecvError</span>, <span class="ident">TrySendError</span>};
-<span class="kw">use</span> <span class="ident">select</span>::{<span class="ident">Operation</span>, <span class="ident">SelectHandle</span>, <span class="ident">Selected</span>, <span class="ident">Token</span>};
-<span class="kw">use</span> <span class="ident">waker</span>::<span class="ident">SyncWaker</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">context</span>::<span class="ident">Context</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">err</span>::{<span class="ident">RecvTimeoutError</span>, <span class="ident">SendTimeoutError</span>, <span class="ident">TryRecvError</span>, <span class="ident">TrySendError</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">select</span>::{<span class="ident">Operation</span>, <span class="ident">SelectHandle</span>, <span class="ident">Selected</span>, <span class="ident">Token</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">waker</span>::<span class="ident">SyncWaker</span>;
 
 <span class="comment">// TODO(stjepang): Once we bump the minimum required Rust version to 1.28 or newer, re-apply the</span>
 <span class="comment">// following changes by @kleimkuhler:</span>
@@ -707,7 +712,7 @@
 <span class="doccomment">/// A slot in a block.</span>
 <span class="kw">struct</span> <span class="ident">Slot</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// The message.</span>
-    <span class="ident">msg</span>: <span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="ident">ManuallyDrop</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">msg</span>: <span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 
     <span class="doccomment">/// The state of the slot.</span>
     <span class="ident">state</span>: <span class="ident">AtomicUsize</span>,
@@ -737,7 +742,13 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Block</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Creates an empty block.</span>
     <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Block</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">unsafe</span> { <span class="ident">mem</span>::<span class="ident">zeroed</span>() }
+        <span class="comment">// SAFETY: This is safe because:</span>
+        <span class="comment">//  [1] `Block::next` (AtomicPtr) may be safely zero initialized.</span>
+        <span class="comment">//  [2] `Block::slots` (Array) may be safely zero initialized because of [3, 4].</span>
+        <span class="comment">//  [3] `Slot::msg` (UnsafeCell) may be safely zero initialized because it</span>
+        <span class="comment">//       holds a MaybeUninit.</span>
+        <span class="comment">//  [4] `Slot::state` (AtomicUsize) may be safely zero initialized.</span>
+        <span class="kw">unsafe</span> { <span class="ident">MaybeUninit</span>::<span class="ident">zeroed</span>().<span class="ident">assume_init</span>() }
     }
 
     <span class="doccomment">/// Waits until the next pointer is set.</span>
@@ -754,8 +765,8 @@
 
     <span class="doccomment">/// Sets the `DESTROY` bit in slots starting from `start` and destroys the block.</span>
     <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">destroy</span>(<span class="ident">this</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">Block</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">start</span>: <span class="ident">usize</span>) {
-        <span class="comment">// It is not necessary to set the `DESTROY bit in the last slot because that slot has begun</span>
-        <span class="comment">// destruction of the block.</span>
+        <span class="comment">// It is not necessary to set the `DESTROY` bit in the last slot because that slot has</span>
+        <span class="comment">// begun destruction of the block.</span>
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="ident">start</span>..<span class="ident">BLOCK_CAP</span> <span class="op">-</span> <span class="number">1</span> {
             <span class="kw">let</span> <span class="ident">slot</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">this</span>).<span class="ident">slots</span>.<span class="ident">get_unchecked</span>(<span class="ident">i</span>);
 
@@ -842,12 +853,12 @@
     }
 
     <span class="doccomment">/// Returns a receiver handle to the channel.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">receiver</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">receiver</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Receiver</span>(<span class="self">self</span>)
     }
 
     <span class="doccomment">/// Returns a sender handle to the channel.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sender</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Sender</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sender</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Sender</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">Sender</span>(<span class="self">self</span>)
     }
 
@@ -945,7 +956,7 @@
         <span class="kw">let</span> <span class="ident">block</span> <span class="op">=</span> <span class="ident">token</span>.<span class="ident">list</span>.<span class="ident">block</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">Block</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
         <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">token</span>.<span class="ident">list</span>.<span class="ident">offset</span>;
         <span class="kw">let</span> <span class="ident">slot</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">block</span>).<span class="ident">slots</span>.<span class="ident">get_unchecked</span>(<span class="ident">offset</span>);
-        <span class="ident">slot</span>.<span class="ident">msg</span>.<span class="ident">get</span>().<span class="ident">write</span>(<span class="ident">ManuallyDrop</span>::<span class="ident">new</span>(<span class="ident">msg</span>));
+        <span class="ident">slot</span>.<span class="ident">msg</span>.<span class="ident">get</span>().<span class="ident">write</span>(<span class="ident">MaybeUninit</span>::<span class="ident">new</span>(<span class="ident">msg</span>));
         <span class="ident">slot</span>.<span class="ident">state</span>.<span class="ident">fetch_or</span>(<span class="ident">WRITE</span>, <span class="ident">Ordering</span>::<span class="ident">Release</span>);
 
         <span class="comment">// Wake a sleeping receiver.</span>
@@ -1050,8 +1061,7 @@
         <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">token</span>.<span class="ident">list</span>.<span class="ident">offset</span>;
         <span class="kw">let</span> <span class="ident">slot</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">block</span>).<span class="ident">slots</span>.<span class="ident">get_unchecked</span>(<span class="ident">offset</span>);
         <span class="ident">slot</span>.<span class="ident">wait_write</span>();
-        <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">slot</span>.<span class="ident">msg</span>.<span class="ident">get</span>().<span class="ident">read</span>();
-        <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="ident">ManuallyDrop</span>::<span class="ident">into_inner</span>(<span class="ident">m</span>);
+        <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="ident">slot</span>.<span class="ident">msg</span>.<span class="ident">get</span>().<span class="ident">read</span>().<span class="ident">assume_init</span>();
 
         <span class="comment">// Destroy the block if we&#39;ve reached the end, or if another thread wanted to destroy but</span>
         <span class="comment">// couldn&#39;t because we were busy reading from the slot.</span>
@@ -1158,6 +1168,14 @@
                 <span class="ident">tail</span> <span class="kw-2">&amp;</span><span class="op">=</span> <span class="op">!</span>((<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">SHIFT</span>) <span class="op">-</span> <span class="number">1</span>);
                 <span class="ident">head</span> <span class="kw-2">&amp;</span><span class="op">=</span> <span class="op">!</span>((<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">SHIFT</span>) <span class="op">-</span> <span class="number">1</span>);
 
+                <span class="comment">// Fix up indices if they fall onto block ends.</span>
+                <span class="kw">if</span> (<span class="ident">tail</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">SHIFT</span>) <span class="op">&amp;</span> (<span class="ident">LAP</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">LAP</span> <span class="op">-</span> <span class="number">1</span> {
+                    <span class="ident">tail</span> <span class="op">=</span> <span class="ident">tail</span>.<span class="ident">wrapping_add</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">SHIFT</span>);
+                }
+                <span class="kw">if</span> (<span class="ident">head</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">SHIFT</span>) <span class="op">&amp;</span> (<span class="ident">LAP</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">LAP</span> <span class="op">-</span> <span class="number">1</span> {
+                    <span class="ident">head</span> <span class="op">=</span> <span class="ident">head</span>.<span class="ident">wrapping_add</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">SHIFT</span>);
+                }
+
                 <span class="comment">// Rotate indices so that head falls into the first block.</span>
                 <span class="kw">let</span> <span class="ident">lap</span> <span class="op">=</span> (<span class="ident">head</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">SHIFT</span>) <span class="op">/</span> <span class="ident">LAP</span>;
                 <span class="ident">tail</span> <span class="op">=</span> <span class="ident">tail</span>.<span class="ident">wrapping_sub</span>((<span class="ident">lap</span> <span class="op">*</span> <span class="ident">LAP</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">SHIFT</span>);
@@ -1166,15 +1184,6 @@
                 <span class="comment">// Remove the lower bits.</span>
                 <span class="ident">tail</span> <span class="op">&gt;</span><span class="op">&gt;</span><span class="op">=</span> <span class="ident">SHIFT</span>;
                 <span class="ident">head</span> <span class="op">&gt;</span><span class="op">&gt;</span><span class="op">=</span> <span class="ident">SHIFT</span>;
-
-                <span class="comment">// Fix up indices if they fall onto block ends.</span>
-                <span class="kw">if</span> <span class="ident">head</span> <span class="op">=</span><span class="op">=</span> <span class="ident">BLOCK_CAP</span> {
-                    <span class="ident">head</span> <span class="op">=</span> <span class="number">0</span>;
-                    <span class="ident">tail</span> <span class="op">-</span><span class="op">=</span> <span class="ident">LAP</span>;
-                }
-                <span class="kw">if</span> <span class="ident">tail</span> <span class="op">=</span><span class="op">=</span> <span class="ident">BLOCK_CAP</span> {
-                    <span class="ident">tail</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-                }
 
                 <span class="comment">// Return the difference minus the number of blocks between tail and head.</span>
                 <span class="kw">return</span> <span class="ident">tail</span> <span class="op">-</span> <span class="ident">head</span> <span class="op">-</span> <span class="ident">tail</span> <span class="op">/</span> <span class="ident">LAP</span>;
@@ -1237,7 +1246,8 @@
                 <span class="kw">if</span> <span class="ident">offset</span> <span class="op">&lt;</span> <span class="ident">BLOCK_CAP</span> {
                     <span class="comment">// Drop the message in the slot.</span>
                     <span class="kw">let</span> <span class="ident">slot</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">block</span>).<span class="ident">slots</span>.<span class="ident">get_unchecked</span>(<span class="ident">offset</span>);
-                    <span class="ident">ManuallyDrop</span>::<span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span>(<span class="kw-2">*</span><span class="ident">slot</span>).<span class="ident">msg</span>.<span class="ident">get</span>());
+                    <span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">slot</span>.<span class="ident">msg</span>.<span class="ident">get</span>();
+                    <span class="ident">p</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">drop_in_place</span>();
                 } <span class="kw">else</span> {
                     <span class="comment">// Deallocate the block and move to the next one.</span>
                     <span class="kw">let</span> <span class="ident">next</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">block</span>).<span class="ident">next</span>.<span class="ident">load</span>(<span class="ident">Ordering</span>::<span class="ident">Relaxed</span>);
@@ -1257,12 +1267,12 @@
 }
 
 <span class="doccomment">/// Receiver handle to a channel.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Channel</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Channel</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
 
 <span class="doccomment">/// Sender handle to a channel.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Sender</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Channel</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Sender</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Channel</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SelectHandle</span> <span class="kw">for</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SelectHandle</span> <span class="kw">for</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">try_select</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">token</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Token</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">start_recv</span>(<span class="ident">token</span>)
     }
@@ -1298,7 +1308,7 @@
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SelectHandle</span> <span class="kw">for</span> <span class="ident">Sender</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">SelectHandle</span> <span class="kw">for</span> <span class="ident">Sender</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">try_select</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">token</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Token</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">start_send</span>(<span class="ident">token</span>)
     }
@@ -1328,4 +1338,4 @@
     <span class="kw">fn</span> <span class="ident">unwatch</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_oper</span>: <span class="ident">Operation</span>) {}
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "crossbeam_channel";</script><script src="../../../aliases.js"></script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "crossbeam_channel";</script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>

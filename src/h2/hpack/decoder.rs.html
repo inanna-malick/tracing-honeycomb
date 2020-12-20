@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/h2-0.1.26/src/hpack/decoder.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>decoder.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../h2/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/h2-0.2.7/src/hpack/decoder.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>decoder.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../h2/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -855,37 +855,14 @@
 <span id="855">855</span>
 <span id="856">856</span>
 <span id="857">857</span>
-<span id="858">858</span>
-<span id="859">859</span>
-<span id="860">860</span>
-<span id="861">861</span>
-<span id="862">862</span>
-<span id="863">863</span>
-<span id="864">864</span>
-<span id="865">865</span>
-<span id="866">866</span>
-<span id="867">867</span>
-<span id="868">868</span>
-<span id="869">869</span>
-<span id="870">870</span>
-<span id="871">871</span>
-<span id="872">872</span>
-<span id="873">873</span>
-<span id="874">874</span>
-<span id="875">875</span>
-<span id="876">876</span>
-<span id="877">877</span>
-<span id="878">878</span>
-<span id="879">879</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">huffman</span>, <span class="ident">Header</span>};
-<span class="kw">use</span> <span class="ident">frame</span>;
+<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">header</span>::<span class="ident">BytesStr</span>, <span class="ident">huffman</span>, <span class="ident">Header</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">frame</span>;
 
 <span class="kw">use</span> <span class="ident">bytes</span>::{<span class="ident">Buf</span>, <span class="ident">Bytes</span>, <span class="ident">BytesMut</span>};
 <span class="kw">use</span> <span class="ident">http</span>::<span class="ident">header</span>;
 <span class="kw">use</span> <span class="ident">http</span>::<span class="ident">method</span>::{<span class="self">self</span>, <span class="ident">Method</span>};
 <span class="kw">use</span> <span class="ident">http</span>::<span class="ident">status</span>::{<span class="self">self</span>, <span class="ident">StatusCode</span>};
-<span class="kw">use</span> <span class="ident">string</span>::<span class="ident">String</span>;
 
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">cmp</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">collections</span>::<span class="ident">VecDeque</span>;
@@ -925,7 +902,6 @@
     <span class="ident">StringUnderflow</span>,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">enum</span> <span class="ident">Representation</span> {
     <span class="doccomment">/// Indexed header field representation</span>
     <span class="doccomment">///</span>
@@ -1038,53 +1014,37 @@
     }
 
     <span class="doccomment">/// Queues a potential size update</span>
+    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">queue_size_update</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">size</span>: <span class="ident">usize</span>) {
         <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">max_size_update</span> {
             <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">cmp</span>::<span class="ident">max</span>(<span class="ident">v</span>, <span class="ident">size</span>),
             <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">size</span>,
         };
 
-        <span class="comment">// If size isn&#39;t changing, then an Update isn&#39;t required</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">table</span>.<span class="ident">max_size</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">size</span> {
-            <span class="self">self</span>.<span class="ident">max_size_update</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">size</span>);
-        }
+        <span class="self">self</span>.<span class="ident">max_size_update</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">size</span>);
     }
 
     <span class="doccomment">/// Decodes the headers found in the given buffer.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Cursor</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span><span class="op">&gt;</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DecoderError</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Cursor</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span><span class="op">&gt;</span>,
+        <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DecoderError</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">Header</span>),
     {
         <span class="kw">use</span> <span class="self">self</span>::<span class="ident">Representation</span>::<span class="kw-2">*</span>;
 
-        <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;decode&quot;</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">can_resize</span> <span class="op">=</span> <span class="bool-val">true</span>;
 
-        <span class="comment">// If a max size update is expected, it MUST occur at the beginning</span>
-        <span class="comment">// of the next header block.</span>
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">size</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">max_size_update</span> {
-            <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">peek_u8</span>(<span class="ident">src</span>) {
-                <span class="prelude-val">Some</span>(<span class="ident">byte</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Representation</span>::<span class="ident">load</span>(<span class="ident">byte</span>)<span class="question-mark">?</span>,
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(()),
-            };
-            <span class="kw">match</span> <span class="ident">ty</span> {
-                <span class="ident">SizeUpdate</span> <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;    SizeUpdate required and found&quot;</span>);
-                    <span class="self">self</span>.<span class="ident">last_max_update</span> <span class="op">=</span> <span class="ident">size</span>;
-                    <span class="self">self</span>.<span class="ident">max_size_update</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-                    <span class="comment">// Handle the dynamic table size update</span>
-                    <span class="self">self</span>.<span class="ident">process_size_update</span>(<span class="ident">src</span>)<span class="question-mark">?</span>;
-                    <span class="ident">consume</span>(<span class="ident">src</span>);
-                },
-                <span class="ident">ty</span> <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;    expected SizeUpdate, received={:?}&quot;</span>, <span class="ident">ty</span>);
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError</span>::<span class="ident">InvalidMaxDynamicSize</span>);
-                },
-            }
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">size</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">max_size_update</span>.<span class="ident">take</span>() {
+            <span class="self">self</span>.<span class="ident">last_max_update</span> <span class="op">=</span> <span class="ident">size</span>;
         }
 
-        <span class="comment">// Above, a SizeUpdate was *required* because of a SETTINGS change.</span>
-        <span class="comment">// However, a SizeUpdate can happen without one...</span>
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">can_resize</span> <span class="op">=</span> <span class="bool-val">true</span>;
+        <span class="kw">let</span> <span class="ident">span</span> <span class="op">=</span> <span class="ident">tracing</span>::<span class="macro">trace_span</span><span class="macro">!</span>(<span class="string">&quot;hpack::decode&quot;</span>);
+        <span class="kw">let</span> <span class="ident">_e</span> <span class="op">=</span> <span class="ident">span</span>.<span class="ident">enter</span>();
+
+        <span class="ident">tracing</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;decode&quot;</span>);
 
         <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ty</span>) <span class="op">=</span> <span class="ident">peek_u8</span>(<span class="ident">src</span>) {
             <span class="comment">// At this point we are always at the beginning of the next block</span>
@@ -1092,14 +1052,14 @@
             <span class="comment">// determined from the first byte.</span>
             <span class="kw">match</span> <span class="ident">Representation</span>::<span class="ident">load</span>(<span class="ident">ty</span>)<span class="question-mark">?</span> {
                 <span class="ident">Indexed</span> <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;    Indexed; rem={:?}&quot;</span>, <span class="ident">src</span>.<span class="ident">remaining</span>());
+                    <span class="ident">tracing</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="ident">rem</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">remaining</span>(), <span class="ident">kind</span> <span class="op">=</span> <span class="op">%</span><span class="string">&quot;Indexed&quot;</span>);
                     <span class="ident">can_resize</span> <span class="op">=</span> <span class="bool-val">false</span>;
                     <span class="kw">let</span> <span class="ident">entry</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">decode_indexed</span>(<span class="ident">src</span>)<span class="question-mark">?</span>;
                     <span class="ident">consume</span>(<span class="ident">src</span>);
                     <span class="ident">f</span>(<span class="ident">entry</span>);
-                },
+                }
                 <span class="ident">LiteralWithIndexing</span> <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;    LiteralWithIndexing; rem={:?}&quot;</span>, <span class="ident">src</span>.<span class="ident">remaining</span>());
+                    <span class="ident">tracing</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="ident">rem</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">remaining</span>(), <span class="ident">kind</span> <span class="op">=</span> <span class="op">%</span><span class="string">&quot;LiteralWithIndexing&quot;</span>);
                     <span class="ident">can_resize</span> <span class="op">=</span> <span class="bool-val">false</span>;
                     <span class="kw">let</span> <span class="ident">entry</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">decode_literal</span>(<span class="ident">src</span>, <span class="bool-val">true</span>)<span class="question-mark">?</span>;
 
@@ -1108,16 +1068,16 @@
                     <span class="ident">consume</span>(<span class="ident">src</span>);
 
                     <span class="ident">f</span>(<span class="ident">entry</span>);
-                },
+                }
                 <span class="ident">LiteralWithoutIndexing</span> <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;    LiteralWithoutIndexing; rem={:?}&quot;</span>, <span class="ident">src</span>.<span class="ident">remaining</span>());
+                    <span class="ident">tracing</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="ident">rem</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">remaining</span>(), <span class="ident">kind</span> <span class="op">=</span> <span class="op">%</span><span class="string">&quot;LiteralWithoutIndexing&quot;</span>);
                     <span class="ident">can_resize</span> <span class="op">=</span> <span class="bool-val">false</span>;
                     <span class="kw">let</span> <span class="ident">entry</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">decode_literal</span>(<span class="ident">src</span>, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
                     <span class="ident">consume</span>(<span class="ident">src</span>);
                     <span class="ident">f</span>(<span class="ident">entry</span>);
-                },
+                }
                 <span class="ident">LiteralNeverIndexed</span> <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;    LiteralNeverIndexed; rem={:?}&quot;</span>, <span class="ident">src</span>.<span class="ident">remaining</span>());
+                    <span class="ident">tracing</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="ident">rem</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">remaining</span>(), <span class="ident">kind</span> <span class="op">=</span> <span class="op">%</span><span class="string">&quot;LiteralNeverIndexed&quot;</span>);
                     <span class="ident">can_resize</span> <span class="op">=</span> <span class="bool-val">false</span>;
                     <span class="kw">let</span> <span class="ident">entry</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">decode_literal</span>(<span class="ident">src</span>, <span class="bool-val">false</span>)<span class="question-mark">?</span>;
                     <span class="ident">consume</span>(<span class="ident">src</span>);
@@ -1125,9 +1085,9 @@
                     <span class="comment">// TODO: Track that this should never be indexed</span>
 
                     <span class="ident">f</span>(<span class="ident">entry</span>);
-                },
+                }
                 <span class="ident">SizeUpdate</span> <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;    SizeUpdate; rem={:?}&quot;</span>, <span class="ident">src</span>.<span class="ident">remaining</span>());
+                    <span class="ident">tracing</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="ident">rem</span> <span class="op">=</span> <span class="ident">src</span>.<span class="ident">remaining</span>(), <span class="ident">kind</span> <span class="op">=</span> <span class="op">%</span><span class="string">&quot;SizeUpdate&quot;</span>);
                     <span class="kw">if</span> <span class="op">!</span><span class="ident">can_resize</span> {
                         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError</span>::<span class="ident">InvalidMaxDynamicSize</span>);
                     }
@@ -1135,7 +1095,7 @@
                     <span class="comment">// Handle the dynamic table size update</span>
                     <span class="self">self</span>.<span class="ident">process_size_update</span>(<span class="ident">src</span>)<span class="question-mark">?</span>;
                     <span class="ident">consume</span>(<span class="ident">src</span>);
-                },
+                }
             }
         }
 
@@ -1149,10 +1109,10 @@
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError</span>::<span class="ident">InvalidMaxDynamicSize</span>);
         }
 
-        <span class="macro">debug</span><span class="macro">!</span>(
-            <span class="string">&quot;Decoder changed max table size from {} to {}&quot;</span>,
-            <span class="self">self</span>.<span class="ident">table</span>.<span class="ident">size</span>(),
-            <span class="ident">new_size</span>
+        <span class="ident">tracing</span>::<span class="macro">debug</span><span class="macro">!</span>(
+            <span class="ident">from</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">table</span>.<span class="ident">size</span>(),
+            <span class="ident">to</span> <span class="op">=</span> <span class="ident">new_size</span>,
+            <span class="string">&quot;Decoder changed max table size&quot;</span>
         );
 
         <span class="self">self</span>.<span class="ident">table</span>.<span class="ident">set_max_size</span>(<span class="ident">new_size</span>);
@@ -1191,7 +1151,7 @@
     }
 
     <span class="kw">fn</span> <span class="ident">decode_string</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Cursor</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Bytes</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
-        <span class="kw">const</span> <span class="ident">HUFF_FLAG</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b10000000</span>;
+        <span class="kw">const</span> <span class="ident">HUFF_FLAG</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b1000_0000</span>;
 
         <span class="comment">// The first bit in the first byte contains the huffman encoded flag.</span>
         <span class="kw">let</span> <span class="ident">huff</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">peek_u8</span>(<span class="ident">buf</span>) {
@@ -1203,18 +1163,14 @@
         <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">decode_int</span>(<span class="ident">buf</span>, <span class="number">7</span>)<span class="question-mark">?</span>;
 
         <span class="kw">if</span> <span class="ident">len</span> <span class="op">&gt;</span> <span class="ident">buf</span>.<span class="ident">remaining</span>() {
-            <span class="macro">trace</span><span class="macro">!</span>(
-                <span class="string">&quot;decode_string underflow; len={}; remaining={}&quot;</span>,
-                <span class="ident">len</span>,
-                <span class="ident">buf</span>.<span class="ident">remaining</span>()
-            );
+            <span class="ident">tracing</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="ident">len</span>, <span class="ident">remaining</span> <span class="op">=</span> <span class="ident">buf</span>.<span class="ident">remaining</span>(), <span class="string">&quot;decode_string underflow&quot;</span>,);
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError</span>::<span class="ident">NeedMore</span>(<span class="ident">NeedMore</span>::<span class="ident">StringUnderflow</span>));
         }
 
         <span class="kw">if</span> <span class="ident">huff</span> {
             <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> {
                 <span class="kw">let</span> <span class="ident">raw</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">buf</span>.<span class="ident">bytes</span>()[..<span class="ident">len</span>];
-                <span class="ident">huffman</span>::<span class="ident">decode</span>(<span class="ident">raw</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">buffer</span>).<span class="ident">map</span>(<span class="ident">Into</span>::<span class="ident">into</span>)
+                <span class="ident">huffman</span>::<span class="ident">decode</span>(<span class="ident">raw</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">buffer</span>).<span class="ident">map</span>(<span class="ident">BytesMut</span>::<span class="ident">freeze</span>)
             };
 
             <span class="ident">buf</span>.<span class="ident">advance</span>(<span class="ident">len</span>);
@@ -1235,12 +1191,12 @@
 
 <span class="kw">impl</span> <span class="ident">Representation</span> {
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load</span>(<span class="ident">byte</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Representation</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
-        <span class="kw">const</span> <span class="ident">INDEXED</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b10000000</span>;
-        <span class="kw">const</span> <span class="ident">LITERAL_WITH_INDEXING</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b01000000</span>;
-        <span class="kw">const</span> <span class="ident">LITERAL_WITHOUT_INDEXING</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b11110000</span>;
-        <span class="kw">const</span> <span class="ident">LITERAL_NEVER_INDEXED</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b00010000</span>;
-        <span class="kw">const</span> <span class="ident">SIZE_UPDATE_MASK</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b11100000</span>;
-        <span class="kw">const</span> <span class="ident">SIZE_UPDATE</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b00100000</span>;
+        <span class="kw">const</span> <span class="ident">INDEXED</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b1000_0000</span>;
+        <span class="kw">const</span> <span class="ident">LITERAL_WITH_INDEXING</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b0100_0000</span>;
+        <span class="kw">const</span> <span class="ident">LITERAL_WITHOUT_INDEXING</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b1111_0000</span>;
+        <span class="kw">const</span> <span class="ident">LITERAL_NEVER_INDEXED</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b0001_0000</span>;
+        <span class="kw">const</span> <span class="ident">SIZE_UPDATE_MASK</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b1110_0000</span>;
+        <span class="kw">const</span> <span class="ident">SIZE_UPDATE</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b0010_0000</span>;
 
         <span class="comment">// TODO: What did I even write here?</span>
 
@@ -1265,8 +1221,8 @@
     <span class="comment">// never overflow an unsigned 32-bit integer. The maximum value of any</span>
     <span class="comment">// integer that can be encoded with 5 octets is ~2^28</span>
     <span class="kw">const</span> <span class="ident">MAX_BYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">5</span>;
-    <span class="kw">const</span> <span class="ident">VARINT_MASK</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b01111111</span>;
-    <span class="kw">const</span> <span class="ident">VARINT_FLAG</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b10000000</span>;
+    <span class="kw">const</span> <span class="ident">VARINT_MASK</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b0111_1111</span>;
+    <span class="kw">const</span> <span class="ident">VARINT_FLAG</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">0b1000_0000</span>;
 
     <span class="kw">if</span> <span class="ident">prefix_size</span> <span class="op">&lt;</span> <span class="number">1</span> <span class="op">|</span><span class="op">|</span> <span class="ident">prefix_size</span> <span class="op">&gt;</span> <span class="number">8</span> {
         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError</span>::<span class="ident">InvalidIntegerPrefix</span>);
@@ -1331,7 +1287,7 @@
     <span class="kw">let</span> <span class="ident">pos</span> <span class="op">=</span> <span class="ident">buf</span>.<span class="ident">position</span>() <span class="kw">as</span> <span class="ident">usize</span>;
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">head</span> <span class="op">=</span> <span class="ident">buf</span>.<span class="ident">get_mut</span>().<span class="ident">split_to</span>(<span class="ident">pos</span> <span class="op">+</span> <span class="ident">n</span>);
     <span class="ident">buf</span>.<span class="ident">set_position</span>(<span class="number">0</span>);
-    <span class="ident">head</span>.<span class="ident">split_to</span>(<span class="ident">pos</span>);
+    <span class="ident">head</span>.<span class="ident">advance</span>(<span class="ident">pos</span>);
     <span class="ident">head</span>.<span class="ident">freeze</span>()
 }
 
@@ -1349,16 +1305,12 @@
         <span class="ident">Table</span> {
             <span class="ident">entries</span>: <span class="ident">VecDeque</span>::<span class="ident">new</span>(),
             <span class="ident">size</span>: <span class="number">0</span>,
-            <span class="ident">max_size</span>: <span class="ident">max_size</span>,
+            <span class="ident">max_size</span>,
         }
     }
 
     <span class="kw">fn</span> <span class="ident">size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="ident">size</span>
-    }
-
-    <span class="kw">fn</span> <span class="ident">max_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
-        <span class="self">self</span>.<span class="ident">max_size</span>
     }
 
     <span class="doccomment">/// Returns the entry located at the given index.</span>
@@ -1424,7 +1376,7 @@
                         <span class="comment">// Can never happen as the size of the table must reach</span>
                         <span class="comment">// 0 by the time we&#39;ve exhausted all elements.</span>
                         <span class="macro">panic</span><span class="macro">!</span>(<span class="string">&quot;Size of table != 0, but no headers left!&quot;</span>);
-                    },
+                    }
                 };
 
                 <span class="self">self</span>.<span class="ident">size</span> <span class="op">-</span><span class="op">=</span> <span class="ident">last</span>.<span class="ident">len</span>();
@@ -1689,14 +1641,14 @@
     }
 }
 
-<span class="kw">fn</span> <span class="ident">from_static</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span><span class="op">&lt;</span><span class="ident">Bytes</span><span class="op">&gt;</span> {
-    <span class="kw">unsafe</span> { <span class="ident">String</span>::<span class="ident">from_utf8_unchecked</span>(<span class="ident">Bytes</span>::<span class="ident">from_static</span>(<span class="ident">s</span>.<span class="ident">as_bytes</span>())) }
+<span class="kw">fn</span> <span class="ident">from_static</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BytesStr</span> {
+    <span class="kw">unsafe</span> { <span class="ident">BytesStr</span>::<span class="ident">from_utf8_unchecked</span>(<span class="ident">Bytes</span>::<span class="ident">from_static</span>(<span class="ident">s</span>.<span class="ident">as_bytes</span>())) }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident">hpack</span>::<span class="ident">Header</span>;
+    <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">hpack</span>::<span class="ident">Header</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_peek_u8</span>() {
@@ -1727,23 +1679,27 @@
     <span class="kw">fn</span> <span class="ident">test_decode_indexed_larger_than_table</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">de</span> <span class="op">=</span> <span class="ident">Decoder</span>::<span class="ident">new</span>(<span class="number">0</span>);
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0b01000000</span>, <span class="number">0x80</span> <span class="op">|</span> <span class="number">2</span>];
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">BytesMut</span>::<span class="ident">new</span>();
+        <span class="ident">buf</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span>[<span class="number">0b01000000</span>, <span class="number">0x80</span> <span class="op">|</span> <span class="number">2</span>]);
         <span class="ident">buf</span>.<span class="ident">extend</span>(<span class="ident">huff_encode</span>(<span class="string">b&quot;foo&quot;</span>));
         <span class="ident">buf</span>.<span class="ident">extend</span>(<span class="kw-2">&amp;</span>[<span class="number">0x80</span> <span class="op">|</span> <span class="number">3</span>]);
         <span class="ident">buf</span>.<span class="ident">extend</span>(<span class="ident">huff_encode</span>(<span class="string">b&quot;bar&quot;</span>));
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">buf</span>.<span class="ident">into</span>();
-
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[];
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">de</span>.<span class="ident">decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Cursor</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>), <span class="op">|</span><span class="ident">h</span><span class="op">|</span> {
-            <span class="ident">res</span>.<span class="ident">push</span>(<span class="ident">h</span>);
-        }).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">de</span>
+            .<span class="ident">decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Cursor</span>::<span class="ident">new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>), <span class="op">|</span><span class="ident">h</span><span class="op">|</span> {
+                <span class="ident">res</span>.<span class="ident">push</span>(<span class="ident">h</span>);
+            })
+            .<span class="ident">unwrap</span>();
 
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">res</span>.<span class="ident">len</span>(), <span class="number">1</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">de</span>.<span class="ident">table</span>.<span class="ident">size</span>(), <span class="number">0</span>);
 
         <span class="kw">match</span> <span class="ident">res</span>[<span class="number">0</span>] {
-            <span class="ident">Header</span>::<span class="ident">Field</span> { <span class="kw-2">ref</span> <span class="ident">name</span>, <span class="kw-2">ref</span> <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Header</span>::<span class="ident">Field</span> {
+                <span class="kw-2">ref</span> <span class="ident">name</span>,
+                <span class="kw-2">ref</span> <span class="ident">value</span>,
+            } <span class="op">=</span><span class="op">&gt;</span> {
                 <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">name</span>, <span class="string">&quot;foo&quot;</span>);
                 <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">value</span>, <span class="string">&quot;bar&quot;</span>);
             }
@@ -1758,4 +1714,4 @@
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "h2";</script><script src="../../../aliases.js"></script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "h2";</script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-subscriber-0.2.5/src/layer.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>layer.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing_subscriber/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-subscriber-0.2.15/src/layer.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>layer.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing_subscriber/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1142,13 +1142,161 @@
 <span id="1142">1142</span>
 <span id="1143">1143</span>
 <span id="1144">1144</span>
+<span id="1145">1145</span>
+<span id="1146">1146</span>
+<span id="1147">1147</span>
+<span id="1148">1148</span>
+<span id="1149">1149</span>
+<span id="1150">1150</span>
+<span id="1151">1151</span>
+<span id="1152">1152</span>
+<span id="1153">1153</span>
+<span id="1154">1154</span>
+<span id="1155">1155</span>
+<span id="1156">1156</span>
+<span id="1157">1157</span>
+<span id="1158">1158</span>
+<span id="1159">1159</span>
+<span id="1160">1160</span>
+<span id="1161">1161</span>
+<span id="1162">1162</span>
+<span id="1163">1163</span>
+<span id="1164">1164</span>
+<span id="1165">1165</span>
+<span id="1166">1166</span>
+<span id="1167">1167</span>
+<span id="1168">1168</span>
+<span id="1169">1169</span>
+<span id="1170">1170</span>
+<span id="1171">1171</span>
+<span id="1172">1172</span>
+<span id="1173">1173</span>
+<span id="1174">1174</span>
+<span id="1175">1175</span>
+<span id="1176">1176</span>
+<span id="1177">1177</span>
+<span id="1178">1178</span>
+<span id="1179">1179</span>
+<span id="1180">1180</span>
+<span id="1181">1181</span>
+<span id="1182">1182</span>
+<span id="1183">1183</span>
+<span id="1184">1184</span>
+<span id="1185">1185</span>
+<span id="1186">1186</span>
+<span id="1187">1187</span>
+<span id="1188">1188</span>
+<span id="1189">1189</span>
+<span id="1190">1190</span>
+<span id="1191">1191</span>
+<span id="1192">1192</span>
+<span id="1193">1193</span>
+<span id="1194">1194</span>
+<span id="1195">1195</span>
+<span id="1196">1196</span>
+<span id="1197">1197</span>
+<span id="1198">1198</span>
+<span id="1199">1199</span>
+<span id="1200">1200</span>
+<span id="1201">1201</span>
+<span id="1202">1202</span>
+<span id="1203">1203</span>
+<span id="1204">1204</span>
+<span id="1205">1205</span>
+<span id="1206">1206</span>
+<span id="1207">1207</span>
+<span id="1208">1208</span>
+<span id="1209">1209</span>
+<span id="1210">1210</span>
+<span id="1211">1211</span>
+<span id="1212">1212</span>
+<span id="1213">1213</span>
+<span id="1214">1214</span>
+<span id="1215">1215</span>
+<span id="1216">1216</span>
+<span id="1217">1217</span>
+<span id="1218">1218</span>
+<span id="1219">1219</span>
+<span id="1220">1220</span>
+<span id="1221">1221</span>
+<span id="1222">1222</span>
+<span id="1223">1223</span>
+<span id="1224">1224</span>
+<span id="1225">1225</span>
+<span id="1226">1226</span>
+<span id="1227">1227</span>
+<span id="1228">1228</span>
+<span id="1229">1229</span>
+<span id="1230">1230</span>
+<span id="1231">1231</span>
+<span id="1232">1232</span>
+<span id="1233">1233</span>
+<span id="1234">1234</span>
+<span id="1235">1235</span>
+<span id="1236">1236</span>
+<span id="1237">1237</span>
+<span id="1238">1238</span>
+<span id="1239">1239</span>
+<span id="1240">1240</span>
+<span id="1241">1241</span>
+<span id="1242">1242</span>
+<span id="1243">1243</span>
+<span id="1244">1244</span>
+<span id="1245">1245</span>
+<span id="1246">1246</span>
+<span id="1247">1247</span>
+<span id="1248">1248</span>
+<span id="1249">1249</span>
+<span id="1250">1250</span>
+<span id="1251">1251</span>
+<span id="1252">1252</span>
+<span id="1253">1253</span>
+<span id="1254">1254</span>
+<span id="1255">1255</span>
+<span id="1256">1256</span>
+<span id="1257">1257</span>
+<span id="1258">1258</span>
+<span id="1259">1259</span>
+<span id="1260">1260</span>
+<span id="1261">1261</span>
+<span id="1262">1262</span>
+<span id="1263">1263</span>
+<span id="1264">1264</span>
+<span id="1265">1265</span>
+<span id="1266">1266</span>
+<span id="1267">1267</span>
+<span id="1268">1268</span>
+<span id="1269">1269</span>
+<span id="1270">1270</span>
+<span id="1271">1271</span>
+<span id="1272">1272</span>
+<span id="1273">1273</span>
+<span id="1274">1274</span>
+<span id="1275">1275</span>
+<span id="1276">1276</span>
+<span id="1277">1277</span>
+<span id="1278">1278</span>
+<span id="1279">1279</span>
+<span id="1280">1280</span>
+<span id="1281">1281</span>
+<span id="1282">1282</span>
+<span id="1283">1283</span>
+<span id="1284">1284</span>
+<span id="1285">1285</span>
+<span id="1286">1286</span>
+<span id="1287">1287</span>
+<span id="1288">1288</span>
+<span id="1289">1289</span>
+<span id="1290">1290</span>
+<span id="1291">1291</span>
+<span id="1292">1292</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! A composable abstraction for building `Subscriber`s.</span>
 <span class="kw">use</span> <span class="ident">tracing_core</span>::{
     <span class="ident">metadata</span>::<span class="ident">Metadata</span>,
     <span class="ident">span</span>,
     <span class="ident">subscriber</span>::{<span class="ident">Interest</span>, <span class="ident">Subscriber</span>},
-    <span class="ident">Event</span>,
+    <span class="ident">Event</span>, <span class="ident">LevelFilter</span>,
 };
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;registry&quot;</span>)]</span>
@@ -1357,13 +1505,23 @@
     <span class="doccomment">/// By default, this returns [`Interest::always()`] if [`self.enabled`] returns</span>
     <span class="doccomment">/// true, or [`Interest::never()`] if it returns false.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// **Note:** This method (and [`Layer::enabled`]) determine whether a</span>
-    <span class="doccomment">/// span or event is globally enabled, _not_ whether the individual layer</span>
-    <span class="doccomment">/// will be notified about that span or event. This is intended to be used</span>
+    <span class="doccomment">/// &lt;div class=&quot;information&quot;&gt;</span>
+    <span class="doccomment">///     &lt;div class=&quot;tooltip ignore&quot; style=&quot;&quot;&gt;ⓘ&lt;span class=&quot;tooltiptext&quot;&gt;Note&lt;/span&gt;&lt;/div&gt;</span>
+    <span class="doccomment">/// &lt;/div&gt;</span>
+    <span class="doccomment">/// &lt;div class=&quot;example-wrap&quot; style=&quot;display:inline-block&quot;&gt;</span>
+    <span class="doccomment">/// &lt;pre class=&quot;ignore&quot; style=&quot;white-space:normal;font:inherit;&quot;&gt;</span>
+    <span class="doccomment">/// &lt;strong&gt;Note&lt;/strong&gt;: This method (and &lt;a href=&quot;#method.enabled&quot;&gt;</span>
+    <span class="doccomment">/// &lt;code&gt;Layer::enabled&lt;/code&gt;&lt;/a&gt;) determine whether a span or event is</span>
+    <span class="doccomment">/// globally enabled, &lt;em&gt;not&lt;/em&gt; whether the individual layer will be</span>
+    <span class="doccomment">/// notified about that span or event. This is intended to be used</span>
     <span class="doccomment">/// by layers that implement filtering for the entire stack. Layers which do</span>
     <span class="doccomment">/// not wish to be notified about certain spans or events but do not wish to</span>
     <span class="doccomment">/// globally disable them should ignore those spans or events in their</span>
-    <span class="doccomment">/// [`on_event`], [`on_enter`], [`on_exit`], and other notification methods.</span>
+    <span class="doccomment">/// &lt;a href=&quot;#method.on_event&quot;&gt;&lt;code&gt;on_event&lt;/code&gt;&lt;/a&gt;,</span>
+    <span class="doccomment">/// &lt;a href=&quot;#method.on_enter&quot;&gt;&lt;code&gt;on_enter&lt;/code&gt;&lt;/a&gt;,</span>
+    <span class="doccomment">/// &lt;a href=&quot;#method.on_exit&quot;&gt;&lt;code&gt;on_exit&lt;/code&gt;&lt;/a&gt;, and other notification</span>
+    <span class="doccomment">/// methods.</span>
+    <span class="doccomment">/// &lt;/pre&gt;&lt;/div&gt;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// See [the trait-level documentation] for more information on filtering</span>
     <span class="doccomment">/// with `Layer`s.</span>
@@ -1399,13 +1557,23 @@
     <span class="doccomment">/// By default, this always returns `true`, allowing the wrapped subscriber</span>
     <span class="doccomment">/// to choose to disable the span.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// **Note:** This method (and [`Layer::register_callsite`]) determine whether a</span>
-    <span class="doccomment">/// span or event is globally enabled, _not_ whether the individual layer</span>
-    <span class="doccomment">/// will be notified about that span or event. This is intended to be used</span>
+    <span class="doccomment">/// &lt;div class=&quot;information&quot;&gt;</span>
+    <span class="doccomment">///     &lt;div class=&quot;tooltip ignore&quot; style=&quot;&quot;&gt;ⓘ&lt;span class=&quot;tooltiptext&quot;&gt;Note&lt;/span&gt;&lt;/div&gt;</span>
+    <span class="doccomment">/// &lt;/div&gt;</span>
+    <span class="doccomment">/// &lt;div class=&quot;example-wrap&quot; style=&quot;display:inline-block&quot;&gt;</span>
+    <span class="doccomment">/// &lt;pre class=&quot;ignore&quot; style=&quot;white-space:normal;font:inherit;&quot;&gt;</span>
+    <span class="doccomment">/// &lt;strong&gt;Note&lt;/strong&gt;: This method (and &lt;a href=&quot;#method.register_callsite&quot;&gt;</span>
+    <span class="doccomment">/// &lt;code&gt;Layer::register_callsite&lt;/code&gt;&lt;/a&gt;) determine whether a span or event is</span>
+    <span class="doccomment">/// globally enabled, &lt;em&gt;not&lt;/em&gt; whether the individual layer will be</span>
+    <span class="doccomment">/// notified about that span or event. This is intended to be used</span>
     <span class="doccomment">/// by layers that implement filtering for the entire stack. Layers which do</span>
     <span class="doccomment">/// not wish to be notified about certain spans or events but do not wish to</span>
     <span class="doccomment">/// globally disable them should ignore those spans or events in their</span>
-    <span class="doccomment">/// [`on_event`], [`on_enter`], [`on_exit`], and other notification methods.</span>
+    <span class="doccomment">/// &lt;a href=&quot;#method.on_event&quot;&gt;&lt;code&gt;on_event&lt;/code&gt;&lt;/a&gt;,</span>
+    <span class="doccomment">/// &lt;a href=&quot;#method.on_enter&quot;&gt;&lt;code&gt;on_enter&lt;/code&gt;&lt;/a&gt;,</span>
+    <span class="doccomment">/// &lt;a href=&quot;#method.on_exit&quot;&gt;&lt;code&gt;on_exit&lt;/code&gt;&lt;/a&gt;, and other notification</span>
+    <span class="doccomment">/// methods.</span>
+    <span class="doccomment">/// &lt;/pre&gt;&lt;/div&gt;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// See [the trait-level documentation] for more information on filtering</span>
@@ -1428,6 +1596,14 @@
     <span class="doccomment">/// `Attributes` and `Id`.</span>
     <span class="kw">fn</span> <span class="ident">new_span</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">attrs</span>: <span class="kw-2">&amp;</span><span class="ident">span</span>::<span class="ident">Attributes</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">span</span>::<span class="ident">Id</span>, <span class="ident">ctx</span>: <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">S</span><span class="op">&gt;</span>) {
         <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> (<span class="ident">attrs</span>, <span class="ident">id</span>, <span class="ident">ctx</span>);
+    }
+
+    <span class="comment">// TODO(eliza): do we want this to be a public API? If we end up moving</span>
+    <span class="comment">// filtering layers to a separate trait, we may no longer want `Layer`s to</span>
+    <span class="comment">// be able to participate in max level hinting...</span>
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">max_level_hint</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">LevelFilter</span><span class="op">&gt;</span> {
+        <span class="prelude-val">None</span>
     }
 
     <span class="doccomment">/// Notifies this layer that a span with the given `Id` recorded the given</span>
@@ -1648,8 +1824,28 @@
 <span class="doccomment">/// Represents information about the current context provided to [`Layer`]s by the</span>
 <span class="doccomment">/// wrapped [`Subscriber`].</span>
 <span class="doccomment">///</span>
+<span class="doccomment">/// To access [stored data] keyed by a span ID, implementors of the `Layer`</span>
+<span class="doccomment">/// trait should ensure that the `Subscriber` type parameter is *also* bound by the</span>
+<span class="doccomment">/// [`LookupSpan`]:</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// ```rust</span>
+<span class="doccomment">/// use tracing::Subscriber;</span>
+<span class="doccomment">/// use tracing_subscriber::{Layer, registry::LookupSpan};</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// pub struct MyLayer;</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// impl&lt;S&gt; Layer&lt;S&gt; for MyLayer</span>
+<span class="doccomment">/// where</span>
+<span class="doccomment">///     S: Subscriber + for&lt;&#39;a&gt; LookupSpan&lt;&#39;a&gt;,</span>
+<span class="doccomment">/// {</span>
+<span class="doccomment">///     // ...</span>
+<span class="doccomment">/// }</span>
+<span class="doccomment">/// ```</span>
+<span class="doccomment">///</span>
 <span class="doccomment">/// [`Layer`]: ../layer/trait.Layer.html</span>
 <span class="doccomment">/// [`Subscriber`]: https://docs.rs/tracing-core/latest/tracing_core/trait.Subscriber.html</span>
+<span class="doccomment">/// [stored data]: ../registry/struct.SpanRef.html</span>
+<span class="doccomment">/// [`LookupSpan`]: &quot;../registry/trait.LookupSpan.html</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">S</span><span class="op">&gt;</span> {
     <span class="ident">subscriber</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">S</span><span class="op">&gt;</span>,
@@ -1674,7 +1870,7 @@
 }
 
 <span class="doccomment">/// An iterator over the [stored data] for all the spans in the</span>
-<span class="doccomment">/// current context, starting  the root of the trace tree and ending with</span>
+<span class="doccomment">/// current context, starting the root of the trace tree and ending with</span>
 <span class="doccomment">/// the current span.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// This is returned by [`Context::scope`].</span>
@@ -1721,6 +1917,10 @@
             <span class="comment">// otherwise, the callsite is disabled by the layer</span>
             <span class="bool-val">false</span>
         }
+    }
+
+    <span class="kw">fn</span> <span class="ident">max_level_hint</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">LevelFilter</span><span class="op">&gt;</span> {
+        <span class="ident">std</span>::<span class="ident">cmp</span>::<span class="ident">max</span>(<span class="self">self</span>.<span class="ident">layer</span>.<span class="ident">max_level_hint</span>(), <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">max_level_hint</span>())
     }
 
     <span class="kw">fn</span> <span class="ident">new_span</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">span</span>: <span class="kw-2">&amp;</span><span class="ident">span</span>::<span class="ident">Attributes</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">span</span>::<span class="ident">Id</span> {
@@ -1817,7 +2017,7 @@
         <span class="kw">let</span> <span class="ident">outer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">layer</span>.<span class="ident">register_callsite</span>(<span class="ident">metadata</span>);
         <span class="kw">if</span> <span class="ident">outer</span>.<span class="ident">is_never</span>() {
             <span class="comment">// if the outer layer has disabled the callsite, return now so that</span>
-            <span class="comment">// inner layers  don&#39;t get their hopes up.</span>
+            <span class="comment">// inner layers don&#39;t get their hopes up.</span>
             <span class="kw">return</span> <span class="ident">outer</span>;
         }
 
@@ -1901,6 +2101,102 @@
     }
 }
 
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">L</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">L</span>: <span class="ident">Layer</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
+    <span class="ident">S</span>: <span class="ident">Subscriber</span>,
+{
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">new_span</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">attrs</span>: <span class="kw-2">&amp;</span><span class="ident">span</span>::<span class="ident">Attributes</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">span</span>::<span class="ident">Id</span>, <span class="ident">ctx</span>: <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">S</span><span class="op">&gt;</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">inner</span>) <span class="op">=</span> <span class="self">self</span> {
+            <span class="ident">inner</span>.<span class="ident">new_span</span>(<span class="ident">attrs</span>, <span class="ident">id</span>, <span class="ident">ctx</span>)
+        }
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">register_callsite</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">metadata</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Interest</span> {
+        <span class="kw">match</span> <span class="self">self</span> {
+            <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">inner</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">inner</span>.<span class="ident">register_callsite</span>(<span class="ident">metadata</span>),
+            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Interest</span>::<span class="ident">always</span>(),
+        }
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">metadata</span>: <span class="kw-2">&amp;</span><span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">ctx</span>: <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">S</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="kw">match</span> <span class="self">self</span> {
+            <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">inner</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">inner</span>.<span class="ident">enabled</span>(<span class="ident">metadata</span>, <span class="ident">ctx</span>),
+            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+        }
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">max_level_hint</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">LevelFilter</span><span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="self">self</span> {
+            <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">inner</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">inner</span>.<span class="ident">max_level_hint</span>(),
+            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+        }
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">on_record</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">span</span>: <span class="kw-2">&amp;</span><span class="ident">span</span>::<span class="ident">Id</span>, <span class="ident">values</span>: <span class="kw-2">&amp;</span><span class="ident">span</span>::<span class="ident">Record</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">ctx</span>: <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">S</span><span class="op">&gt;</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">inner</span>) <span class="op">=</span> <span class="self">self</span> {
+            <span class="ident">inner</span>.<span class="ident">on_record</span>(<span class="ident">span</span>, <span class="ident">values</span>, <span class="ident">ctx</span>);
+        }
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">on_follows_from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">span</span>: <span class="kw-2">&amp;</span><span class="ident">span</span>::<span class="ident">Id</span>, <span class="ident">follows</span>: <span class="kw-2">&amp;</span><span class="ident">span</span>::<span class="ident">Id</span>, <span class="ident">ctx</span>: <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">S</span><span class="op">&gt;</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">inner</span>) <span class="op">=</span> <span class="self">self</span> {
+            <span class="ident">inner</span>.<span class="ident">on_follows_from</span>(<span class="ident">span</span>, <span class="ident">follows</span>, <span class="ident">ctx</span>);
+        }
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">on_event</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">event</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">ctx</span>: <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">S</span><span class="op">&gt;</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">inner</span>) <span class="op">=</span> <span class="self">self</span> {
+            <span class="ident">inner</span>.<span class="ident">on_event</span>(<span class="ident">event</span>, <span class="ident">ctx</span>);
+        }
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">on_enter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">span</span>::<span class="ident">Id</span>, <span class="ident">ctx</span>: <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">S</span><span class="op">&gt;</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">inner</span>) <span class="op">=</span> <span class="self">self</span> {
+            <span class="ident">inner</span>.<span class="ident">on_enter</span>(<span class="ident">id</span>, <span class="ident">ctx</span>);
+        }
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">on_exit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">span</span>::<span class="ident">Id</span>, <span class="ident">ctx</span>: <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">S</span><span class="op">&gt;</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">inner</span>) <span class="op">=</span> <span class="self">self</span> {
+            <span class="ident">inner</span>.<span class="ident">on_exit</span>(<span class="ident">id</span>, <span class="ident">ctx</span>);
+        }
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">on_close</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="ident">span</span>::<span class="ident">Id</span>, <span class="ident">ctx</span>: <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">S</span><span class="op">&gt;</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">inner</span>) <span class="op">=</span> <span class="self">self</span> {
+            <span class="ident">inner</span>.<span class="ident">on_close</span>(<span class="ident">id</span>, <span class="ident">ctx</span>);
+        }
+    }
+
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">fn</span> <span class="ident">on_id_change</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">old</span>: <span class="kw-2">&amp;</span><span class="ident">span</span>::<span class="ident">Id</span>, <span class="ident">new</span>: <span class="kw-2">&amp;</span><span class="ident">span</span>::<span class="ident">Id</span>, <span class="ident">ctx</span>: <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">S</span><span class="op">&gt;</span>) {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">inner</span>) <span class="op">=</span> <span class="self">self</span> {
+            <span class="ident">inner</span>.<span class="ident">on_id_change</span>(<span class="ident">old</span>, <span class="ident">new</span>, <span class="ident">ctx</span>)
+        }
+    }
+
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">downcast_raw</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="ident">TypeId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw">const</span> ()<span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="ident">id</span> <span class="op">=</span><span class="op">=</span> <span class="ident">TypeId</span>::<span class="ident">of</span>::<span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>() {
+            <span class="prelude-val">Some</span>(<span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> ())
+        } <span class="kw">else</span> {
+            <span class="self">self</span>.<span class="ident">as_ref</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">inner</span><span class="op">|</span> <span class="ident">inner</span>.<span class="ident">downcast_raw</span>(<span class="ident">id</span>))
+        }
+    }
+}
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;registry&quot;</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;registry&quot;</span>)))]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">LookupSpan</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Layered</span><span class="op">&lt;</span><span class="ident">L</span>, <span class="ident">S</span><span class="op">&gt;</span>
@@ -1939,7 +2235,10 @@
 
 <span class="comment">// === impl Context ===</span>
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">S</span>: <span class="ident">Subscriber</span><span class="op">&gt;</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">S</span><span class="op">&gt;</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">S</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">S</span>: <span class="ident">Subscriber</span>,
+{
     <span class="doccomment">/// Returns the wrapped subscriber&#39;s view of the current span.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">current_span</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">span</span>::<span class="ident">Current</span> {
@@ -1992,16 +2291,6 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// If this returns `None`, then no span exists for that ID (either it has</span>
     <span class="doccomment">/// closed or the ID is invalid).</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// **Note**: This requires the wrapped subscriber to implement the</span>
-    <span class="doccomment">/// [`LookupSpan`] trait. `Layer` implementations that wish to use this</span>
-    <span class="doccomment">/// function can bound their `Subscriber` type parameter with</span>
-    <span class="doccomment">/// ```rust,ignore</span>
-    <span class="doccomment">/// where S: Subscriber + for&lt;&#39;a&gt; LookupSpan&lt;&#39;a&gt;,</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// or similar.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// [`LookupSpan`]: ../registry/trait.LookupSpan.html</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;registry&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;registry&quot;</span>)))]</span>
@@ -2018,16 +2307,18 @@
     <span class="doccomment">/// If this returns `None`, then no span exists for that ID (either it has</span>
     <span class="doccomment">/// closed or the ID is invalid).</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// **Note**: This requires the wrapped subscriber to implement the</span>
-    <span class="doccomment">/// [`LookupSpan`] trait. `Layer` implementations that wish to use this</span>
-    <span class="doccomment">/// function can bound their `Subscriber` type parameter with</span>
-    <span class="doccomment">/// ```rust,ignore</span>
-    <span class="doccomment">/// where S: Subscriber + for&lt;&#39;span&gt; LookupSpan&lt;&#39;span&gt;,</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// or similar.</span>
+    <span class="doccomment">/// &lt;div class=&quot;information&quot;&gt;</span>
+    <span class="doccomment">///     &lt;div class=&quot;tooltip ignore&quot; style=&quot;&quot;&gt;ⓘ&lt;span class=&quot;tooltiptext&quot;&gt;Note&lt;/span&gt;&lt;/div&gt;</span>
+    <span class="doccomment">/// &lt;/div&gt;</span>
+    <span class="doccomment">/// &lt;div class=&quot;example-wrap&quot; style=&quot;display:inline-block&quot;&gt;</span>
+    <span class="doccomment">/// &lt;pre class=&quot;ignore&quot; style=&quot;white-space:normal;font:inherit;&quot;&gt;</span>
+    <span class="doccomment">/// &lt;strong&gt;Note&lt;/strong&gt;: This requires the wrapped subscriber to implement the</span>
+    <span class="doccomment">/// &lt;a href=&quot;../registry/trait.LookupSpan.html&quot;&gt;&lt;code&gt;LookupSpan&lt;/code&gt;&lt;/a&gt; trait.</span>
+    <span class="doccomment">/// See the documentation on &lt;a href=&quot;./struct.Context.html&quot;&gt;&lt;code&gt;Context&lt;/code&gt;&#39;s</span>
+    <span class="doccomment">/// declaration&lt;/a&gt; for details.</span>
+    <span class="doccomment">/// &lt;/pre&gt;&lt;/div&gt;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [stored data]: ../registry/struct.SpanRef.html</span>
-    <span class="doccomment">/// [`LookupSpan`]: ../registry/trait.LookupSpan.html</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;registry&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;registry&quot;</span>)))]</span>
@@ -2040,15 +2331,16 @@
 
     <span class="doccomment">/// Returns `true` if an active span exists for the given `Id`.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// **Note**: This requires the wrapped subscriber to implement the</span>
-    <span class="doccomment">/// [`LookupSpan`] trait. `Layer` implementations that wish to use this</span>
-    <span class="doccomment">/// function can bound their `Subscriber` type parameter with</span>
-    <span class="doccomment">/// ```rust,ignore</span>
-    <span class="doccomment">/// where S: Subscriber + for&lt;&#39;a&gt; LookupSpan&lt;&#39;a&gt;,</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// or similar.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// [`LookupSpan`]: ../registry/trait.LookupSpan.html</span>
+    <span class="doccomment">/// &lt;div class=&quot;information&quot;&gt;</span>
+    <span class="doccomment">///     &lt;div class=&quot;tooltip ignore&quot; style=&quot;&quot;&gt;ⓘ&lt;span class=&quot;tooltiptext&quot;&gt;Note&lt;/span&gt;&lt;/div&gt;</span>
+    <span class="doccomment">/// &lt;/div&gt;</span>
+    <span class="doccomment">/// &lt;div class=&quot;example-wrap&quot; style=&quot;display:inline-block&quot;&gt;</span>
+    <span class="doccomment">/// &lt;pre class=&quot;ignore&quot; style=&quot;white-space:normal;font:inherit;&quot;&gt;</span>
+    <span class="doccomment">/// &lt;strong&gt;Note&lt;/strong&gt;: This requires the wrapped subscriber to implement the</span>
+    <span class="doccomment">/// &lt;a href=&quot;../registry/trait.LookupSpan.html&quot;&gt;&lt;code&gt;LookupSpan&lt;/code&gt;&lt;/a&gt; trait.</span>
+    <span class="doccomment">/// See the documentation on &lt;a href=&quot;./struct.Context.html&quot;&gt;&lt;code&gt;Context&lt;/code&gt;&#39;s</span>
+    <span class="doccomment">/// declaration&lt;/a&gt; for details.</span>
+    <span class="doccomment">/// &lt;/pre&gt;&lt;/div&gt;</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;registry&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;registry&quot;</span>)))]</span>
@@ -2064,16 +2356,18 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// If this returns `None`, then we are not currently within a span.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// **Note**: This requires the wrapped subscriber to implement the</span>
-    <span class="doccomment">/// [`LookupSpan`] trait. `Layer` implementations that wish to use this</span>
-    <span class="doccomment">/// function can bound their `Subscriber` type parameter with</span>
-    <span class="doccomment">/// ```rust,ignore</span>
-    <span class="doccomment">/// where S: Subscriber + for&lt;&#39;span&gt; LookupSpan&lt;&#39;span&gt;,</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// or similar.</span>
+    <span class="doccomment">/// &lt;div class=&quot;information&quot;&gt;</span>
+    <span class="doccomment">///     &lt;div class=&quot;tooltip ignore&quot; style=&quot;&quot;&gt;ⓘ&lt;span class=&quot;tooltiptext&quot;&gt;Note&lt;/span&gt;&lt;/div&gt;</span>
+    <span class="doccomment">/// &lt;/div&gt;</span>
+    <span class="doccomment">/// &lt;div class=&quot;example-wrap&quot; style=&quot;display:inline-block&quot;&gt;</span>
+    <span class="doccomment">/// &lt;pre class=&quot;ignore&quot; style=&quot;white-space:normal;font:inherit;&quot;&gt;</span>
+    <span class="doccomment">/// &lt;strong&gt;Note&lt;/strong&gt;: This requires the wrapped subscriber to implement the</span>
+    <span class="doccomment">/// &lt;a href=&quot;../registry/trait.LookupSpan.html&quot;&gt;&lt;code&gt;LookupSpan&lt;/code&gt;&lt;/a&gt; trait.</span>
+    <span class="doccomment">/// See the documentation on &lt;a href=&quot;./struct.Context.html&quot;&gt;&lt;code&gt;Context&lt;/code&gt;&#39;s</span>
+    <span class="doccomment">/// declaration&lt;/a&gt; for details.</span>
+    <span class="doccomment">/// &lt;/pre&gt;&lt;/div&gt;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [stored data]: ../registry/struct.SpanRef.html</span>
-    <span class="doccomment">/// [`LookupSpan`]: ../registry/trait.LookupSpan.html</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;registry&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;registry&quot;</span>)))]</span>
@@ -2094,21 +2388,23 @@
     }
 
     <span class="doccomment">/// Returns an iterator over the [stored data] for all the spans in the</span>
-    <span class="doccomment">/// current context, starting  the root of the trace tree and ending with</span>
+    <span class="doccomment">/// current context, starting the root of the trace tree and ending with</span>
     <span class="doccomment">/// the current span.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// If this iterator is empty, then there are no spans in the current context</span>
+    <span class="doccomment">/// If this iterator is empty, then there are no spans in the current context.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// **Note**: This requires the wrapped subscriber to implement the</span>
-    <span class="doccomment">/// [`LookupSpan`] trait. `Layer` implementations that wish to use this</span>
-    <span class="doccomment">/// function can bound their `Subscriber` type parameter with</span>
-    <span class="doccomment">/// ```rust,ignore</span>
-    <span class="doccomment">/// where S: Subscriber + for&lt;&#39;span&gt; LookupSpan&lt;&#39;span&gt;,</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// or similar.</span>
+    <span class="doccomment">/// &lt;div class=&quot;information&quot;&gt;</span>
+    <span class="doccomment">///     &lt;div class=&quot;tooltip ignore&quot; style=&quot;&quot;&gt;ⓘ&lt;span class=&quot;tooltiptext&quot;&gt;Note&lt;/span&gt;&lt;/div&gt;</span>
+    <span class="doccomment">/// &lt;/div&gt;</span>
+    <span class="doccomment">/// &lt;div class=&quot;example-wrap&quot; style=&quot;display:inline-block&quot;&gt;</span>
+    <span class="doccomment">/// &lt;pre class=&quot;ignore&quot; style=&quot;white-space:normal;font:inherit;&quot;&gt;</span>
+    <span class="doccomment">/// &lt;strong&gt;Note&lt;/strong&gt;: This requires the wrapped subscriber to implement the</span>
+    <span class="doccomment">/// &lt;a href=&quot;../registry/trait.LookupSpan.html&quot;&gt;&lt;code&gt;LookupSpan&lt;/code&gt;&lt;/a&gt; trait.</span>
+    <span class="doccomment">/// See the documentation on &lt;a href=&quot;./struct.Context.html&quot;&gt;&lt;code&gt;Context&lt;/code&gt;&#39;s</span>
+    <span class="doccomment">/// declaration&lt;/a&gt; for details.</span>
+    <span class="doccomment">/// &lt;/pre&gt;&lt;/div&gt;</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [stored data]: ../registry/struct.SpanRef.html</span>
-    <span class="doccomment">/// [`LookupSpan`]: ../registry/trait.LookupSpan.html</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;registry&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;registry&quot;</span>)))]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">scope</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Scope</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">S</span><span class="op">&gt;</span>
@@ -2283,9 +2579,9 @@
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="kw-2">&amp;</span><span class="ident">layer</span>.<span class="number">0</span>, <span class="string">&quot;layer_1&quot;</span>);
         <span class="kw">let</span> <span class="ident">layer</span> <span class="op">=</span> <span class="ident">Subscriber</span>::<span class="ident">downcast_ref</span>::<span class="op">&lt;</span><span class="ident">StringLayer2</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>).<span class="ident">expect</span>(<span class="string">&quot;layer 2 should downcast&quot;</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="kw-2">&amp;</span><span class="ident">layer</span>.<span class="number">0</span>, <span class="string">&quot;layer_2&quot;</span>);
-        <span class="kw">let</span> <span class="ident">layer</span> <span class="op">=</span> <span class="ident">Subscriber</span>::<span class="ident">downcast_ref</span>::<span class="op">&lt;</span><span class="ident">StringLayer3</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>).<span class="ident">expect</span>(<span class="string">&quot;layer 13 should downcast&quot;</span>);
+        <span class="kw">let</span> <span class="ident">layer</span> <span class="op">=</span> <span class="ident">Subscriber</span>::<span class="ident">downcast_ref</span>::<span class="op">&lt;</span><span class="ident">StringLayer3</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>).<span class="ident">expect</span>(<span class="string">&quot;layer 3 should downcast&quot;</span>);
         <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="kw-2">&amp;</span><span class="ident">layer</span>.<span class="number">0</span>, <span class="string">&quot;layer_3&quot;</span>);
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "tracing_subscriber";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "tracing_subscriber";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

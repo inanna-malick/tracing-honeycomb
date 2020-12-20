@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/pin-project-internal-0.4.17/src/pinned_drop.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>pinned_drop.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../pin_project_internal/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/pin-project-internal-0.4.27/src/pinned_drop.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>pinned_drop.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../pin_project_internal/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -189,6 +189,26 @@
 <span id="189">189</span>
 <span id="190">190</span>
 <span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">proc_macro2</span>::<span class="ident">TokenStream</span>;
 <span class="kw">use</span> <span class="ident">quote</span>::{<span class="ident">quote</span>, <span class="ident">ToTokens</span>};
@@ -198,23 +218,29 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">attribute</span>(<span class="ident">args</span>: <span class="kw-2">&amp;</span><span class="ident">TokenStream</span>, <span class="kw-2">mut</span> <span class="ident">input</span>: <span class="ident">ItemImpl</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">parse_as_empty</span>(<span class="ident">args</span>).<span class="ident">and_then</span>(<span class="op">|</span>()<span class="op">|</span> <span class="ident">parse</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">input</span>)) {
-        <span class="kw">let</span> <span class="ident">self_ty</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">input</span>.<span class="ident">self_ty</span>;
-        <span class="kw">let</span> (<span class="ident">impl_generics</span>, <span class="kw">_</span>, <span class="ident">where_clause</span>) <span class="op">=</span> <span class="ident">input</span>.<span class="ident">generics</span>.<span class="ident">split_for_impl</span>();
-
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tokens</span> <span class="op">=</span> <span class="ident">e</span>.<span class="ident">to_compile_error</span>();
-        <span class="comment">// Generate a dummy `PinnedDrop` implementation.</span>
-        <span class="comment">// In many cases, `#[pinned_drop] impl` is declared after `#[pin_project]`.</span>
-        <span class="comment">// Therefore, if `pinned_drop` compile fails, you will also get an error</span>
-        <span class="comment">// about `PinnedDrop` not being implemented.</span>
-        <span class="comment">// This can be prevented to some extent by generating a dummy</span>
-        <span class="comment">// `PinnedDrop` implementation.</span>
-        <span class="comment">// We already know that we will get a compile error, so this won&#39;t</span>
-        <span class="comment">// accidentally compile successfully.</span>
-        <span class="ident">tokens</span>.<span class="ident">extend</span>(<span class="macro">quote</span><span class="macro">!</span> {
-            <span class="kw">impl</span> #<span class="ident">impl_generics</span> ::<span class="ident">pin_project</span>::<span class="ident">__private</span>::<span class="ident">PinnedDrop</span> <span class="kw">for</span> #<span class="ident">self_ty</span> #<span class="ident">where_clause</span> {
-                <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">drop</span>(<span class="self">self</span>: ::<span class="ident">pin_project</span>::<span class="ident">__reexport</span>::<span class="ident">pin</span>::<span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>) {}
-            }
-        });
+        <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Type</span>::<span class="ident">Path</span>(<span class="ident">self_ty</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">input</span>.<span class="ident">self_ty</span> {
+            <span class="kw">let</span> (<span class="ident">impl_generics</span>, <span class="kw">_</span>, <span class="ident">where_clause</span>) <span class="op">=</span> <span class="ident">input</span>.<span class="ident">generics</span>.<span class="ident">split_for_impl</span>();
+
+            <span class="comment">// A dummy impl of `PinnedDrop`.</span>
+            <span class="comment">// In many cases, `#[pinned_drop] impl` is declared after `#[pin_project]`.</span>
+            <span class="comment">// Therefore, if `pinned_drop` compile fails, you will also get an error</span>
+            <span class="comment">// about `PinnedDrop` not being implemented.</span>
+            <span class="comment">// This can be prevented to some extent by generating a dummy</span>
+            <span class="comment">// `PinnedDrop` implementation.</span>
+            <span class="comment">// We already know that we will get a compile error, so this won&#39;t</span>
+            <span class="comment">// accidentally compile successfully.</span>
+            <span class="comment">//</span>
+            <span class="comment">// However, if `input.self_ty` is not Type::Path, there is a high possibility that</span>
+            <span class="comment">// the type does not exist, so do not generate a dummy impl.</span>
+            <span class="ident">tokens</span>.<span class="ident">extend</span>(<span class="macro">quote</span><span class="macro">!</span> {
+                <span class="kw">impl</span> #<span class="ident">impl_generics</span> ::<span class="ident">pin_project</span>::<span class="ident">__private</span>::<span class="ident">PinnedDrop</span> <span class="kw">for</span> #<span class="ident">self_ty</span>
+                #<span class="ident">where_clause</span>
+                {
+                    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">drop</span>(<span class="self">self</span>: ::<span class="ident">pin_project</span>::<span class="ident">__private</span>::<span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>) {}
+                }
+            });
+        }
         <span class="ident">tokens</span>
     } <span class="kw">else</span> {
         <span class="ident">input</span>.<span class="ident">into_token_stream</span>()
@@ -308,6 +334,16 @@
         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">error</span><span class="macro">!</span>(<span class="ident">item</span>, <span class="string">&quot;not all trait items implemented, missing: `drop`&quot;</span>));
     }
 
+    <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">item</span>.<span class="ident">self_ty</span> {
+        <span class="ident">Type</span>::<span class="ident">Path</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {}
+        <span class="ident">ty</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">error</span><span class="macro">!</span>(
+                <span class="ident">ty</span>,
+                <span class="string">&quot;implementing the trait `PinnedDrop` on this type is unsupported&quot;</span>
+            ));
+        }
+    }
+
     <span class="ident">item</span>.<span class="ident">items</span>
         .<span class="ident">iter</span>()
         .<span class="ident">enumerate</span>()
@@ -363,23 +399,27 @@
             <span class="ident">prepend_underscore_to_self</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ident</span>.<span class="ident">ident</span>);
         }
     }
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">visitor</span> <span class="op">=</span> <span class="ident">ReplaceReceiver</span>(<span class="kw-2">&amp;</span><span class="ident">item</span>.<span class="ident">self_ty</span>);
+    <span class="kw">let</span> <span class="ident">self_ty</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Type</span>::<span class="ident">Path</span>(<span class="ident">ty</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">item</span>.<span class="ident">self_ty</span> { <span class="ident">ty</span> } <span class="kw">else</span> { <span class="macro">unreachable</span><span class="macro">!</span>() };
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">visitor</span> <span class="op">=</span> <span class="ident">ReplaceReceiver</span>(<span class="ident">self_ty</span>);
     <span class="ident">visitor</span>.<span class="ident">visit_signature_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">drop_inner</span>.<span class="ident">sig</span>);
     <span class="ident">visitor</span>.<span class="ident">visit_block_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">drop_inner</span>.<span class="ident">block</span>);
 
     <span class="comment">// `fn drop(mut self: Pin&lt;&amp;mut Self&gt;)` -&gt; `unsafe fn drop(self: Pin&lt;&amp;mut Self&gt;)`</span>
-    <span class="ident">method</span>.<span class="ident">sig</span>.<span class="ident">unsafety</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">token</span>::<span class="ident">Unsafe</span>::<span class="ident">default</span>());
+    <span class="ident">method</span>.<span class="ident">sig</span>.<span class="ident">unsafety</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="op">&lt;</span><span class="macro">Token</span><span class="macro">!</span>[<span class="kw">unsafe</span>]<span class="op">&gt;</span>::<span class="ident">default</span>());
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">self_token</span> <span class="op">=</span> <span class="prelude-val">None</span>;
     <span class="kw">if</span> <span class="kw">let</span> <span class="ident">FnArg</span>::<span class="ident">Typed</span>(<span class="ident">arg</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">method</span>.<span class="ident">sig</span>.<span class="ident">inputs</span>[<span class="number">0</span>] {
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Pat</span>::<span class="ident">Ident</span>(<span class="ident">ident</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">arg</span>.<span class="ident">pat</span> {
             <span class="ident">ident</span>.<span class="ident">mutability</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+            <span class="ident">self_token</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">ident</span>.<span class="ident">ident</span>);
         }
     }
+    <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">self_token</span>.<span class="ident">is_some</span>());
 
-    <span class="ident">method</span>.<span class="ident">block</span>.<span class="ident">stmts</span> <span class="op">=</span> <span class="ident">syn</span>::<span class="macro">parse_quote</span><span class="macro">!</span> {
+    <span class="ident">method</span>.<span class="ident">block</span>.<span class="ident">stmts</span> <span class="op">=</span> <span class="macro">parse_quote</span><span class="macro">!</span> {
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy</span>::<span class="ident">needless_pass_by_value</span>)]</span> <span class="comment">// This lint does not warn the receiver.</span>
         #<span class="ident">drop_inner</span>
-        <span class="ident">__drop_inner</span>(<span class="self">self</span>);
+        <span class="ident">__drop_inner</span>(#<span class="ident">self_token</span>);
     };
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "pin_project_internal";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "pin_project_internal";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

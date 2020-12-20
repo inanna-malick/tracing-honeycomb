@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-subscriber-0.2.5/src/registry/sharded.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>sharded.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../tracing_subscriber/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-subscriber-0.2.15/src/registry/sharded.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>sharded.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../tracing_subscriber/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -726,8 +726,94 @@
 <span id="726">726</span>
 <span id="727">727</span>
 <span id="728">728</span>
+<span id="729">729</span>
+<span id="730">730</span>
+<span id="731">731</span>
+<span id="732">732</span>
+<span id="733">733</span>
+<span id="734">734</span>
+<span id="735">735</span>
+<span id="736">736</span>
+<span id="737">737</span>
+<span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
+<span id="747">747</span>
+<span id="748">748</span>
+<span id="749">749</span>
+<span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+<span id="763">763</span>
+<span id="764">764</span>
+<span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
+<span id="772">772</span>
+<span id="773">773</span>
+<span id="774">774</span>
+<span id="775">775</span>
+<span id="776">776</span>
+<span id="777">777</span>
+<span id="778">778</span>
+<span id="779">779</span>
+<span id="780">780</span>
+<span id="781">781</span>
+<span id="782">782</span>
+<span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
+<span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
+<span id="803">803</span>
+<span id="804">804</span>
+<span id="805">805</span>
+<span id="806">806</span>
+<span id="807">807</span>
+<span id="808">808</span>
+<span id="809">809</span>
+<span id="810">810</span>
+<span id="811">811</span>
+<span id="812">812</span>
+<span id="813">813</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">use</span> <span class="ident">sharded_slab</span>::{<span class="ident">Guard</span>, <span class="ident">Slab</span>};
+<span class="kw">use</span> <span class="ident">sharded_slab</span>::{<span class="ident">pool</span>::<span class="ident">Ref</span>, <span class="ident">Clear</span>, <span class="ident">Pool</span>};
+<span class="kw">use</span> <span class="ident">thread_local</span>::<span class="ident">ThreadLocal</span>;
 
 <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">stack</span>::<span class="ident">SpanStack</span>;
 <span class="kw">use</span> <span class="kw">crate</span>::{
@@ -755,7 +841,7 @@
 <span class="doccomment">/// instead, it collects and stores span data that is exposed to any `Layer`s</span>
 <span class="doccomment">/// wrapping it through implementations of the [`LookupSpan`] trait.</span>
 <span class="doccomment">/// The `Registry` is responsible for storing span metadata, recording</span>
-<span class="doccomment">/// relationships between spans, and tracking which spans  are active and whicb</span>
+<span class="doccomment">/// relationships between spans, and tracking which spans are active and whicb</span>
 <span class="doccomment">/// are closed. In addition, it provides a mechanism for `Layer`s to store</span>
 <span class="doccomment">/// user-defined per-span data, called [extensions], in the registry. This</span>
 <span class="doccomment">/// allows `Layer`-specific data to benefit from the `Registry`&#39;s</span>
@@ -775,7 +861,8 @@
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;registry&quot;</span>)))]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Registry</span> {
-    <span class="ident">spans</span>: <span class="ident">Slab</span><span class="op">&lt;</span><span class="ident">DataInner</span><span class="op">&gt;</span>,
+    <span class="ident">spans</span>: <span class="ident">Pool</span><span class="op">&lt;</span><span class="ident">DataInner</span><span class="op">&gt;</span>,
+    <span class="ident">current_spans</span>: <span class="ident">ThreadLocal</span><span class="op">&lt;</span><span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">SpanStack</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="doccomment">/// Span data stored in a [`Registry`].</span>
@@ -786,20 +873,29 @@
 <span class="doccomment">/// be stored in the [extensions] typemap.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// [`Registry`]: struct.Registry.html</span>
-<span class="doccomment">/// [`Layer`s]: ../trait.Layer.html</span>
-<span class="doccomment">/// [extensions]: extensions/index.html</span>
+<span class="doccomment">/// [`Layer`s]: ../layer/trait.Layer.html</span>
+<span class="doccomment">/// [extensions]: struct.Extensions.html</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;registry&quot;</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;registry&quot;</span>)))]</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Data</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="ident">inner</span>: <span class="ident">Guard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">DataInner</span><span class="op">&gt;</span>,
+    <span class="doccomment">/// Immutable reference to the pooled `DataInner` entry.</span>
+    <span class="ident">inner</span>: <span class="ident">Ref</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">DataInner</span><span class="op">&gt;</span>,
 }
 
+<span class="doccomment">/// Stored data associated with a span.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// This type is pooled using `sharded_slab::Pool`; when a span is dropped, the</span>
+<span class="doccomment">/// `DataInner` entry at that span&#39;s slab index is cleared in place and reused</span>
+<span class="doccomment">/// by a future span. Thus, the `Default` and `sharded_slab::Clear`</span>
+<span class="doccomment">/// implementations for this type are load-bearing.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">struct</span> <span class="ident">DataInner</span> {
     <span class="ident">metadata</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span>,
     <span class="ident">parent</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Id</span><span class="op">&gt;</span>,
     <span class="ident">ref_count</span>: <span class="ident">AtomicUsize</span>,
+    <span class="comment">// The span&#39;s `Extensions` typemap. Allocations for the `HashMap` backing</span>
+    <span class="comment">// this are pooled and reused in place.</span>
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">extensions</span>: <span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">ExtensionsInner</span><span class="op">&gt;</span>,
 }
 
@@ -807,7 +903,10 @@
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Registry</span> {
     <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="self">Self</span> { <span class="ident">spans</span>: <span class="ident">Slab</span>::<span class="ident">new</span>() }
+        <span class="self">Self</span> {
+            <span class="ident">spans</span>: <span class="ident">Pool</span>::<span class="ident">new</span>(),
+            <span class="ident">current_spans</span>: <span class="ident">ThreadLocal</span>::<span class="ident">new</span>(),
+        }
     }
 }
 
@@ -850,11 +949,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Registry</span> {
-    <span class="kw">fn</span> <span class="ident">insert</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">s</span>: <span class="ident">DataInner</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">spans</span>.<span class="ident">insert</span>(<span class="ident">s</span>)
-    }
-
-    <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">Id</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Guard</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">DataInner</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">Id</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ref</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">DataInner</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">spans</span>.<span class="ident">get</span>(<span class="ident">id_to_idx</span>(<span class="ident">id</span>))
     }
 
@@ -883,7 +978,6 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// [`CloseGuard`]: ./struct.CloseGuard.html</span>
     <span class="kw">static</span> <span class="ident">CLOSE_COUNT</span>: <span class="ident">Cell</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Cell</span>::<span class="ident">new</span>(<span class="number">0</span>);
-    <span class="kw">static</span> <span class="ident">CURRENT_SPANS</span>: <span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">SpanStack</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">RefCell</span>::<span class="ident">new</span>(<span class="ident">SpanStack</span>::<span class="ident">new</span>());
 }
 
 <span class="kw">impl</span> <span class="ident">Subscriber</span> <span class="kw">for</span> <span class="ident">Registry</span> {
@@ -905,13 +999,20 @@
             <span class="ident">attrs</span>.<span class="ident">parent</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">id</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">clone_span</span>(<span class="ident">id</span>))
         };
 
-        <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">DataInner</span> {
-            <span class="ident">metadata</span>: <span class="ident">attrs</span>.<span class="ident">metadata</span>(),
-            <span class="ident">parent</span>,
-            <span class="ident">ref_count</span>: <span class="ident">AtomicUsize</span>::<span class="ident">new</span>(<span class="number">1</span>),
-            <span class="ident">extensions</span>: <span class="ident">RwLock</span>::<span class="ident">new</span>(<span class="ident">ExtensionsInner</span>::<span class="ident">new</span>()),
-        };
-        <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">insert</span>(<span class="ident">s</span>).<span class="ident">expect</span>(<span class="string">&quot;Unable to allocate another span&quot;</span>);
+        <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">spans</span>
+            <span class="comment">// Check out a `DataInner` entry from the pool for the new span. If</span>
+            <span class="comment">// there are free entries already allocated in the pool, this will</span>
+            <span class="comment">// preferentially reuse one; otherwise, a new `DataInner` is</span>
+            <span class="comment">// allocated and added to the pool.</span>
+            .<span class="ident">create_with</span>(<span class="op">|</span><span class="ident">data</span><span class="op">|</span> {
+                <span class="ident">data</span>.<span class="ident">metadata</span> <span class="op">=</span> <span class="ident">attrs</span>.<span class="ident">metadata</span>();
+                <span class="ident">data</span>.<span class="ident">parent</span> <span class="op">=</span> <span class="ident">parent</span>;
+                <span class="kw">let</span> <span class="ident">refs</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">ref_count</span>.<span class="ident">get_mut</span>();
+                <span class="macro">debug_assert_eq</span><span class="macro">!</span>(<span class="kw-2">*</span><span class="ident">refs</span>, <span class="number">0</span>);
+                <span class="kw-2">*</span><span class="ident">refs</span> <span class="op">=</span> <span class="number">1</span>;
+            })
+            .<span class="ident">expect</span>(<span class="string">&quot;Unable to allocate another span&quot;</span>);
         <span class="ident">idx_to_id</span>(<span class="ident">id</span>)
     }
 
@@ -927,14 +1028,21 @@
     <span class="kw">fn</span> <span class="ident">event</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">Event</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) {}
 
     <span class="kw">fn</span> <span class="ident">enter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">span</span>::<span class="ident">Id</span>) {
-        <span class="ident">CURRENT_SPANS</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">spans</span><span class="op">|</span> {
-            <span class="ident">spans</span>.<span class="ident">borrow_mut</span>().<span class="ident">push</span>(<span class="self">self</span>.<span class="ident">clone_span</span>(<span class="ident">id</span>));
-        })
+        <span class="kw">if</span> <span class="self">self</span>
+            .<span class="ident">current_spans</span>
+            .<span class="ident">get_or_default</span>()
+            .<span class="ident">borrow_mut</span>()
+            .<span class="ident">push</span>(<span class="ident">id</span>.<span class="ident">clone</span>())
+        {
+            <span class="self">self</span>.<span class="ident">clone_span</span>(<span class="ident">id</span>);
+        }
     }
 
     <span class="kw">fn</span> <span class="ident">exit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">span</span>::<span class="ident">Id</span>) {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">id</span>) <span class="op">=</span> <span class="ident">CURRENT_SPANS</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">spans</span><span class="op">|</span> <span class="ident">spans</span>.<span class="ident">borrow_mut</span>().<span class="ident">pop</span>(<span class="ident">id</span>)) {
-            <span class="ident">dispatcher</span>::<span class="ident">get_default</span>(<span class="op">|</span><span class="ident">dispatch</span><span class="op">|</span> <span class="ident">dispatch</span>.<span class="ident">try_close</span>(<span class="ident">id</span>.<span class="ident">clone</span>()));
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">spans</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">current_spans</span>.<span class="ident">get</span>() {
+            <span class="kw">if</span> <span class="ident">spans</span>.<span class="ident">borrow_mut</span>().<span class="ident">pop</span>(<span class="ident">id</span>) {
+                <span class="ident">dispatcher</span>::<span class="ident">get_default</span>(<span class="op">|</span><span class="ident">dispatch</span><span class="op">|</span> <span class="ident">dispatch</span>.<span class="ident">try_close</span>(<span class="ident">id</span>.<span class="ident">clone</span>()));
+            }
         }
     }
 
@@ -945,16 +1053,21 @@
         <span class="comment">// Like `std::sync::Arc`, adds to the ref count (on clone) don&#39;t require</span>
         <span class="comment">// a strong ordering; if we call` clone_span`, the reference count must</span>
         <span class="comment">// always at least 1. The only synchronization necessary is between</span>
-        <span class="comment">// calls to `try_close`:  we have to ensure that all threads have</span>
+        <span class="comment">// calls to `try_close`: we have to ensure that all threads have</span>
         <span class="comment">// dropped their refs to the span before the span is closed.</span>
         <span class="kw">let</span> <span class="ident">refs</span> <span class="op">=</span> <span class="ident">span</span>.<span class="ident">ref_count</span>.<span class="ident">fetch_add</span>(<span class="number">1</span>, <span class="ident">Ordering</span>::<span class="ident">Relaxed</span>);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">refs</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>, <span class="string">&quot;tried to clone a span that already closed&quot;</span>);
+        <span class="macro">assert</span><span class="macro">!</span>(
+            <span class="ident">refs</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>,
+            <span class="string">&quot;tried to clone a span ({:?}) that already closed&quot;</span>,
+            <span class="ident">id</span>
+        );
         <span class="ident">id</span>.<span class="ident">clone</span>()
     }
 
     <span class="kw">fn</span> <span class="ident">current_span</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Current</span> {
-        <span class="ident">CURRENT_SPANS</span>
-            .<span class="ident">with</span>(<span class="op">|</span><span class="ident">spans</span><span class="op">|</span> {
+        <span class="self">self</span>.<span class="ident">current_spans</span>
+            .<span class="ident">get</span>()
+            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">spans</span><span class="op">|</span> {
                 <span class="kw">let</span> <span class="ident">spans</span> <span class="op">=</span> <span class="ident">spans</span>.<span class="ident">borrow</span>();
                 <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">spans</span>.<span class="ident">current</span>()<span class="question-mark">?</span>;
                 <span class="kw">let</span> <span class="ident">span</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get</span>(<span class="ident">id</span>)<span class="question-mark">?</span>;
@@ -999,34 +1112,7 @@
     }
 }
 
-<span class="comment">// === impl DataInner ===</span>
-
-<span class="kw">impl</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">DataInner</span> {
-    <span class="comment">// A span is not considered closed until all of its children have closed.</span>
-    <span class="comment">// Therefore, each span&#39;s `DataInner` holds a &quot;reference&quot; to the parent</span>
-    <span class="comment">// span, keeping the parent span open until all its children have closed.</span>
-    <span class="comment">// When we close a span, we must then decrement the parent&#39;s ref count</span>
-    <span class="comment">// (potentially, allowing it to close, if this child is the last reference</span>
-    <span class="comment">// to that span).</span>
-    <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
-        <span class="comment">// We have to actually unpack the option inside the `get_default`</span>
-        <span class="comment">// closure, since it is a `FnMut`, but testing that there _is_ a value</span>
-        <span class="comment">// here lets us avoid the thread-local access if we don&#39;t need the</span>
-        <span class="comment">// dispatcher at all.</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">parent</span>.<span class="ident">is_some</span>() {
-            <span class="comment">// Note that --- because `Layered::try_close` works by calling</span>
-            <span class="comment">// `try_close` on the inner subscriber and using the return value to</span>
-            <span class="comment">// determine whether to call the `Layer`&#39;s `on_close` callback ---</span>
-            <span class="comment">// we must call `try_close` on the entire subscriber stack, rather</span>
-            <span class="comment">// than just on the registry. If the registry called `try_close` on</span>
-            <span class="comment">// itself directly, the layers wouldn&#39;t see the close notification.</span>
-            <span class="kw">let</span> <span class="ident">subscriber</span> <span class="op">=</span> <span class="ident">dispatcher</span>::<span class="ident">get_default</span>(<span class="ident">Dispatch</span>::<span class="ident">clone</span>);
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">parent</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">parent</span>.<span class="ident">take</span>() {
-                <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">subscriber</span>.<span class="ident">try_close</span>(<span class="ident">parent</span>);
-            }
-        }
-    }
-}
+<span class="comment">// === impl CloseGuard ===</span>
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">CloseGuard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">is_closing</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
@@ -1053,7 +1139,7 @@
             <span class="comment">// `on_close` call. If the span is closing, it&#39;s okay to remove the</span>
             <span class="comment">// span.</span>
             <span class="kw">if</span> <span class="ident">c</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span> <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="self">self</span>.<span class="ident">is_closing</span> {
-                <span class="self">self</span>.<span class="ident">registry</span>.<span class="ident">spans</span>.<span class="ident">remove</span>(<span class="ident">id_to_idx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">id</span>));
+                <span class="self">self</span>.<span class="ident">registry</span>.<span class="ident">spans</span>.<span class="ident">clear</span>(<span class="ident">id_to_idx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">id</span>));
             }
         });
     }
@@ -1080,6 +1166,90 @@
 
     <span class="kw">fn</span> <span class="ident">extensions_mut</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ExtensionsMut</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
         <span class="ident">ExtensionsMut</span>::<span class="ident">new</span>(<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">extensions</span>.<span class="ident">write</span>().<span class="ident">expect</span>(<span class="string">&quot;Mutex poisoned&quot;</span>))
+    }
+}
+
+<span class="comment">// === impl DataInner ===</span>
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">DataInner</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="comment">// Since `DataInner` owns a `&amp;&#39;static Callsite` pointer, we need</span>
+        <span class="comment">// something to use as the initial default value for that callsite.</span>
+        <span class="comment">// Since we can&#39;t access a `DataInner` until it has had actual span data</span>
+        <span class="comment">// inserted into it, the null metadata will never actually be accessed.</span>
+        <span class="kw">struct</span> <span class="ident">NullCallsite</span>;
+        <span class="kw">impl</span> <span class="ident">tracing_core</span>::<span class="ident">callsite</span>::<span class="ident">Callsite</span> <span class="kw">for</span> <span class="ident">NullCallsite</span> {
+            <span class="kw">fn</span> <span class="ident">set_interest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="ident">Interest</span>) {
+                <span class="macro">unreachable</span><span class="macro">!</span>(
+                    <span class="string">&quot;/!\\ Tried to register the null callsite /!\\\n \
+                    This should never have happened and is definitely a bug. \
+                    A `tracing` bug report would be appreciated.&quot;</span>
+                )
+            }
+
+            <span class="kw">fn</span> <span class="ident">metadata</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
+                <span class="macro">unreachable</span><span class="macro">!</span>(
+                    <span class="string">&quot;/!\\ Tried to access the null callsite&#39;s metadata /!\\\n \
+                    This should never have happened and is definitely a bug. \
+                    A `tracing` bug report would be appreciated.&quot;</span>
+                )
+            }
+        }
+
+        <span class="kw">static</span> <span class="ident">NULL_CALLSITE</span>: <span class="ident">NullCallsite</span> <span class="op">=</span> <span class="ident">NullCallsite</span>;
+        <span class="kw">static</span> <span class="ident">NULL_METADATA</span>: <span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">tracing_core</span>::<span class="macro">metadata</span><span class="macro">!</span> {
+            <span class="ident">name</span>: <span class="string">&quot;&quot;</span>,
+            <span class="ident">target</span>: <span class="string">&quot;&quot;</span>,
+            <span class="ident">level</span>: <span class="ident">tracing_core</span>::<span class="ident">Level</span>::<span class="ident">TRACE</span>,
+            <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[],
+            <span class="ident">callsite</span>: <span class="kw-2">&amp;</span><span class="ident">NULL_CALLSITE</span>,
+            <span class="ident">kind</span>: <span class="ident">tracing_core</span>::<span class="ident">metadata</span>::<span class="ident">Kind</span>::<span class="ident">SPAN</span>,
+        };
+
+        <span class="self">Self</span> {
+            <span class="ident">metadata</span>: <span class="kw-2">&amp;</span><span class="ident">NULL_METADATA</span>,
+            <span class="ident">parent</span>: <span class="prelude-val">None</span>,
+            <span class="ident">ref_count</span>: <span class="ident">AtomicUsize</span>::<span class="ident">new</span>(<span class="number">0</span>),
+            <span class="ident">extensions</span>: <span class="ident">RwLock</span>::<span class="ident">new</span>(<span class="ident">ExtensionsInner</span>::<span class="ident">new</span>()),
+        }
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">Clear</span> <span class="kw">for</span> <span class="ident">DataInner</span> {
+    <span class="doccomment">/// Clears the span&#39;s data in place, dropping the parent&#39;s reference count.</span>
+    <span class="kw">fn</span> <span class="ident">clear</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="comment">// A span is not considered closed until all of its children have closed.</span>
+        <span class="comment">// Therefore, each span&#39;s `DataInner` holds a &quot;reference&quot; to the parent</span>
+        <span class="comment">// span, keeping the parent span open until all its children have closed.</span>
+        <span class="comment">// When we close a span, we must then decrement the parent&#39;s ref count</span>
+        <span class="comment">// (potentially, allowing it to close, if this child is the last reference</span>
+        <span class="comment">// to that span).</span>
+        <span class="comment">// We have to actually unpack the option inside the `get_default`</span>
+        <span class="comment">// closure, since it is a `FnMut`, but testing that there _is_ a value</span>
+        <span class="comment">// here lets us avoid the thread-local access if we don&#39;t need the</span>
+        <span class="comment">// dispatcher at all.</span>
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">parent</span>.<span class="ident">is_some</span>() {
+            <span class="comment">// Note that --- because `Layered::try_close` works by calling</span>
+            <span class="comment">// `try_close` on the inner subscriber and using the return value to</span>
+            <span class="comment">// determine whether to call the `Layer`&#39;s `on_close` callback ---</span>
+            <span class="comment">// we must call `try_close` on the entire subscriber stack, rather</span>
+            <span class="comment">// than just on the registry. If the registry called `try_close` on</span>
+            <span class="comment">// itself directly, the layers wouldn&#39;t see the close notification.</span>
+            <span class="kw">let</span> <span class="ident">subscriber</span> <span class="op">=</span> <span class="ident">dispatcher</span>::<span class="ident">get_default</span>(<span class="ident">Dispatch</span>::<span class="ident">clone</span>);
+            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">parent</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">parent</span>.<span class="ident">take</span>() {
+                <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">subscriber</span>.<span class="ident">try_close</span>(<span class="ident">parent</span>);
+            }
+        }
+
+        <span class="comment">// Clear (but do not deallocate!) the pooled `HashMap` for the span&#39;s extensions.</span>
+        <span class="self">self</span>.<span class="ident">extensions</span>
+            .<span class="ident">get_mut</span>()
+            .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">l</span><span class="op">|</span> {
+                <span class="comment">// This function can be called in a `Drop` impl, such as while</span>
+                <span class="comment">// panicking, so ignore lock poisoning.</span>
+                <span class="ident">l</span>.<span class="ident">into_inner</span>()
+            })
+            .<span class="ident">clear</span>();
     }
 }
 
@@ -1456,4 +1626,4 @@
     }
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "tracing_subscriber";</script><script src="../../../aliases.js"></script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "tracing_subscriber";</script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>

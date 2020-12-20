@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.14/src/dispatcher.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>dispatcher.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-0.1.22/src/dispatcher.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>dispatcher.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -150,7 +150,6 @@
 <span id="150">150</span>
 <span id="151">151</span>
 <span id="152">152</span>
-<span id="153">153</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Dispatches trace events to [`Subscriber`]s.</span>
 <span class="doccomment">//!</span>
@@ -261,17 +260,16 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // `my_subscriber` is now the default</span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! **Note**: the thread-local scoped dispatcher (`with_default`) requires the</span>
-<span class="doccomment">//! Rust standard library. `no_std` users should use [`set_global_default`]</span>
+<span class="doccomment">//! &lt;div class=&quot;information&quot;&gt;</span>
+<span class="doccomment">//!     &lt;div class=&quot;tooltip ignore&quot; style=&quot;&quot;&gt;ⓘ&lt;span class=&quot;tooltiptext&quot;&gt;Note&lt;/span&gt;&lt;/div&gt;</span>
+<span class="doccomment">//! &lt;/div&gt;</span>
+<span class="doccomment">//! &lt;div class=&quot;example-wrap&quot; style=&quot;display:inline-block&quot;&gt;</span>
+<span class="doccomment">//! &lt;pre class=&quot;ignore&quot; style=&quot;white-space:normal;font:inherit;&quot;&gt;</span>
+<span class="doccomment">//! &lt;strong&gt;Note&lt;/strong&gt;: The thread-local scoped dispatcher (&lt;code&gt;with_default&lt;/code&gt;)</span>
+<span class="doccomment">//! requires the Rust standard library. &lt;code&gt;no_std&lt;/code&gt; users should</span>
+<span class="doccomment">//! use &lt;a href=&quot;fn.set_global_default.html&quot;&gt;&lt;code&gt;set_global_default&lt;/code&gt;&lt;/a&gt;</span>
 <span class="doccomment">//! instead.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Finally, `tokio` users should note that versions of `tokio` &gt;= 0.1.22</span>
-<span class="doccomment">//! support an `experimental-tracing` feature flag. When this flag is enabled,</span>
-<span class="doccomment">//! the `tokio` runtime&#39;s thread pool will automatically propagate the default</span>
-<span class="doccomment">//! subscriber. This means that if `tokio::runtime::Runtime::new()` or</span>
-<span class="doccomment">//! `tokio::run()` are invoked when a default subscriber is set, it will also be</span>
-<span class="doccomment">//! set by all worker threads created by that runtime.</span>
+<span class="doccomment">//! &lt;/pre&gt;&lt;/div&gt;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ## Accessing the Default Subscriber</span>
 <span class="doccomment">//!</span>
@@ -306,4 +304,4 @@
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">tracing_core</span>::<span class="ident">dispatcher</span>::<span class="ident">has_been_set</span>;
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "tracing";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "tracing";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

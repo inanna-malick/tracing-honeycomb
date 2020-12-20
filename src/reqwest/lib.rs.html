@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/reqwest-0.9.17/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../reqwest/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/reqwest-0.10.10/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../reqwest/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -318,27 +318,11 @@
 <span id="318">318</span>
 <span id="319">319</span>
 <span id="320">320</span>
-<span id="321">321</span>
-<span id="322">322</span>
-<span id="323">323</span>
-<span id="324">324</span>
-<span id="325">325</span>
-<span id="326">326</span>
-<span id="327">327</span>
-<span id="328">328</span>
-<span id="329">329</span>
-<span id="330">330</span>
-<span id="331">331</span>
-<span id="332">332</span>
-<span id="333">333</span>
-<span id="334">334</span>
-<span id="335">335</span>
-<span id="336">336</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_docs</span>)]</span>
 <span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_debug_implementations</span>)]</span>
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">test</span>, <span class="ident">deny</span>(<span class="ident">warnings</span>))]</span>
-<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/reqwest/0.9.17&quot;</span>)]</span>
+<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/reqwest/0.10.10&quot;</span>)]</span>
 
 <span class="doccomment">//! # reqwest</span>
 <span class="doccomment">//!</span>
@@ -348,20 +332,16 @@
 <span class="doccomment">//! It handles many of the things that most people just expect an HTTP client</span>
 <span class="doccomment">//! to do for them.</span>
 <span class="doccomment">//!</span>
+<span class="doccomment">//! - Async and [blocking](blocking) Clients</span>
 <span class="doccomment">//! - Plain bodies, [JSON](#json), [urlencoded](#forms), [multipart](multipart)</span>
-<span class="doccomment">//! - Customizable [redirect policy](#redirect-policy)</span>
+<span class="doccomment">//! - Customizable [redirect policy](#redirect-policies)</span>
 <span class="doccomment">//! - HTTP [Proxies](#proxies)</span>
 <span class="doccomment">//! - Uses system-native [TLS](#tls)</span>
 <span class="doccomment">//! - Cookies</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! The rudimentary cookie support means that the cookies need to be manually</span>
-<span class="doccomment">//! configured for every single request. In other words, there&#39;s no cookie jar</span>
-<span class="doccomment">//! support as of now. The tracking issue for this feature is available</span>
-<span class="doccomment">//! [on GitHub][cookiejar_issue].</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! The [`reqwest::Client`][client] is synchronous, making it a great fit for</span>
-<span class="doccomment">//! applications that only require a few HTTP requests, and wish to handle</span>
-<span class="doccomment">//! them synchronously.</span>
+<span class="doccomment">//! The [`reqwest::Client`][client] is asynchronous. For applications wishing</span>
+<span class="doccomment">//! to only make a few HTTP requests, the [`reqwest::blocking`](blocking) API</span>
+<span class="doccomment">//! may be more convenient.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Additional learning resources include:</span>
 <span class="doccomment">//!</span>
@@ -373,21 +353,16 @@
 <span class="doccomment">//! For a single request, you can use the [`get`][get] shortcut method.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! # use reqwest::{Error, Response};</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # fn run() -&gt; Result&lt;(), Error&gt; {</span>
-<span class="doccomment">//! let body = reqwest::get(&quot;https://www.rust-lang.org&quot;)?</span>
-<span class="doccomment">//!     .text()?;</span>
+<span class="doccomment">//! # async fn run() -&gt; Result&lt;(), reqwest::Error&gt; {</span>
+<span class="doccomment">//! let body = reqwest::get(&quot;https://www.rust-lang.org&quot;)</span>
+<span class="doccomment">//!     .await?</span>
+<span class="doccomment">//!     .text()</span>
+<span class="doccomment">//!     .await?;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! println!(&quot;body = {:?}&quot;, body);</span>
 <span class="doccomment">//! # Ok(())</span>
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Additionally, reqwest&#39;s [`Response`][response] struct implements Rust&#39;s</span>
-<span class="doccomment">//! `Read` trait, so many useful standard library and third party crates will</span>
-<span class="doccomment">//! have convenience methods that take a `Response` anywhere `T: Read` is</span>
-<span class="doccomment">//! acceptable.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! **NOTE**: If you plan to perform multiple requests, it is best to create a</span>
 <span class="doccomment">//! [`Client`][client] and reuse it, taking advantage of keep-alive connection</span>
@@ -399,16 +374,17 @@
 <span class="doccomment">//! by using the `body()` method of a [`RequestBuilder`][builder]. This lets you set the</span>
 <span class="doccomment">//! exact raw bytes of what the body should be. It accepts various types,</span>
 <span class="doccomment">//! including `String`, `Vec&lt;u8&gt;`, and `File`. If you wish to pass a custom</span>
-<span class="doccomment">//! Reader, you can use the `reqwest::Body::new()` constructor.</span>
+<span class="doccomment">//! type, you can use the `reqwest::Body` constructors.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust</span>
 <span class="doccomment">//! # use reqwest::Error;</span>
 <span class="doccomment">//! #</span>
-<span class="doccomment">//! # fn run() -&gt; Result&lt;(), Error&gt; {</span>
+<span class="doccomment">//! # async fn run() -&gt; Result&lt;(), Error&gt; {</span>
 <span class="doccomment">//! let client = reqwest::Client::new();</span>
 <span class="doccomment">//! let res = client.post(&quot;http://httpbin.org/post&quot;)</span>
 <span class="doccomment">//!     .body(&quot;the exact body that is sent&quot;)</span>
-<span class="doccomment">//!     .send()?;</span>
+<span class="doccomment">//!     .send()</span>
+<span class="doccomment">//!     .await?;</span>
 <span class="doccomment">//! # Ok(())</span>
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
@@ -424,13 +400,14 @@
 <span class="doccomment">//! ```rust</span>
 <span class="doccomment">//! # use reqwest::Error;</span>
 <span class="doccomment">//! #</span>
-<span class="doccomment">//! # fn run() -&gt; Result&lt;(), Error&gt; {</span>
+<span class="doccomment">//! # async fn run() -&gt; Result&lt;(), Error&gt; {</span>
 <span class="doccomment">//! // This will POST a body of `foo=bar&amp;baz=quux`</span>
 <span class="doccomment">//! let params = [(&quot;foo&quot;, &quot;bar&quot;), (&quot;baz&quot;, &quot;quux&quot;)];</span>
 <span class="doccomment">//! let client = reqwest::Client::new();</span>
 <span class="doccomment">//! let res = client.post(&quot;http://httpbin.org/post&quot;)</span>
 <span class="doccomment">//!     .form(&amp;params)</span>
-<span class="doccomment">//!     .send()?;</span>
+<span class="doccomment">//!     .send()</span>
+<span class="doccomment">//!     .await?;</span>
 <span class="doccomment">//! # Ok(())</span>
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
@@ -439,13 +416,14 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! There is also a `json` method helper on the [`RequestBuilder`][builder] that works in</span>
 <span class="doccomment">//! a similar fashion the `form` method. It can take any value that can be</span>
-<span class="doccomment">//! serialized into JSON.</span>
+<span class="doccomment">//! serialized into JSON. The feature `json` is required.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust</span>
 <span class="doccomment">//! # use reqwest::Error;</span>
 <span class="doccomment">//! # use std::collections::HashMap;</span>
 <span class="doccomment">//! #</span>
-<span class="doccomment">//! # fn run() -&gt; Result&lt;(), Error&gt; {</span>
+<span class="doccomment">//! # #[cfg(feature = &quot;json&quot;)]</span>
+<span class="doccomment">//! # async fn run() -&gt; Result&lt;(), Error&gt; {</span>
 <span class="doccomment">//! // This will POST a body of `{&quot;lang&quot;:&quot;rust&quot;,&quot;body&quot;:&quot;json&quot;}`</span>
 <span class="doccomment">//! let mut map = HashMap::new();</span>
 <span class="doccomment">//! map.insert(&quot;lang&quot;, &quot;rust&quot;);</span>
@@ -454,21 +432,41 @@
 <span class="doccomment">//! let client = reqwest::Client::new();</span>
 <span class="doccomment">//! let res = client.post(&quot;http://httpbin.org/post&quot;)</span>
 <span class="doccomment">//!     .json(&amp;map)</span>
-<span class="doccomment">//!     .send()?;</span>
+<span class="doccomment">//!     .send()</span>
+<span class="doccomment">//!     .await?;</span>
 <span class="doccomment">//! # Ok(())</span>
 <span class="doccomment">//! # }</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ## Redirect Policies</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! By default, a `Client` will automatically handle HTTP redirects, detecting</span>
-<span class="doccomment">//! loops, and having a maximum redirect chain of 10 hops. To customize this</span>
-<span class="doccomment">//! behavior, a [`RedirectPolicy`][redirect] can used with a `ClientBuilder`.</span>
+<span class="doccomment">//! By default, a `Client` will automatically handle HTTP redirects, having a</span>
+<span class="doccomment">//! maximum redirect chain of 10 hops. To customize this behavior, a</span>
+<span class="doccomment">//! [`redirect::Policy`][redirect] can be used with a `ClientBuilder`.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Cookies</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The automatic storing and sending of session cookies can be enabled with</span>
+<span class="doccomment">//! the [`cookie_store`][ClientBuilder::cookie_store] method on `ClientBuilder`.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ## Proxies</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! A `Client` can be configured to make use of HTTP proxies by adding</span>
-<span class="doccomment">//! [`Proxy`](Proxy)s to a `ClientBuilder`.</span>
+<span class="doccomment">//! **NOTE**: System proxies are enabled by default.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! System proxies look in environment variables to set HTTP or HTTPS proxies.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! `HTTP_PROXY` or `http_proxy` provide http proxies for http connections while</span>
+<span class="doccomment">//! `HTTPS_PROXY` or `https_proxy` provide HTTPS proxies for HTTPS connections.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! These can be overwritten by adding a [`Proxy`](Proxy) to `ClientBuilder`</span>
+<span class="doccomment">//! i.e. `let proxy = reqwest::Proxy::http(&quot;https://secure.example&quot;)?;`</span>
+<span class="doccomment">//! or disabled by calling `ClientBuilder::no_proxy()`.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! `socks` feature is required if you have configured socks proxy like this:</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ```bash</span>
+<span class="doccomment">//! export https_proxy=socks5://127.0.0.1:1086</span>
+<span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ## TLS</span>
 <span class="doccomment">//!</span>
@@ -488,135 +486,66 @@
 <span class="doccomment">//! The following are a list of [Cargo features][cargo-features] that can be</span>
 <span class="doccomment">//! enabled or disabled:</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! - **default-tls** *(enabled by default)*: Provides TLS support via the</span>
-<span class="doccomment">//!   `native-tls` library to connect over HTTPS.</span>
-<span class="doccomment">//! - **default-tls-vendored**: Enables the `vendored` feature of `native-tls`.</span>
-<span class="doccomment">//! - **rustls-tls**: Provides TLS support via the `rustls` library.</span>
+<span class="doccomment">//! - **default-tls** *(enabled by default)*: Provides TLS support to connect</span>
+<span class="doccomment">//!   over HTTPS.</span>
+<span class="doccomment">//! - **native-tls**: Enables TLS functionality provided by `native-tls`.</span>
+<span class="doccomment">//! - **native-tls-vendored**: Enables the `vendored` feature of `native-tls`.</span>
+<span class="doccomment">//! - **rustls-tls**: Enables TLS functionality provided by `rustls`.</span>
+<span class="doccomment">//!   Equivalent to `rustls-tls-webpki-roots`.</span>
+<span class="doccomment">//! - **rustls-tls-manual-roots**: Enables TLS functionality provided by `rustls`,</span>
+<span class="doccomment">//!   without setting any root certificates. Roots have to be specified manually.</span>
+<span class="doccomment">//! - **rustls-tls-webpki-roots**: Enables TLS functionality provided by `rustls`,</span>
+<span class="doccomment">//!   while using root certificates from the `webpki-roots` crate.</span>
+<span class="doccomment">//! - **rustls-tls-native-roots**: Enables TLS functionality provided by `rustls`,</span>
+<span class="doccomment">//!   while using root certificates from the `rustls-native-certs` crate.</span>
+<span class="doccomment">//! - **blocking**: Provides the [blocking][] client API.</span>
+<span class="doccomment">//! - **cookies**: Provides cookie session support.</span>
+<span class="doccomment">//! - **gzip**: Provides response body gzip decompression.</span>
+<span class="doccomment">//! - **brotli**: Provides response body brotli decompression.</span>
+<span class="doccomment">//! - **json**: Provides serialization and deserialization for JSON bodies.</span>
+<span class="doccomment">//! - **stream**: Adds support for `futures::Stream`.</span>
 <span class="doccomment">//! - **socks**: Provides SOCKS5 proxy support.</span>
 <span class="doccomment">//! - **trust-dns**: Enables a trust-dns async resolver instead of default</span>
 <span class="doccomment">//!   threadpool using `getaddrinfo`.</span>
-<span class="doccomment">//! - **hyper-011**: Provides support for hyper&#39;s old typed headers.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [hyper]: http://hyper.rs</span>
+<span class="doccomment">//! [blocking]: ./blocking/index.html</span>
 <span class="doccomment">//! [client]: ./struct.Client.html</span>
 <span class="doccomment">//! [response]: ./struct.Response.html</span>
 <span class="doccomment">//! [get]: ./fn.get.html</span>
 <span class="doccomment">//! [builder]: ./struct.RequestBuilder.html</span>
 <span class="doccomment">//! [serde]: http://serde.rs</span>
-<span class="doccomment">//! [cookiejar_issue]: https://github.com/seanmonstar/reqwest/issues/14</span>
-<span class="doccomment">//! [redirect]: ./struct.RedirectPolicy.html</span>
+<span class="doccomment">//! [redirect]: crate::redirect</span>
 <span class="doccomment">//! [Proxy]: ./struct.Proxy.html</span>
 <span class="doccomment">//! [cargo-features]: https://doc.rust-lang.org/stable/cargo/reference/manifest.html#the-features-section</span>
 
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">base64</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">bytes</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">cookie</span> <span class="kw">as</span> <span class="ident">cookie_crate</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">cookie_store</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">encoding_rs</span>;
-<span class="attribute">#[<span class="ident">macro_use</span>]</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">futures</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">http</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">hyper</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;hyper-011&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">hyper_old_types</span> <span class="kw">as</span> <span class="ident">hyper_011</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;default-tls&quot;</span>)]</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">hyper_tls</span>;
-<span class="attribute">#[<span class="ident">macro_use</span>]</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">log</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">flate2</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">mime</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">mime_guess</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;default-tls&quot;</span>)]</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">native_tls</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">serde</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="attribute">#[<span class="ident">macro_use</span>]</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">serde_derive</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">serde_json</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">serde_urlencoded</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">time</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">tokio</span>;
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;default-tls&quot;</span>, <span class="ident">macro_use</span>)]</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">tokio_io</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">tokio_timer</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;trust-dns&quot;</span>)]</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">trust_dns_resolver</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">url</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">uuid</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;socks&quot;</span>)]</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">socks</span>;
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">if_wasm</span> {
+    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">item</span>:<span class="ident">item</span>)<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {$(
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;wasm32&quot;</span>)]</span>
+        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">item</span>
+    )<span class="kw-2">*</span>}
+}
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rustls-tls&quot;</span>)]</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">hyper_rustls</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rustls-tls&quot;</span>)]</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">tokio_rustls</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rustls-tls&quot;</span>)]</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">webpki_roots</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rustls-tls&quot;</span>)]</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">rustls</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="attribute">#[<span class="ident">macro_use</span>]</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">doc_comment</span>;
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">if_hyper</span> {
+    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">item</span>:<span class="ident">item</span>)<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {$(
+        <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;wasm32&quot;</span>))]</span>
+        <span class="macro-nonterminal">$</span><span class="macro-nonterminal">item</span>
+    )<span class="kw-2">*</span>}
+}
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="macro">doctest</span><span class="macro">!</span>(<span class="string">&quot;../README.md&quot;</span>);
-
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">hyper</span>::<span class="ident">header</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">hyper</span>::<span class="ident">Method</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">hyper</span>::{<span class="ident">StatusCode</span>, <span class="ident">Version</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">http</span>::<span class="ident">header</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">http</span>::<span class="ident">Method</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">http</span>::{<span class="ident">StatusCode</span>, <span class="ident">Version</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">url</span>::<span class="ident">Url</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">url</span>::<span class="ident">ParseError</span> <span class="kw">as</span> <span class="ident">UrlError</span>;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">client</span>::{<span class="ident">Client</span>, <span class="ident">ClientBuilder</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">error</span>::{<span class="ident">Error</span>, <span class="prelude-ty">Result</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">body</span>::<span class="ident">Body</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">into_url</span>::<span class="ident">IntoUrl</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">proxy</span>::<span class="ident">Proxy</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">redirect</span>::{<span class="ident">RedirectAction</span>, <span class="ident">RedirectAttempt</span>, <span class="ident">RedirectPolicy</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">request</span>::{<span class="ident">Request</span>, <span class="ident">RequestBuilder</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">response</span>::<span class="ident">Response</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tls&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">tls</span>::{<span class="ident">Certificate</span>, <span class="ident">Identity</span>};
-
-
-<span class="comment">// this module must be first because of the `try_` macro</span>
+<span class="comment">// universal mods</span>
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
 <span class="kw">mod</span> <span class="ident">error</span>;
-
-<span class="kw">mod</span> <span class="ident">async_impl</span>;
-<span class="kw">mod</span> <span class="ident">connect</span>;
-<span class="kw">mod</span> <span class="ident">body</span>;
-<span class="kw">mod</span> <span class="ident">client</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">cookie</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;trust-dns&quot;</span>)]</span>
-<span class="kw">mod</span> <span class="ident">dns</span>;
 <span class="kw">mod</span> <span class="ident">into_url</span>;
-<span class="kw">mod</span> <span class="ident">proxy</span>;
-<span class="kw">mod</span> <span class="ident">redirect</span>;
-<span class="kw">mod</span> <span class="ident">request</span>;
-<span class="kw">mod</span> <span class="ident">response</span>;
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tls&quot;</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tls</span>;
-<span class="kw">mod</span> <span class="ident">wait</span>;
 
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">multipart</span>;
-
-<span class="doccomment">/// An &#39;async&#39; implementation of the reqwest `Client`.</span>
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">async</span> {
-    <span class="kw">pub</span> <span class="kw">use</span> ::<span class="ident">async_impl</span>::{
-        <span class="ident">Body</span>,
-        <span class="ident">Chunk</span>,
-        <span class="ident">Decoder</span>,
-        <span class="ident">Client</span>,
-        <span class="ident">ClientBuilder</span>,
-        <span class="ident">Request</span>,
-        <span class="ident">RequestBuilder</span>,
-        <span class="ident">Response</span>,
-        <span class="ident">ResponseBuilderExt</span>,
-        <span class="ident">multipart</span>
-    };
-}
+<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">error</span>::{<span class="ident">Error</span>, <span class="prelude-ty">Result</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">into_url</span>::<span class="ident">IntoUrl</span>;
 
 <span class="doccomment">/// Shortcut method to quickly make a `GET` request.</span>
 <span class="doccomment">///</span>
@@ -630,12 +559,11 @@
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```rust</span>
-<span class="doccomment">/// # fn run() -&gt; Result&lt;(), reqwest::Error&gt; {</span>
-<span class="doccomment">/// let body = reqwest::get(&quot;https://www.rust-lang.org&quot;)?</span>
-<span class="doccomment">///     .text()?;</span>
+<span class="doccomment">/// # async fn run() -&gt; Result&lt;(), reqwest::Error&gt; {</span>
+<span class="doccomment">/// let body = reqwest::get(&quot;https://www.rust-lang.org&quot;).await?</span>
+<span class="doccomment">///     .text().await?;</span>
 <span class="doccomment">/// # Ok(())</span>
 <span class="doccomment">/// # }</span>
-<span class="doccomment">/// # fn main() { }</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Errors</span>
@@ -645,13 +573,9 @@
 <span class="doccomment">/// - native TLS backend cannot be initialized</span>
 <span class="doccomment">/// - supplied `Url` cannot be parsed</span>
 <span class="doccomment">/// - there was an error while sending request</span>
-<span class="doccomment">/// - redirect loop was detected</span>
 <span class="doccomment">/// - redirect limit was exhausted</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">IntoUrl</span><span class="op">&gt;</span>(<span class="ident">url</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> ::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Response</span><span class="op">&gt;</span> {
-    <span class="ident">Client</span>::<span class="ident">builder</span>()
-        .<span class="ident">build</span>()<span class="question-mark">?</span>
-        .<span class="ident">get</span>(<span class="ident">url</span>)
-        .<span class="ident">send</span>()
+<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">IntoUrl</span><span class="op">&gt;</span>(<span class="ident">url</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Response</span><span class="op">&gt;</span> {
+    <span class="ident">Client</span>::<span class="ident">builder</span>().<span class="ident">build</span>()<span class="question-mark">?</span>.<span class="ident">get</span>(<span class="ident">url</span>).<span class="ident">send</span>().<span class="kw">await</span>
 }
 
 <span class="kw">fn</span> <span class="ident">_assert_impls</span>() {
@@ -666,10 +590,54 @@
     <span class="ident">assert_send</span>::<span class="op">&lt;</span><span class="ident">Request</span><span class="op">&gt;</span>();
     <span class="ident">assert_send</span>::<span class="op">&lt;</span><span class="ident">RequestBuilder</span><span class="op">&gt;</span>();
 
-    <span class="ident">assert_send</span>::<span class="op">&lt;</span><span class="ident">Response</span><span class="op">&gt;</span>();
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;wasm32&quot;</span>))]</span>
+    {
+        <span class="ident">assert_send</span>::<span class="op">&lt;</span><span class="ident">Response</span><span class="op">&gt;</span>();
+    }
 
     <span class="ident">assert_send</span>::<span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;</span>();
     <span class="ident">assert_sync</span>::<span class="op">&lt;</span><span class="ident">Error</span><span class="op">&gt;</span>();
 }
+
+<span class="macro">if_hyper</span><span class="macro">!</span> {
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+    <span class="attribute">#[<span class="ident">macro_use</span>]</span>
+    <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">doc_comment</span>;
+
+    <span class="attribute">#[<span class="ident">macro_use</span>]</span>
+    <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">lazy_static</span>;
+
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+    <span class="macro">doctest</span><span class="macro">!</span>(<span class="string">&quot;../README.md&quot;</span>);
+
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">async_impl</span>::{
+        <span class="ident">multipart</span>, <span class="ident">Body</span>, <span class="ident">Client</span>, <span class="ident">ClientBuilder</span>, <span class="ident">Request</span>, <span class="ident">RequestBuilder</span>, <span class="ident">Response</span>, <span class="ident">ResponseBuilderExt</span>,
+    };
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">proxy</span>::<span class="ident">Proxy</span>;
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;__tls&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">tls</span>::{<span class="ident">Certificate</span>, <span class="ident">Identity</span>};
+
+
+    <span class="kw">mod</span> <span class="ident">async_impl</span>;
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;blocking&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">blocking</span>;
+    <span class="kw">mod</span> <span class="ident">connect</span>;
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;cookies&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">cookie</span>;
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;trust-dns&quot;</span>)]</span>
+    <span class="kw">mod</span> <span class="ident">dns</span>;
+    <span class="kw">mod</span> <span class="ident">proxy</span>;
+    <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">redirect</span>;
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;__tls&quot;</span>)]</span>
+    <span class="kw">mod</span> <span class="ident">tls</span>;
+    <span class="kw">mod</span> <span class="ident">util</span>;
+}
+
+<span class="macro">if_wasm</span><span class="macro">!</span> {
+    <span class="kw">mod</span> <span class="ident">wasm</span>;
+    <span class="kw">mod</span> <span class="ident">util</span>;
+
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="self">self</span>::<span class="ident">wasm</span>::{<span class="ident">multipart</span>, <span class="ident">Body</span>, <span class="ident">Client</span>, <span class="ident">ClientBuilder</span>, <span class="ident">Request</span>, <span class="ident">RequestBuilder</span>, <span class="ident">Response</span>};
+}
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "reqwest";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "reqwest";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

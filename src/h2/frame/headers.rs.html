@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/h2-0.1.26/src/frame/headers.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>headers.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../h2/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/h2-0.2.7/src/frame/headers.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>headers.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../h2/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -909,20 +909,92 @@
 <span id="909">909</span>
 <span id="910">910</span>
 <span id="911">911</span>
+<span id="912">912</span>
+<span id="913">913</span>
+<span id="914">914</span>
+<span id="915">915</span>
+<span id="916">916</span>
+<span id="917">917</span>
+<span id="918">918</span>
+<span id="919">919</span>
+<span id="920">920</span>
+<span id="921">921</span>
+<span id="922">922</span>
+<span id="923">923</span>
+<span id="924">924</span>
+<span id="925">925</span>
+<span id="926">926</span>
+<span id="927">927</span>
+<span id="928">928</span>
+<span id="929">929</span>
+<span id="930">930</span>
+<span id="931">931</span>
+<span id="932">932</span>
+<span id="933">933</span>
+<span id="934">934</span>
+<span id="935">935</span>
+<span id="936">936</span>
+<span id="937">937</span>
+<span id="938">938</span>
+<span id="939">939</span>
+<span id="940">940</span>
+<span id="941">941</span>
+<span id="942">942</span>
+<span id="943">943</span>
+<span id="944">944</span>
+<span id="945">945</span>
+<span id="946">946</span>
+<span id="947">947</span>
+<span id="948">948</span>
+<span id="949">949</span>
+<span id="950">950</span>
+<span id="951">951</span>
+<span id="952">952</span>
+<span id="953">953</span>
+<span id="954">954</span>
+<span id="955">955</span>
+<span id="956">956</span>
+<span id="957">957</span>
+<span id="958">958</span>
+<span id="959">959</span>
+<span id="960">960</span>
+<span id="961">961</span>
+<span id="962">962</span>
+<span id="963">963</span>
+<span id="964">964</span>
+<span id="965">965</span>
+<span id="966">966</span>
+<span id="967">967</span>
+<span id="968">968</span>
+<span id="969">969</span>
+<span id="970">970</span>
+<span id="971">971</span>
+<span id="972">972</span>
+<span id="973">973</span>
+<span id="974">974</span>
+<span id="975">975</span>
+<span id="976">976</span>
+<span id="977">977</span>
+<span id="978">978</span>
+<span id="979">979</span>
+<span id="980">980</span>
+<span id="981">981</span>
+<span id="982">982</span>
+<span id="983">983</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">util</span>, <span class="ident">StreamDependency</span>, <span class="ident">StreamId</span>};
-<span class="kw">use</span> <span class="ident">frame</span>::{<span class="ident">Error</span>, <span class="ident">Frame</span>, <span class="ident">Head</span>, <span class="ident">Kind</span>};
-<span class="kw">use</span> <span class="ident">hpack</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">frame</span>::{<span class="ident">Error</span>, <span class="ident">Frame</span>, <span class="ident">Head</span>, <span class="ident">Kind</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">hpack</span>::{<span class="self">self</span>, <span class="ident">BytesStr</span>};
 
-<span class="kw">use</span> <span class="ident">http</span>::{<span class="ident">uri</span>, <span class="ident">HeaderMap</span>, <span class="ident">Method</span>, <span class="ident">StatusCode</span>, <span class="ident">Uri</span>};
 <span class="kw">use</span> <span class="ident">http</span>::<span class="ident">header</span>::{<span class="self">self</span>, <span class="ident">HeaderName</span>, <span class="ident">HeaderValue</span>};
+<span class="kw">use</span> <span class="ident">http</span>::{<span class="ident">uri</span>, <span class="ident">HeaderMap</span>, <span class="ident">Method</span>, <span class="ident">Request</span>, <span class="ident">StatusCode</span>, <span class="ident">Uri</span>};
 
-<span class="kw">use</span> <span class="ident">byteorder</span>::{<span class="ident">BigEndian</span>, <span class="ident">ByteOrder</span>};
 <span class="kw">use</span> <span class="ident">bytes</span>::{<span class="ident">Bytes</span>, <span class="ident">BytesMut</span>};
-<span class="kw">use</span> <span class="ident">string</span>::<span class="ident">String</span>;
 
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Cursor</span>;
+
+<span class="kw">type</span> <span class="ident">EncodeBuf</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">bytes</span>::<span class="ident">buf</span>::<span class="ident">ext</span>::<span class="ident">Limit</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">BytesMut</span><span class="op">&gt;</span>;
 
 <span class="comment">// Minimum MAX_FRAME_SIZE is 16kb, so save some arbitrary space for frame</span>
 <span class="comment">// head and other header bits.</span>
@@ -980,9 +1052,9 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Pseudo</span> {
     <span class="comment">// Request</span>
     <span class="kw">pub</span> <span class="ident">method</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Method</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">scheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&lt;</span><span class="ident">Bytes</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">authority</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&lt;</span><span class="ident">Bytes</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&lt;</span><span class="ident">Bytes</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">scheme</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BytesStr</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">authority</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BytesStr</span><span class="op">&gt;</span>,
+    <span class="kw">pub</span> <span class="ident">path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BytesStr</span><span class="op">&gt;</span>,
 
     <span class="comment">// Response</span>
     <span class="kw">pub</span> <span class="ident">status</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">StatusCode</span><span class="op">&gt;</span>,
@@ -1031,12 +1103,12 @@
     <span class="doccomment">/// Create a new HEADERS frame</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">stream_id</span>: <span class="ident">StreamId</span>, <span class="ident">pseudo</span>: <span class="ident">Pseudo</span>, <span class="ident">fields</span>: <span class="ident">HeaderMap</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
         <span class="ident">Headers</span> {
-            <span class="ident">stream_id</span>: <span class="ident">stream_id</span>,
+            <span class="ident">stream_id</span>,
             <span class="ident">stream_dep</span>: <span class="prelude-val">None</span>,
             <span class="ident">header_block</span>: <span class="ident">HeaderBlock</span> {
-                <span class="ident">fields</span>: <span class="ident">fields</span>,
+                <span class="ident">fields</span>,
                 <span class="ident">is_over_size</span>: <span class="bool-val">false</span>,
-                <span class="ident">pseudo</span>: <span class="ident">pseudo</span>,
+                <span class="ident">pseudo</span>,
             },
             <span class="ident">flags</span>: <span class="ident">HeadersFlag</span>::<span class="ident">default</span>(),
         }
@@ -1050,11 +1122,11 @@
             <span class="ident">stream_id</span>,
             <span class="ident">stream_dep</span>: <span class="prelude-val">None</span>,
             <span class="ident">header_block</span>: <span class="ident">HeaderBlock</span> {
-                <span class="ident">fields</span>: <span class="ident">fields</span>,
+                <span class="ident">fields</span>,
                 <span class="ident">is_over_size</span>: <span class="bool-val">false</span>,
                 <span class="ident">pseudo</span>: <span class="ident">Pseudo</span>::<span class="ident">default</span>(),
             },
-            <span class="ident">flags</span>: <span class="ident">flags</span>,
+            <span class="ident">flags</span>,
         }
     }
 
@@ -1065,11 +1137,11 @@
         <span class="kw">let</span> <span class="ident">flags</span> <span class="op">=</span> <span class="ident">HeadersFlag</span>(<span class="ident">head</span>.<span class="ident">flag</span>());
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pad</span> <span class="op">=</span> <span class="number">0</span>;
 
-        <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;loading headers; flags={:?}&quot;</span>, <span class="ident">flags</span>);
+        <span class="ident">tracing</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;loading headers; flags={:?}&quot;</span>, <span class="ident">flags</span>);
 
         <span class="comment">// Read the padding length</span>
         <span class="kw">if</span> <span class="ident">flags</span>.<span class="ident">is_padded</span>() {
-            <span class="kw">if</span> <span class="ident">src</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">1</span> {
+            <span class="kw">if</span> <span class="ident">src</span>.<span class="ident">is_empty</span>() {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MalformedMessage</span>);
             }
             <span class="ident">pad</span> <span class="op">=</span> <span class="ident">src</span>[<span class="number">0</span>] <span class="kw">as</span> <span class="ident">usize</span>;
@@ -1108,19 +1180,24 @@
 
         <span class="kw">let</span> <span class="ident">headers</span> <span class="op">=</span> <span class="ident">Headers</span> {
             <span class="ident">stream_id</span>: <span class="ident">head</span>.<span class="ident">stream_id</span>(),
-            <span class="ident">stream_dep</span>: <span class="ident">stream_dep</span>,
+            <span class="ident">stream_dep</span>,
             <span class="ident">header_block</span>: <span class="ident">HeaderBlock</span> {
                 <span class="ident">fields</span>: <span class="ident">HeaderMap</span>::<span class="ident">new</span>(),
                 <span class="ident">is_over_size</span>: <span class="bool-val">false</span>,
                 <span class="ident">pseudo</span>: <span class="ident">Pseudo</span>::<span class="ident">default</span>(),
             },
-            <span class="ident">flags</span>: <span class="ident">flags</span>,
+            <span class="ident">flags</span>,
         };
 
         <span class="prelude-val">Ok</span>((<span class="ident">headers</span>, <span class="ident">src</span>))
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_hpack</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span>, <span class="ident">max_header_list_size</span>: <span class="ident">usize</span>, <span class="ident">decoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hpack</span>::<span class="ident">Decoder</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_hpack</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span>,
+        <span class="ident">max_header_list_size</span>: <span class="ident">usize</span>,
+        <span class="ident">decoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hpack</span>::<span class="ident">Decoder</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">header_block</span>.<span class="ident">load</span>(<span class="ident">src</span>, <span class="ident">max_header_list_size</span>, <span class="ident">decoder</span>)
     }
 
@@ -1169,16 +1246,20 @@
         <span class="self">self</span>.<span class="ident">header_block</span>.<span class="ident">fields</span>
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode</span>(<span class="self">self</span>, <span class="ident">encoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hpack</span>::<span class="ident">Encoder</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Continuation</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode</span>(
+        <span class="self">self</span>,
+        <span class="ident">encoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hpack</span>::<span class="ident">Encoder</span>,
+        <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">EncodeBuf</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Continuation</span><span class="op">&gt;</span> {
         <span class="comment">// At this point, the `is_end_headers` flag should always be set</span>
         <span class="macro">debug_assert</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">flags</span>.<span class="ident">is_end_headers</span>());
 
         <span class="comment">// Get the HEADERS frame head</span>
         <span class="kw">let</span> <span class="ident">head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>();
 
-        <span class="self">self</span>.<span class="ident">header_block</span>.<span class="ident">into_encoding</span>()
-            .<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">head</span>, <span class="ident">encoder</span>, <span class="ident">dst</span>, <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
-            })
+        <span class="self">self</span>.<span class="ident">header_block</span>
+            .<span class="ident">into_encoding</span>()
+            .<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">head</span>, <span class="ident">encoder</span>, <span class="ident">dst</span>, <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {})
     }
 
     <span class="kw">fn</span> <span class="ident">head</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Head</span> {
@@ -1208,9 +1289,92 @@
     }
 }
 
+<span class="comment">// ===== util =====</span>
+
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_u64</span>(<span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span>, ()<span class="op">&gt;</span> {
+    <span class="kw">if</span> <span class="ident">src</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">19</span> {
+        <span class="comment">// At danger for overflow...</span>
+        <span class="kw">return</span> <span class="prelude-val">Err</span>(());
+    }
+
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="number">0</span>;
+
+    <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">d</span> <span class="kw">in</span> <span class="ident">src</span> {
+        <span class="kw">if</span> <span class="ident">d</span> <span class="op">&lt;</span> <span class="string">b&#39;0&#39;</span> <span class="op">|</span><span class="op">|</span> <span class="ident">d</span> <span class="op">&gt;</span> <span class="string">b&#39;9&#39;</span> {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(());
+        }
+
+        <span class="ident">ret</span> <span class="kw-2">*</span><span class="op">=</span> <span class="number">10</span>;
+        <span class="ident">ret</span> <span class="op">+</span><span class="op">=</span> (<span class="ident">d</span> <span class="op">-</span> <span class="string">b&#39;0&#39;</span>) <span class="kw">as</span> <span class="ident">u64</span>;
+    }
+
+    <span class="prelude-val">Ok</span>(<span class="ident">ret</span>)
+}
+
 <span class="comment">// ===== impl PushPromise =====</span>
 
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">PushPromiseHeaderError</span> {
+    <span class="ident">InvalidContentLength</span>(<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span>, ()<span class="op">&gt;</span>),
+    <span class="ident">NotSafeAndCacheable</span>,
+}
+
 <span class="kw">impl</span> <span class="ident">PushPromise</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
+        <span class="ident">stream_id</span>: <span class="ident">StreamId</span>,
+        <span class="ident">promised_id</span>: <span class="ident">StreamId</span>,
+        <span class="ident">pseudo</span>: <span class="ident">Pseudo</span>,
+        <span class="ident">fields</span>: <span class="ident">HeaderMap</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="ident">PushPromise</span> {
+            <span class="ident">flags</span>: <span class="ident">PushPromiseFlag</span>::<span class="ident">default</span>(),
+            <span class="ident">header_block</span>: <span class="ident">HeaderBlock</span> {
+                <span class="ident">fields</span>,
+                <span class="ident">is_over_size</span>: <span class="bool-val">false</span>,
+                <span class="ident">pseudo</span>,
+            },
+            <span class="ident">promised_id</span>,
+            <span class="ident">stream_id</span>,
+        }
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">validate_request</span>(<span class="ident">req</span>: <span class="kw-2">&amp;</span><span class="ident">Request</span><span class="op">&lt;</span>()<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">PushPromiseHeaderError</span><span class="op">&gt;</span> {
+        <span class="kw">use</span> <span class="ident">PushPromiseHeaderError</span>::<span class="kw-2">*</span>;
+        <span class="comment">// The spec has some requirements for promised request headers</span>
+        <span class="comment">// [https://httpwg.org/specs/rfc7540.html#PushRequests]</span>
+
+        <span class="comment">// A promised request &quot;that indicates the presence of a request body</span>
+        <span class="comment">// MUST reset the promised stream with a stream error&quot;</span>
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">content_length</span>) <span class="op">=</span> <span class="ident">req</span>.<span class="ident">headers</span>().<span class="ident">get</span>(<span class="ident">header</span>::<span class="ident">CONTENT_LENGTH</span>) {
+            <span class="kw">let</span> <span class="ident">parsed_length</span> <span class="op">=</span> <span class="ident">parse_u64</span>(<span class="ident">content_length</span>.<span class="ident">as_bytes</span>());
+            <span class="kw">if</span> <span class="ident">parsed_length</span> <span class="op">!</span><span class="op">=</span> <span class="prelude-val">Ok</span>(<span class="number">0</span>) {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">InvalidContentLength</span>(<span class="ident">parsed_length</span>));
+            }
+        }
+        <span class="comment">// &quot;The server MUST include a method in the :method pseudo-header field</span>
+        <span class="comment">// that is safe and cacheable&quot;</span>
+        <span class="kw">if</span> <span class="op">!</span><span class="self">Self</span>::<span class="ident">safe_and_cacheable</span>(<span class="ident">req</span>.<span class="ident">method</span>()) {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">NotSafeAndCacheable</span>);
+        }
+
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn</span> <span class="ident">safe_and_cacheable</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">Method</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+        <span class="comment">// Cacheable: https://httpwg.org/specs/rfc7231.html#cacheable.methods</span>
+        <span class="comment">// Safe: https://httpwg.org/specs/rfc7231.html#safe.methods</span>
+        <span class="kw">return</span> <span class="ident">method</span> <span class="op">=</span><span class="op">=</span> <span class="ident">Method</span>::<span class="ident">GET</span> <span class="op">|</span><span class="op">|</span> <span class="ident">method</span> <span class="op">=</span><span class="op">=</span> <span class="ident">Method</span>::<span class="ident">HEAD</span>;
+    }
+
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fields</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">HeaderMap</span> {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">header_block</span>.<span class="ident">fields</span>
+    }
+
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unstable&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_fields</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HeaderMap</span> {
+        <span class="self">self</span>.<span class="ident">header_block</span>.<span class="ident">fields</span>
+    }
+
     <span class="doccomment">/// Loads the push promise frame but doesn&#39;t actually do HPACK decoding.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// HPACK decoding is done in the `load_hpack` step.</span>
@@ -1220,7 +1384,7 @@
 
         <span class="comment">// Read the padding length</span>
         <span class="kw">if</span> <span class="ident">flags</span>.<span class="ident">is_padded</span>() {
-            <span class="kw">if</span> <span class="ident">src</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">1</span> {
+            <span class="kw">if</span> <span class="ident">src</span>.<span class="ident">is_empty</span>() {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MalformedMessage</span>);
             }
 
@@ -1249,19 +1413,24 @@
         }
 
         <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="ident">PushPromise</span> {
-            <span class="ident">flags</span>: <span class="ident">flags</span>,
+            <span class="ident">flags</span>,
             <span class="ident">header_block</span>: <span class="ident">HeaderBlock</span> {
                 <span class="ident">fields</span>: <span class="ident">HeaderMap</span>::<span class="ident">new</span>(),
                 <span class="ident">is_over_size</span>: <span class="bool-val">false</span>,
                 <span class="ident">pseudo</span>: <span class="ident">Pseudo</span>::<span class="ident">default</span>(),
             },
-            <span class="ident">promised_id</span>: <span class="ident">promised_id</span>,
+            <span class="ident">promised_id</span>,
             <span class="ident">stream_id</span>: <span class="ident">head</span>.<span class="ident">stream_id</span>(),
         };
         <span class="prelude-val">Ok</span>((<span class="ident">frame</span>, <span class="ident">src</span>))
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_hpack</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span>, <span class="ident">max_header_list_size</span>: <span class="ident">usize</span>, <span class="ident">decoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hpack</span>::<span class="ident">Decoder</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_hpack</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span>,
+        <span class="ident">max_header_list_size</span>: <span class="ident">usize</span>,
+        <span class="ident">decoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hpack</span>::<span class="ident">Decoder</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">header_block</span>.<span class="ident">load</span>(<span class="ident">src</span>, <span class="ident">max_header_list_size</span>, <span class="ident">decoder</span>)
     }
 
@@ -1285,7 +1454,11 @@
         <span class="self">self</span>.<span class="ident">header_block</span>.<span class="ident">is_over_size</span>
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode</span>(<span class="self">self</span>, <span class="ident">encoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hpack</span>::<span class="ident">Encoder</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Continuation</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode</span>(
+        <span class="self">self</span>,
+        <span class="ident">encoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hpack</span>::<span class="ident">Encoder</span>,
+        <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">EncodeBuf</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Continuation</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">bytes</span>::<span class="ident">BufMut</span>;
 
         <span class="comment">// At this point, the `is_end_headers` flag should always be set</span>
@@ -1294,50 +1467,20 @@
         <span class="kw">let</span> <span class="ident">head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>();
         <span class="kw">let</span> <span class="ident">promised_id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">promised_id</span>;
 
-        <span class="self">self</span>.<span class="ident">header_block</span>.<span class="ident">into_encoding</span>()
+        <span class="self">self</span>.<span class="ident">header_block</span>
+            .<span class="ident">into_encoding</span>()
             .<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">head</span>, <span class="ident">encoder</span>, <span class="ident">dst</span>, <span class="op">|</span><span class="ident">dst</span><span class="op">|</span> {
-                <span class="ident">dst</span>.<span class="ident">put_u32_be</span>(<span class="ident">promised_id</span>.<span class="ident">into</span>());
+                <span class="ident">dst</span>.<span class="ident">put_u32</span>(<span class="ident">promised_id</span>.<span class="ident">into</span>());
             })
     }
 
     <span class="kw">fn</span> <span class="ident">head</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Head</span> {
         <span class="ident">Head</span>::<span class="ident">new</span>(<span class="ident">Kind</span>::<span class="ident">PushPromise</span>, <span class="self">self</span>.<span class="ident">flags</span>.<span class="ident">into</span>(), <span class="self">self</span>.<span class="ident">stream_id</span>)
     }
-}
 
-<span class="kw">impl</span> <span class="ident">PushPromise</span> {
     <span class="doccomment">/// Consume `self`, returning the parts of the frame</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_parts</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Pseudo</span>, <span class="ident">HeaderMap</span>) {
         (<span class="self">self</span>.<span class="ident">header_block</span>.<span class="ident">pseudo</span>, <span class="self">self</span>.<span class="ident">header_block</span>.<span class="ident">fields</span>)
-    }
-}
-
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unstable&quot;</span>)]</span>
-<span class="kw">impl</span> <span class="ident">PushPromise</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
-        <span class="ident">stream_id</span>: <span class="ident">StreamId</span>,
-        <span class="ident">promised_id</span>: <span class="ident">StreamId</span>,
-        <span class="ident">pseudo</span>: <span class="ident">Pseudo</span>,
-        <span class="ident">fields</span>: <span class="ident">HeaderMap</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">PushPromise</span> {
-            <span class="ident">flags</span>: <span class="ident">PushPromiseFlag</span>::<span class="ident">default</span>(),
-            <span class="ident">header_block</span>: <span class="ident">HeaderBlock</span> {
-                <span class="ident">fields</span>,
-                <span class="ident">is_over_size</span>: <span class="bool-val">false</span>,
-                <span class="ident">pseudo</span>,
-            },
-            <span class="ident">promised_id</span>,
-            <span class="ident">stream_id</span>,
-        }
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fields</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">HeaderMap</span> {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">header_block</span>.<span class="ident">fields</span>
-    }
-
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_fields</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HeaderMap</span> {
-        <span class="self">self</span>.<span class="ident">header_block</span>.<span class="ident">fields</span>
     }
 }
 
@@ -1365,13 +1508,15 @@
         <span class="ident">Head</span>::<span class="ident">new</span>(<span class="ident">Kind</span>::<span class="ident">Continuation</span>, <span class="ident">END_HEADERS</span>, <span class="self">self</span>.<span class="ident">stream_id</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode</span>(<span class="self">self</span>, <span class="ident">encoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hpack</span>::<span class="ident">Encoder</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Continuation</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode</span>(
+        <span class="self">self</span>,
+        <span class="ident">encoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hpack</span>::<span class="ident">Encoder</span>,
+        <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">EncodeBuf</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Continuation</span><span class="op">&gt;</span> {
         <span class="comment">// Get the CONTINUATION frame head</span>
         <span class="kw">let</span> <span class="ident">head</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">head</span>();
 
-        <span class="self">self</span>.<span class="ident">header_block</span>
-            .<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">head</span>, <span class="ident">encoder</span>, <span class="ident">dst</span>, <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
-            })
+        <span class="self">self</span>.<span class="ident">header_block</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="ident">head</span>, <span class="ident">encoder</span>, <span class="ident">dst</span>, <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {})
     }
 }
 
@@ -1383,8 +1528,8 @@
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">parts</span>
             .<span class="ident">path_and_query</span>
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="ident">into</span>())
-            .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Bytes</span>::<span class="ident">new</span>());
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">Bytes</span>::<span class="ident">copy_from_slice</span>(<span class="ident">v</span>.<span class="ident">as_str</span>().<span class="ident">as_bytes</span>()))
+            .<span class="ident">unwrap_or_else</span>(<span class="ident">Bytes</span>::<span class="ident">new</span>);
 
         <span class="kw">if</span> <span class="ident">path</span>.<span class="ident">is_empty</span>() <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">method</span> <span class="op">!</span><span class="op">=</span> <span class="ident">Method</span>::<span class="ident">OPTIONS</span> {
             <span class="ident">path</span> <span class="op">=</span> <span class="ident">Bytes</span>::<span class="ident">from_static</span>(<span class="string">b&quot;/&quot;</span>);
@@ -1394,7 +1539,7 @@
             <span class="ident">method</span>: <span class="prelude-val">Some</span>(<span class="ident">method</span>),
             <span class="ident">scheme</span>: <span class="prelude-val">None</span>,
             <span class="ident">authority</span>: <span class="prelude-val">None</span>,
-            <span class="ident">path</span>: <span class="prelude-val">Some</span>(<span class="ident">to_string</span>(<span class="ident">path</span>)),
+            <span class="ident">path</span>: <span class="prelude-val">Some</span>(<span class="kw">unsafe</span> { <span class="ident">BytesStr</span>::<span class="ident">from_utf8_unchecked</span>(<span class="ident">path</span>) }),
             <span class="ident">status</span>: <span class="prelude-val">None</span>,
         };
 
@@ -1408,7 +1553,9 @@
         <span class="comment">// If the URI includes an authority component, add it to the pseudo</span>
         <span class="comment">// headers</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">authority</span>) <span class="op">=</span> <span class="ident">parts</span>.<span class="ident">authority</span> {
-            <span class="ident">pseudo</span>.<span class="ident">set_authority</span>(<span class="ident">to_string</span>(<span class="ident">authority</span>.<span class="ident">into</span>()));
+            <span class="ident">pseudo</span>.<span class="ident">set_authority</span>(<span class="kw">unsafe</span> {
+                <span class="ident">BytesStr</span>::<span class="ident">from_utf8_unchecked</span>(<span class="ident">Bytes</span>::<span class="ident">copy_from_slice</span>(<span class="ident">authority</span>.<span class="ident">as_str</span>().<span class="ident">as_bytes</span>()))
+            });
         }
 
         <span class="ident">pseudo</span>
@@ -1425,37 +1572,40 @@
     }
 
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_scheme</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">scheme</span>: <span class="ident">uri</span>::<span class="ident">Scheme</span>) {
-        <span class="self">self</span>.<span class="ident">scheme</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">to_string</span>(<span class="ident">scheme</span>.<span class="ident">into</span>()));
+        <span class="kw">let</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">scheme</span>.<span class="ident">as_str</span>() {
+            <span class="string">&quot;http&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Bytes</span>::<span class="ident">from_static</span>(<span class="string">b&quot;http&quot;</span>),
+            <span class="string">&quot;https&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Bytes</span>::<span class="ident">from_static</span>(<span class="string">b&quot;https&quot;</span>),
+            <span class="ident">s</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Bytes</span>::<span class="ident">copy_from_slice</span>(<span class="ident">s</span>.<span class="ident">as_bytes</span>()),
+        };
+        <span class="self">self</span>.<span class="ident">scheme</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="kw">unsafe</span> { <span class="ident">BytesStr</span>::<span class="ident">from_utf8_unchecked</span>(<span class="ident">bytes</span>) });
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_authority</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">authority</span>: <span class="ident">String</span><span class="op">&lt;</span><span class="ident">Bytes</span><span class="op">&gt;</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_authority</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">authority</span>: <span class="ident">BytesStr</span>) {
         <span class="self">self</span>.<span class="ident">authority</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">authority</span>);
     }
-}
-
-<span class="kw">fn</span> <span class="ident">to_string</span>(<span class="ident">src</span>: <span class="ident">Bytes</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span><span class="op">&lt;</span><span class="ident">Bytes</span><span class="op">&gt;</span> {
-    <span class="kw">unsafe</span> { <span class="ident">String</span>::<span class="ident">from_utf8_unchecked</span>(<span class="ident">src</span>) }
 }
 
 <span class="comment">// ===== impl EncodingHeaderBlock =====</span>
 
 <span class="kw">impl</span> <span class="ident">EncodingHeaderBlock</span> {
-    <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>,
-                 <span class="ident">head</span>: <span class="kw-2">&amp;</span><span class="ident">Head</span>,
-                 <span class="ident">encoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hpack</span>::<span class="ident">Encoder</span>,
-                 <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span>,
-                 <span class="ident">f</span>: <span class="ident">F</span>)
-        <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Continuation</span><span class="op">&gt;</span>
-    <span class="kw">where</span> <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span>),
+    <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(
+        <span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">head</span>: <span class="kw-2">&amp;</span><span class="ident">Head</span>,
+        <span class="ident">encoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hpack</span>::<span class="ident">Encoder</span>,
+        <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">EncodeBuf</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
+        <span class="ident">f</span>: <span class="ident">F</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Continuation</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">EncodeBuf</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>),
     {
-        <span class="kw">let</span> <span class="ident">head_pos</span> <span class="op">=</span> <span class="ident">dst</span>.<span class="ident">len</span>();
+        <span class="kw">let</span> <span class="ident">head_pos</span> <span class="op">=</span> <span class="ident">dst</span>.<span class="ident">get_ref</span>().<span class="ident">len</span>();
 
         <span class="comment">// At this point, we don&#39;t know how big the h2 frame will be.</span>
         <span class="comment">// So, we write the head with length 0, then write the body, and</span>
         <span class="comment">// finally write the length once we know the size.</span>
         <span class="ident">head</span>.<span class="ident">encode</span>(<span class="number">0</span>, <span class="ident">dst</span>);
 
-        <span class="kw">let</span> <span class="ident">payload_pos</span> <span class="op">=</span> <span class="ident">dst</span>.<span class="ident">len</span>();
+        <span class="kw">let</span> <span class="ident">payload_pos</span> <span class="op">=</span> <span class="ident">dst</span>.<span class="ident">get_ref</span>().<span class="ident">len</span>();
 
         <span class="ident">f</span>(<span class="ident">dst</span>);
 
@@ -1472,17 +1622,19 @@
         };
 
         <span class="comment">// Compute the header block length</span>
-        <span class="kw">let</span> <span class="ident">payload_len</span> <span class="op">=</span> (<span class="ident">dst</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="ident">payload_pos</span>) <span class="kw">as</span> <span class="ident">u64</span>;
+        <span class="kw">let</span> <span class="ident">payload_len</span> <span class="op">=</span> (<span class="ident">dst</span>.<span class="ident">get_ref</span>().<span class="ident">len</span>() <span class="op">-</span> <span class="ident">payload_pos</span>) <span class="kw">as</span> <span class="ident">u64</span>;
 
         <span class="comment">// Write the frame length</span>
-        <span class="ident">BigEndian</span>::<span class="ident">write_uint</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dst</span>[<span class="ident">head_pos</span>..<span class="ident">head_pos</span> <span class="op">+</span> <span class="number">3</span>], <span class="ident">payload_len</span>, <span class="number">3</span>);
+        <span class="kw">let</span> <span class="ident">payload_len_be</span> <span class="op">=</span> <span class="ident">payload_len</span>.<span class="ident">to_be_bytes</span>();
+        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">payload_len_be</span>[<span class="number">0</span>..<span class="number">5</span>].<span class="ident">iter</span>().<span class="ident">all</span>(<span class="op">|</span><span class="ident">b</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">b</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>));
+        (<span class="ident">dst</span>.<span class="ident">get_mut</span>()[<span class="ident">head_pos</span>..<span class="ident">head_pos</span> <span class="op">+</span> <span class="number">3</span>]).<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">payload_len_be</span>[<span class="number">5</span>..]);
 
         <span class="kw">if</span> <span class="ident">continuation</span>.<span class="ident">is_some</span>() {
             <span class="comment">// There will be continuation frames, so the `is_end_headers` flag</span>
             <span class="comment">// must be unset</span>
-            <span class="macro">debug_assert</span><span class="macro">!</span>(<span class="ident">dst</span>[<span class="ident">head_pos</span> <span class="op">+</span> <span class="number">4</span>] <span class="op">&amp;</span> <span class="ident">END_HEADERS</span> <span class="op">=</span><span class="op">=</span> <span class="ident">END_HEADERS</span>);
+            <span class="macro">debug_assert</span><span class="macro">!</span>(<span class="ident">dst</span>.<span class="ident">get_ref</span>()[<span class="ident">head_pos</span> <span class="op">+</span> <span class="number">4</span>] <span class="op">&amp;</span> <span class="ident">END_HEADERS</span> <span class="op">=</span><span class="op">=</span> <span class="ident">END_HEADERS</span>);
 
-            <span class="ident">dst</span>[<span class="ident">head_pos</span> <span class="op">+</span> <span class="number">4</span>] <span class="op">-</span><span class="op">=</span> <span class="ident">END_HEADERS</span>;
+            <span class="ident">dst</span>.<span class="ident">get_mut</span>()[<span class="ident">head_pos</span> <span class="op">+</span> <span class="number">4</span>] <span class="op">-</span><span class="op">=</span> <span class="ident">END_HEADERS</span>;
         }
 
         <span class="ident">continuation</span>
@@ -1495,7 +1647,7 @@
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">hpack</span>::<span class="ident">Header</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">HeaderName</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
     <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span><span class="op">&gt;</span> {
-        <span class="kw">use</span> <span class="ident">hpack</span>::<span class="ident">Header</span>::<span class="kw-2">*</span>;
+        <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">hpack</span>::<span class="ident">Header</span>::<span class="kw-2">*</span>;
 
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">pseudo</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">pseudo</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">method</span>) <span class="op">=</span> <span class="ident">pseudo</span>.<span class="ident">method</span>.<span class="ident">take</span>() {
@@ -1521,12 +1673,9 @@
 
         <span class="self">self</span>.<span class="ident">pseudo</span> <span class="op">=</span> <span class="prelude-val">None</span>;
 
-        <span class="self">self</span>.<span class="ident">fields</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">name</span>, <span class="ident">value</span>)<span class="op">|</span> {
-            <span class="ident">Field</span> {
-                <span class="ident">name</span>: <span class="ident">name</span>,
-                <span class="ident">value</span>: <span class="ident">value</span>,
-            }
-        })
+        <span class="self">self</span>.<span class="ident">fields</span>
+            .<span class="ident">next</span>()
+            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">name</span>, <span class="ident">value</span>)<span class="op">|</span> <span class="ident">Field</span> { <span class="ident">name</span>, <span class="ident">value</span> })
     }
 }
 
@@ -1638,9 +1787,13 @@
 
 <span class="comment">// ===== HeaderBlock =====</span>
 
-
 <span class="kw">impl</span> <span class="ident">HeaderBlock</span> {
-    <span class="kw">fn</span> <span class="ident">load</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span>, <span class="ident">max_header_list_size</span>: <span class="ident">usize</span>, <span class="ident">decoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hpack</span>::<span class="ident">Decoder</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">load</span>(
+        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+        <span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span>,
+        <span class="ident">max_header_list_size</span>: <span class="ident">usize</span>,
+        <span class="ident">decoder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hpack</span>::<span class="ident">Decoder</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reg</span> <span class="op">=</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">fields</span>.<span class="ident">is_empty</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">malformed</span> <span class="op">=</span> <span class="bool-val">false</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">headers_size</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">calculate_header_list_size</span>();
@@ -1648,22 +1801,23 @@
         <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">set_pseudo</span> {
             (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">field</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">val</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {{
                 <span class="kw">if</span> <span class="ident">reg</span> {
-                    <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;load_hpack; header malformed -- pseudo not at head of block&quot;</span>);
+                    <span class="ident">tracing</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;load_hpack; header malformed -- pseudo not at head of block&quot;</span>);
                     <span class="ident">malformed</span> <span class="op">=</span> <span class="bool-val">true</span>;
                 } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">pseudo</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">field</span>.<span class="ident">is_some</span>() {
-                    <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;load_hpack; header malformed -- repeated pseudo&quot;</span>);
+                    <span class="ident">tracing</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;load_hpack; header malformed -- repeated pseudo&quot;</span>);
                     <span class="ident">malformed</span> <span class="op">=</span> <span class="bool-val">true</span>;
                 } <span class="kw">else</span> {
                     <span class="kw">let</span> <span class="ident">__val</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">val</span>;
-                    <span class="ident">headers_size</span> <span class="op">+</span><span class="op">=</span> <span class="ident">decoded_header_size</span>(<span class="macro">stringify</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ident</span>).<span class="ident">len</span>() <span class="op">+</span> <span class="number">1</span>, <span class="ident">__val</span>.<span class="ident">as_str</span>().<span class="ident">len</span>());
+                    <span class="ident">headers_size</span> <span class="op">+</span><span class="op">=</span>
+                        <span class="ident">decoded_header_size</span>(<span class="macro">stringify</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ident</span>).<span class="ident">len</span>() <span class="op">+</span> <span class="number">1</span>, <span class="ident">__val</span>.<span class="ident">as_str</span>().<span class="ident">len</span>());
                     <span class="kw">if</span> <span class="ident">headers_size</span> <span class="op">&lt;</span> <span class="ident">max_header_list_size</span> {
                         <span class="self">self</span>.<span class="ident">pseudo</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">field</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">__val</span>);
                     } <span class="kw">else</span> <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_over_size</span> {
-                        <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;load_hpack; header list size over max&quot;</span>);
+                        <span class="ident">tracing</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;load_hpack; header list size over max&quot;</span>);
                         <span class="self">self</span>.<span class="ident">is_over_size</span> <span class="op">=</span> <span class="bool-val">true</span>;
                     }
                 }
-            }}
+            }};
         }
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cursor</span> <span class="op">=</span> <span class="ident">Cursor</span>::<span class="ident">new</span>(<span class="ident">src</span>);
@@ -1673,13 +1827,10 @@
         <span class="comment">// the hpack state is connection level. In order to maintain correct</span>
         <span class="comment">// state for other streams, the hpack decoding process must complete.</span>
         <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">decoder</span>.<span class="ident">decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">cursor</span>, <span class="op">|</span><span class="ident">header</span><span class="op">|</span> {
-            <span class="kw">use</span> <span class="ident">hpack</span>::<span class="ident">Header</span>::<span class="kw-2">*</span>;
+            <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">hpack</span>::<span class="ident">Header</span>::<span class="kw-2">*</span>;
 
             <span class="kw">match</span> <span class="ident">header</span> {
-                <span class="ident">Field</span> {
-                    <span class="ident">name</span>,
-                    <span class="ident">value</span>,
-                } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">Field</span> { <span class="ident">name</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="comment">// Connection level header fields are not supported and must</span>
                     <span class="comment">// result in a protocol error.</span>
 
@@ -1689,10 +1840,13 @@
                         <span class="op">|</span><span class="op">|</span> <span class="ident">name</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;keep-alive&quot;</span>
                         <span class="op">|</span><span class="op">|</span> <span class="ident">name</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;proxy-connection&quot;</span>
                     {
-                        <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;load_hpack; connection level header&quot;</span>);
+                        <span class="ident">tracing</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;load_hpack; connection level header&quot;</span>);
                         <span class="ident">malformed</span> <span class="op">=</span> <span class="bool-val">true</span>;
                     } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">name</span> <span class="op">=</span><span class="op">=</span> <span class="ident">header</span>::<span class="ident">TE</span> <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">value</span> <span class="op">!</span><span class="op">=</span> <span class="string">&quot;trailers&quot;</span> {
-                        <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;load_hpack; TE header not set to trailers; val={:?}&quot;</span>, <span class="ident">value</span>);
+                        <span class="ident">tracing</span>::<span class="macro">trace</span><span class="macro">!</span>(
+                            <span class="string">&quot;load_hpack; TE header not set to trailers; val={:?}&quot;</span>,
+                            <span class="ident">value</span>
+                        );
                         <span class="ident">malformed</span> <span class="op">=</span> <span class="bool-val">true</span>;
                     } <span class="kw">else</span> {
                         <span class="ident">reg</span> <span class="op">=</span> <span class="bool-val">true</span>;
@@ -1701,11 +1855,11 @@
                         <span class="kw">if</span> <span class="ident">headers_size</span> <span class="op">&lt;</span> <span class="ident">max_header_list_size</span> {
                             <span class="self">self</span>.<span class="ident">fields</span>.<span class="ident">append</span>(<span class="ident">name</span>, <span class="ident">value</span>);
                         } <span class="kw">else</span> <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_over_size</span> {
-                            <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;load_hpack; header list size over max&quot;</span>);
+                            <span class="ident">tracing</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;load_hpack; header list size over max&quot;</span>);
                             <span class="self">self</span>.<span class="ident">is_over_size</span> <span class="op">=</span> <span class="bool-val">true</span>;
                         }
                     }
-                },
+                }
                 <span class="ident">Authority</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">set_pseudo</span><span class="macro">!</span>(<span class="ident">authority</span>, <span class="ident">v</span>),
                 <span class="ident">Method</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">set_pseudo</span><span class="macro">!</span>(<span class="ident">method</span>, <span class="ident">v</span>),
                 <span class="ident">Scheme</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">set_pseudo</span><span class="macro">!</span>(<span class="ident">scheme</span>, <span class="ident">v</span>),
@@ -1715,13 +1869,13 @@
         });
 
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">res</span> {
-            <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;hpack decoding error; err={:?}&quot;</span>, <span class="ident">e</span>);
+            <span class="ident">tracing</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;hpack decoding error; err={:?}&quot;</span>, <span class="ident">e</span>);
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>.<span class="ident">into</span>());
         }
 
         <span class="kw">if</span> <span class="ident">malformed</span> {
-            <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;malformed message&quot;</span>);
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MalformedMessage</span>.<span class="ident">into</span>());
+            <span class="ident">tracing</span>::<span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;malformed message&quot;</span>);
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="ident">MalformedMessage</span>);
         }
 
         <span class="prelude-val">Ok</span>(())
@@ -1746,36 +1900,38 @@
     <span class="doccomment">/// &gt; overhead of 32 octets for each header field.</span>
     <span class="kw">fn</span> <span class="ident">calculate_header_list_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
         <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">pseudo_size</span> {
-            (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> ({
+            (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> {{
                 <span class="self">self</span>.<span class="ident">pseudo</span>
                     .<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>
                     .<span class="ident">as_ref</span>()
                     .<span class="ident">map</span>(<span class="op">|</span><span class="ident">m</span><span class="op">|</span> <span class="ident">decoded_header_size</span>(<span class="macro">stringify</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>).<span class="ident">len</span>() <span class="op">+</span> <span class="number">1</span>, <span class="ident">m</span>.<span class="ident">as_str</span>().<span class="ident">len</span>()))
                     .<span class="ident">unwrap_or</span>(<span class="number">0</span>)
-            });
+            }};
         }
 
-        <span class="macro">pseudo_size</span><span class="macro">!</span>(<span class="ident">method</span>) <span class="op">+</span>
-        <span class="macro">pseudo_size</span><span class="macro">!</span>(<span class="ident">scheme</span>) <span class="op">+</span>
-        <span class="macro">pseudo_size</span><span class="macro">!</span>(<span class="ident">status</span>) <span class="op">+</span>
-        <span class="macro">pseudo_size</span><span class="macro">!</span>(<span class="ident">authority</span>) <span class="op">+</span>
-        <span class="macro">pseudo_size</span><span class="macro">!</span>(<span class="ident">path</span>) <span class="op">+</span>
-        <span class="self">self</span>.<span class="ident">fields</span>.<span class="ident">iter</span>()
-            .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">name</span>, <span class="ident">value</span>)<span class="op">|</span> <span class="ident">decoded_header_size</span>(<span class="ident">name</span>.<span class="ident">as_str</span>().<span class="ident">len</span>(), <span class="ident">value</span>.<span class="ident">len</span>()))
-            .<span class="ident">sum</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>()
+        <span class="macro">pseudo_size</span><span class="macro">!</span>(<span class="ident">method</span>)
+            <span class="op">+</span> <span class="macro">pseudo_size</span><span class="macro">!</span>(<span class="ident">scheme</span>)
+            <span class="op">+</span> <span class="macro">pseudo_size</span><span class="macro">!</span>(<span class="ident">status</span>)
+            <span class="op">+</span> <span class="macro">pseudo_size</span><span class="macro">!</span>(<span class="ident">authority</span>)
+            <span class="op">+</span> <span class="macro">pseudo_size</span><span class="macro">!</span>(<span class="ident">path</span>)
+            <span class="op">+</span> <span class="self">self</span>
+                .<span class="ident">fields</span>
+                .<span class="ident">iter</span>()
+                .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">name</span>, <span class="ident">value</span>)<span class="op">|</span> <span class="ident">decoded_header_size</span>(<span class="ident">name</span>.<span class="ident">as_str</span>().<span class="ident">len</span>(), <span class="ident">value</span>.<span class="ident">len</span>()))
+                .<span class="ident">sum</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>()
     }
 
     <span class="doccomment">/// Iterate over all pseudos and headers to see if any individual pair</span>
     <span class="doccomment">/// would be too large to encode.</span>
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">has_too_big_field</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
         <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">pseudo_size</span> {
-            (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> ({
+            (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> {{
                 <span class="self">self</span>.<span class="ident">pseudo</span>
                     .<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>
                     .<span class="ident">as_ref</span>()
                     .<span class="ident">map</span>(<span class="op">|</span><span class="ident">m</span><span class="op">|</span> <span class="ident">decoded_header_size</span>(<span class="macro">stringify</span><span class="macro">!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>).<span class="ident">len</span>() <span class="op">+</span> <span class="number">1</span>, <span class="ident">m</span>.<span class="ident">as_str</span>().<span class="ident">len</span>()))
                     .<span class="ident">unwrap_or</span>(<span class="number">0</span>)
-            });
+            }};
         }
 
         <span class="kw">if</span> <span class="macro">pseudo_size</span><span class="macro">!</span>(<span class="ident">method</span>) <span class="op">&gt;</span> <span class="ident">MAX_HEADER_LENGTH</span> {
@@ -1809,17 +1965,5 @@
 <span class="kw">fn</span> <span class="ident">decoded_header_size</span>(<span class="ident">name</span>: <span class="ident">usize</span>, <span class="ident">value</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
     <span class="ident">name</span> <span class="op">+</span> <span class="ident">value</span> <span class="op">+</span> <span class="number">32</span>
 }
-
-<span class="comment">// Stupid hack to make the set_pseudo! macro happy, since all other values</span>
-<span class="comment">// have a method `as_str` except for `String&lt;Bytes&gt;`.</span>
-<span class="kw">trait</span> <span class="ident">AsStr</span> {
-    <span class="kw">fn</span> <span class="ident">as_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">str</span>;
-}
-
-<span class="kw">impl</span> <span class="ident">AsStr</span> <span class="kw">for</span> <span class="ident">String</span><span class="op">&lt;</span><span class="ident">Bytes</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">as_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">str</span> {
-        <span class="self">self</span>
-    }
-}
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "h2";</script><script src="../../../aliases.js"></script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "h2";</script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/hyper-0.12.35/src/client/connect/http.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>http.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script src="../../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../../hyper/index.html'><div class='logo-container'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/hyper-0.13.9/src/client/connect/http.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>http.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script src="../../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../../hyper/index.html'><div class='logo-container'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -781,25 +781,240 @@
 <span id="781">781</span>
 <span id="782">782</span>
 <span id="783">783</span>
+<span id="784">784</span>
+<span id="785">785</span>
+<span id="786">786</span>
+<span id="787">787</span>
+<span id="788">788</span>
+<span id="789">789</span>
+<span id="790">790</span>
+<span id="791">791</span>
+<span id="792">792</span>
+<span id="793">793</span>
+<span id="794">794</span>
+<span id="795">795</span>
+<span id="796">796</span>
+<span id="797">797</span>
+<span id="798">798</span>
+<span id="799">799</span>
+<span id="800">800</span>
+<span id="801">801</span>
+<span id="802">802</span>
+<span id="803">803</span>
+<span id="804">804</span>
+<span id="805">805</span>
+<span id="806">806</span>
+<span id="807">807</span>
+<span id="808">808</span>
+<span id="809">809</span>
+<span id="810">810</span>
+<span id="811">811</span>
+<span id="812">812</span>
+<span id="813">813</span>
+<span id="814">814</span>
+<span id="815">815</span>
+<span id="816">816</span>
+<span id="817">817</span>
+<span id="818">818</span>
+<span id="819">819</span>
+<span id="820">820</span>
+<span id="821">821</span>
+<span id="822">822</span>
+<span id="823">823</span>
+<span id="824">824</span>
+<span id="825">825</span>
+<span id="826">826</span>
+<span id="827">827</span>
+<span id="828">828</span>
+<span id="829">829</span>
+<span id="830">830</span>
+<span id="831">831</span>
+<span id="832">832</span>
+<span id="833">833</span>
+<span id="834">834</span>
+<span id="835">835</span>
+<span id="836">836</span>
+<span id="837">837</span>
+<span id="838">838</span>
+<span id="839">839</span>
+<span id="840">840</span>
+<span id="841">841</span>
+<span id="842">842</span>
+<span id="843">843</span>
+<span id="844">844</span>
+<span id="845">845</span>
+<span id="846">846</span>
+<span id="847">847</span>
+<span id="848">848</span>
+<span id="849">849</span>
+<span id="850">850</span>
+<span id="851">851</span>
+<span id="852">852</span>
+<span id="853">853</span>
+<span id="854">854</span>
+<span id="855">855</span>
+<span id="856">856</span>
+<span id="857">857</span>
+<span id="858">858</span>
+<span id="859">859</span>
+<span id="860">860</span>
+<span id="861">861</span>
+<span id="862">862</span>
+<span id="863">863</span>
+<span id="864">864</span>
+<span id="865">865</span>
+<span id="866">866</span>
+<span id="867">867</span>
+<span id="868">868</span>
+<span id="869">869</span>
+<span id="870">870</span>
+<span id="871">871</span>
+<span id="872">872</span>
+<span id="873">873</span>
+<span id="874">874</span>
+<span id="875">875</span>
+<span id="876">876</span>
+<span id="877">877</span>
+<span id="878">878</span>
+<span id="879">879</span>
+<span id="880">880</span>
+<span id="881">881</span>
+<span id="882">882</span>
+<span id="883">883</span>
+<span id="884">884</span>
+<span id="885">885</span>
+<span id="886">886</span>
+<span id="887">887</span>
+<span id="888">888</span>
+<span id="889">889</span>
+<span id="890">890</span>
+<span id="891">891</span>
+<span id="892">892</span>
+<span id="893">893</span>
+<span id="894">894</span>
+<span id="895">895</span>
+<span id="896">896</span>
+<span id="897">897</span>
+<span id="898">898</span>
+<span id="899">899</span>
+<span id="900">900</span>
+<span id="901">901</span>
+<span id="902">902</span>
+<span id="903">903</span>
+<span id="904">904</span>
+<span id="905">905</span>
+<span id="906">906</span>
+<span id="907">907</span>
+<span id="908">908</span>
+<span id="909">909</span>
+<span id="910">910</span>
+<span id="911">911</span>
+<span id="912">912</span>
+<span id="913">913</span>
+<span id="914">914</span>
+<span id="915">915</span>
+<span id="916">916</span>
+<span id="917">917</span>
+<span id="918">918</span>
+<span id="919">919</span>
+<span id="920">920</span>
+<span id="921">921</span>
+<span id="922">922</span>
+<span id="923">923</span>
+<span id="924">924</span>
+<span id="925">925</span>
+<span id="926">926</span>
+<span id="927">927</span>
+<span id="928">928</span>
+<span id="929">929</span>
+<span id="930">930</span>
+<span id="931">931</span>
+<span id="932">932</span>
+<span id="933">933</span>
+<span id="934">934</span>
+<span id="935">935</span>
+<span id="936">936</span>
+<span id="937">937</span>
+<span id="938">938</span>
+<span id="939">939</span>
+<span id="940">940</span>
+<span id="941">941</span>
+<span id="942">942</span>
+<span id="943">943</span>
+<span id="944">944</span>
+<span id="945">945</span>
+<span id="946">946</span>
+<span id="947">947</span>
+<span id="948">948</span>
+<span id="949">949</span>
+<span id="950">950</span>
+<span id="951">951</span>
+<span id="952">952</span>
+<span id="953">953</span>
+<span id="954">954</span>
+<span id="955">955</span>
+<span id="956">956</span>
+<span id="957">957</span>
+<span id="958">958</span>
+<span id="959">959</span>
+<span id="960">960</span>
+<span id="961">961</span>
+<span id="962">962</span>
+<span id="963">963</span>
+<span id="964">964</span>
+<span id="965">965</span>
+<span id="966">966</span>
+<span id="967">967</span>
+<span id="968">968</span>
+<span id="969">969</span>
+<span id="970">970</span>
+<span id="971">971</span>
+<span id="972">972</span>
+<span id="973">973</span>
+<span id="974">974</span>
+<span id="975">975</span>
+<span id="976">976</span>
+<span id="977">977</span>
+<span id="978">978</span>
+<span id="979">979</span>
+<span id="980">980</span>
+<span id="981">981</span>
+<span id="982">982</span>
+<span id="983">983</span>
+<span id="984">984</span>
+<span id="985">985</span>
+<span id="986">986</span>
+<span id="987">987</span>
+<span id="988">988</span>
+<span id="989">989</span>
+<span id="990">990</span>
+<span id="991">991</span>
+<span id="992">992</span>
+<span id="993">993</span>
+<span id="994">994</span>
+<span id="995">995</span>
+<span id="996">996</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Cow</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">StdError</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">future</span>::<span class="ident">Future</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">mem</span>;
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">net</span>::{<span class="ident">IpAddr</span>, <span class="ident">SocketAddr</span>};
-<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">time</span>::{<span class="ident">Duration</span>, <span class="ident">Instant</span>};
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">marker</span>::<span class="ident">PhantomData</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">net</span>::{<span class="ident">IpAddr</span>, <span class="ident">Ipv4Addr</span>, <span class="ident">Ipv6Addr</span>, <span class="ident">SocketAddr</span>};
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">pin</span>::<span class="ident">Pin</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">Arc</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">task</span>::{<span class="self">self</span>, <span class="ident">Poll</span>};
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">Duration</span>;
 
-<span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">Async</span>, <span class="ident">Future</span>, <span class="ident">Poll</span>};
-<span class="kw">use</span> <span class="ident">futures</span>::<span class="ident">future</span>::{<span class="ident">Executor</span>};
-<span class="kw">use</span> <span class="ident">http</span>::<span class="ident">uri</span>::<span class="ident">Scheme</span>;
-<span class="kw">use</span> <span class="ident">net2</span>::<span class="ident">TcpBuilder</span>;
-<span class="kw">use</span> <span class="ident">tokio_reactor</span>::<span class="ident">Handle</span>;
-<span class="kw">use</span> <span class="ident">tokio_tcp</span>::{<span class="ident">TcpStream</span>, <span class="ident">ConnectFuture</span>};
-<span class="kw">use</span> <span class="ident">tokio_timer</span>::<span class="ident">Delay</span>;
+<span class="kw">use</span> <span class="ident">futures_util</span>::<span class="ident">future</span>::<span class="ident">Either</span>;
+<span class="kw">use</span> <span class="ident">http</span>::<span class="ident">uri</span>::{<span class="ident">Scheme</span>, <span class="ident">Uri</span>};
+<span class="kw">use</span> <span class="ident">pin_project</span>::<span class="ident">pin_project</span>;
+<span class="kw">use</span> <span class="ident">tokio</span>::<span class="ident">net</span>::<span class="ident">TcpStream</span>;
+<span class="kw">use</span> <span class="ident">tokio</span>::<span class="ident">time</span>::<span class="ident">Delay</span>;
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Connect</span>, <span class="ident">Connected</span>, <span class="ident">Destination</span>};
-<span class="kw">use</span> <span class="kw">super</span>::<span class="ident">dns</span>::{<span class="self">self</span>, <span class="ident">GaiResolver</span>, <span class="ident">Resolve</span>, <span class="ident">TokioThreadpoolGaiResolver</span>};
+<span class="kw">use</span> <span class="kw">super</span>::<span class="ident">dns</span>::{<span class="self">self</span>, <span class="ident">resolve</span>, <span class="ident">GaiResolver</span>, <span class="ident">Resolve</span>};
+<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Connected</span>, <span class="ident">Connection</span>};
+<span class="comment">//#[cfg(feature = &quot;runtime&quot;)] use super::dns::TokioThreadpoolGaiResolver;</span>
 
 <span class="doccomment">/// A connector for the `http` scheme.</span>
 <span class="doccomment">///</span>
@@ -811,16 +1026,8 @@
 <span class="doccomment">/// transport information such as the remote socket address used.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HttpConnector</span><span class="op">&lt;</span><span class="ident">R</span> <span class="op">=</span> <span class="ident">GaiResolver</span><span class="op">&gt;</span> {
-    <span class="ident">enforce_http</span>: <span class="ident">bool</span>,
-    <span class="ident">handle</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Handle</span><span class="op">&gt;</span>,
-    <span class="ident">happy_eyeballs_timeout</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>,
-    <span class="ident">keep_alive_timeout</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>,
-    <span class="ident">local_address</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IpAddr</span><span class="op">&gt;</span>,
-    <span class="ident">nodelay</span>: <span class="ident">bool</span>,
+    <span class="ident">config</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Config</span><span class="op">&gt;</span>,
     <span class="ident">resolver</span>: <span class="ident">R</span>,
-    <span class="ident">reuse_address</span>: <span class="ident">bool</span>,
-    <span class="ident">send_buffer_size</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
-    <span class="ident">recv_buffer_size</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
 }
 
 <span class="doccomment">/// Extra information about the transport when an HttpConnector is used.</span>
@@ -828,21 +1035,22 @@
 <span class="doccomment">/// # Example</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
+<span class="doccomment">/// # async fn doc() -&gt; hyper::Result&lt;()&gt; {</span>
 <span class="doccomment">/// use hyper::Uri;</span>
 <span class="doccomment">/// use hyper::client::{Client, connect::HttpInfo};</span>
-<span class="doccomment">/// use hyper::rt::Future;</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let client = Client::new();</span>
+<span class="doccomment">/// let uri = Uri::from_static(&quot;http://example.com&quot;);</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// let fut = client.get(Uri::from_static(&quot;http://example.local&quot;))</span>
-<span class="doccomment">///     .inspect(|resp| {</span>
-<span class="doccomment">///         resp</span>
-<span class="doccomment">///             .extensions()</span>
-<span class="doccomment">///             .get::&lt;HttpInfo&gt;()</span>
-<span class="doccomment">///             .map(|info| {</span>
-<span class="doccomment">///                 println!(&quot;remote addr = {}&quot;, info.remote_addr());</span>
-<span class="doccomment">///             });</span>
+<span class="doccomment">/// let res = client.get(uri).await?;</span>
+<span class="doccomment">/// res</span>
+<span class="doccomment">///     .extensions()</span>
+<span class="doccomment">///     .get::&lt;HttpInfo&gt;()</span>
+<span class="doccomment">///     .map(|info| {</span>
+<span class="doccomment">///         println!(&quot;remote addr = {}&quot;, info.remote_addr());</span>
 <span class="doccomment">///     });</span>
+<span class="doccomment">/// # Ok(())</span>
+<span class="doccomment">/// # }</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// # Note</span>
@@ -855,63 +1063,60 @@
     <span class="ident">remote_addr</span>: <span class="ident">SocketAddr</span>,
 }
 
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="kw">struct</span> <span class="ident">Config</span> {
+    <span class="ident">connect_timeout</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>,
+    <span class="ident">enforce_http</span>: <span class="ident">bool</span>,
+    <span class="ident">happy_eyeballs_timeout</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>,
+    <span class="ident">keep_alive_timeout</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>,
+    <span class="ident">local_address_ipv4</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ipv4Addr</span><span class="op">&gt;</span>,
+    <span class="ident">local_address_ipv6</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ipv6Addr</span><span class="op">&gt;</span>,
+    <span class="ident">nodelay</span>: <span class="ident">bool</span>,
+    <span class="ident">reuse_address</span>: <span class="ident">bool</span>,
+    <span class="ident">send_buffer_size</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
+    <span class="ident">recv_buffer_size</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
+}
+
+<span class="comment">// ===== impl HttpConnector =====</span>
+
 <span class="kw">impl</span> <span class="ident">HttpConnector</span> {
     <span class="doccomment">/// Construct a new HttpConnector.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Takes number of DNS worker threads.</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">threads</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HttpConnector</span> {
-        <span class="ident">HttpConnector</span>::<span class="ident">new_with_resolver</span>(<span class="ident">GaiResolver</span>::<span class="ident">new</span>(<span class="ident">threads</span>))
-    }
-
-    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-    <span class="attribute">#[<span class="ident">deprecated</span>(<span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;Use HttpConnector::set_reactor to set a reactor handle&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_handle</span>(<span class="ident">threads</span>: <span class="ident">usize</span>, <span class="ident">handle</span>: <span class="ident">Handle</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HttpConnector</span> {
-        <span class="kw">let</span> <span class="ident">resolver</span> <span class="op">=</span> <span class="ident">GaiResolver</span>::<span class="ident">new</span>(<span class="ident">threads</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">http</span> <span class="op">=</span> <span class="ident">HttpConnector</span>::<span class="ident">new_with_resolver</span>(<span class="ident">resolver</span>);
-        <span class="ident">http</span>.<span class="ident">set_reactor</span>(<span class="prelude-val">Some</span>(<span class="ident">handle</span>));
-        <span class="ident">http</span>
-    }
-
-    <span class="doccomment">/// Construct a new HttpConnector.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Takes an executor to run blocking `getaddrinfo` tasks on.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_executor</span><span class="op">&lt;</span><span class="ident">E</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="ident">executor</span>: <span class="ident">E</span>, <span class="ident">handle</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Handle</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HttpConnector</span>
-        <span class="kw">where</span> <span class="ident">E</span>: <span class="ident">Executor</span><span class="op">&lt;</span><span class="ident">dns</span>::<span class="ident">sealed</span>::<span class="ident">GaiTask</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span>
-    {
-        <span class="kw">let</span> <span class="ident">resolver</span> <span class="op">=</span> <span class="ident">GaiResolver</span>::<span class="ident">new_with_executor</span>(<span class="ident">executor</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">http</span> <span class="op">=</span> <span class="ident">HttpConnector</span>::<span class="ident">new_with_resolver</span>(<span class="ident">resolver</span>);
-        <span class="ident">http</span>.<span class="ident">set_reactor</span>(<span class="ident">handle</span>);
-        <span class="ident">http</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HttpConnector</span> {
+        <span class="ident">HttpConnector</span>::<span class="ident">new_with_resolver</span>(<span class="ident">GaiResolver</span>::<span class="ident">new</span>())
     }
 }
 
-<span class="kw">impl</span> <span class="ident">HttpConnector</span><span class="op">&lt;</span><span class="ident">TokioThreadpoolGaiResolver</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// Construct a new HttpConnector using the `TokioThreadpoolGaiResolver`.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// This resolver **requires** the threadpool runtime to be used.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_tokio_threadpool_resolver</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-        <span class="ident">HttpConnector</span>::<span class="ident">new_with_resolver</span>(<span class="ident">TokioThreadpoolGaiResolver</span>::<span class="ident">new</span>())
+<span class="comment">/*
+#[cfg(feature = &quot;runtime&quot;)]
+impl HttpConnector&lt;TokioThreadpoolGaiResolver&gt; {
+    /// Construct a new HttpConnector using the `TokioThreadpoolGaiResolver`.
+    ///
+    /// This resolver **requires** the threadpool runtime to be used.
+    pub fn new_with_tokio_threadpool_resolver() -&gt; Self {
+        HttpConnector::new_with_resolver(TokioThreadpoolGaiResolver::new())
     }
 }
-
+*/</span>
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="ident">HttpConnector</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Construct a new HttpConnector.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Takes a `Resolve` to handle DNS lookups.</span>
+    <span class="doccomment">/// Takes a [`Resolver`](crate::client::connect::dns#resolvers-are-services) to handle DNS lookups.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_resolver</span>(<span class="ident">resolver</span>: <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HttpConnector</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> {
         <span class="ident">HttpConnector</span> {
-            <span class="ident">enforce_http</span>: <span class="bool-val">true</span>,
-            <span class="ident">handle</span>: <span class="prelude-val">None</span>,
-            <span class="ident">happy_eyeballs_timeout</span>: <span class="prelude-val">Some</span>(<span class="ident">Duration</span>::<span class="ident">from_millis</span>(<span class="number">300</span>)),
-            <span class="ident">keep_alive_timeout</span>: <span class="prelude-val">None</span>,
-            <span class="ident">local_address</span>: <span class="prelude-val">None</span>,
-            <span class="ident">nodelay</span>: <span class="bool-val">false</span>,
+            <span class="ident">config</span>: <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="ident">Config</span> {
+                <span class="ident">connect_timeout</span>: <span class="prelude-val">None</span>,
+                <span class="ident">enforce_http</span>: <span class="bool-val">true</span>,
+                <span class="ident">happy_eyeballs_timeout</span>: <span class="prelude-val">Some</span>(<span class="ident">Duration</span>::<span class="ident">from_millis</span>(<span class="number">300</span>)),
+                <span class="ident">keep_alive_timeout</span>: <span class="prelude-val">None</span>,
+                <span class="ident">local_address_ipv4</span>: <span class="prelude-val">None</span>,
+                <span class="ident">local_address_ipv6</span>: <span class="prelude-val">None</span>,
+                <span class="ident">nodelay</span>: <span class="bool-val">false</span>,
+                <span class="ident">reuse_address</span>: <span class="bool-val">false</span>,
+                <span class="ident">send_buffer_size</span>: <span class="prelude-val">None</span>,
+                <span class="ident">recv_buffer_size</span>: <span class="prelude-val">None</span>,
+            }),
             <span class="ident">resolver</span>,
-            <span class="ident">reuse_address</span>: <span class="bool-val">false</span>,
-            <span class="ident">send_buffer_size</span>: <span class="prelude-val">None</span>,
-            <span class="ident">recv_buffer_size</span>: <span class="prelude-val">None</span>,
         }
     }
 
@@ -920,15 +1125,7 @@
     <span class="doccomment">/// Enabled by default.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">enforce_http</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">is_enforced</span>: <span class="ident">bool</span>) {
-        <span class="self">self</span>.<span class="ident">enforce_http</span> <span class="op">=</span> <span class="ident">is_enforced</span>;
-    }
-
-    <span class="doccomment">/// Set a handle to a `Reactor` to register connections to.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// If `None`, the implicit default reactor will be used.</span>
-    <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_reactor</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">handle</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Handle</span><span class="op">&gt;</span>) {
-        <span class="self">self</span>.<span class="ident">handle</span> <span class="op">=</span> <span class="ident">handle</span>;
+        <span class="self">self</span>.<span class="ident">config_mut</span>().<span class="ident">enforce_http</span> <span class="op">=</span> <span class="ident">is_enforced</span>;
     }
 
     <span class="doccomment">/// Set that all sockets have `SO_KEEPALIVE` set with the supplied duration.</span>
@@ -938,7 +1135,7 @@
     <span class="doccomment">/// Default is `None`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_keepalive</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">dur</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>) {
-        <span class="self">self</span>.<span class="ident">keep_alive_timeout</span> <span class="op">=</span> <span class="ident">dur</span>;
+        <span class="self">self</span>.<span class="ident">config_mut</span>().<span class="ident">keep_alive_timeout</span> <span class="op">=</span> <span class="ident">dur</span>;
     }
 
     <span class="doccomment">/// Set that all sockets have `SO_NODELAY` set to the supplied value `nodelay`.</span>
@@ -946,19 +1143,19 @@
     <span class="doccomment">/// Default is `false`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_nodelay</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">nodelay</span>: <span class="ident">bool</span>) {
-        <span class="self">self</span>.<span class="ident">nodelay</span> <span class="op">=</span> <span class="ident">nodelay</span>;
+        <span class="self">self</span>.<span class="ident">config_mut</span>().<span class="ident">nodelay</span> <span class="op">=</span> <span class="ident">nodelay</span>;
     }
 
     <span class="doccomment">/// Sets the value of the SO_SNDBUF option on the socket.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_send_buffer_size</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">size</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) {
-        <span class="self">self</span>.<span class="ident">send_buffer_size</span> <span class="op">=</span> <span class="ident">size</span>;
+        <span class="self">self</span>.<span class="ident">config_mut</span>().<span class="ident">send_buffer_size</span> <span class="op">=</span> <span class="ident">size</span>;
     }
 
     <span class="doccomment">/// Sets the value of the SO_RCVBUF option on the socket.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_recv_buffer_size</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">size</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) {
-        <span class="self">self</span>.<span class="ident">recv_buffer_size</span> <span class="op">=</span> <span class="ident">size</span>;
+        <span class="self">self</span>.<span class="ident">config_mut</span>().<span class="ident">recv_buffer_size</span> <span class="op">=</span> <span class="ident">size</span>;
     }
 
     <span class="doccomment">/// Set that all sockets are bound to the configured address before connection.</span>
@@ -968,7 +1165,37 @@
     <span class="doccomment">/// Default is `None`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_local_address</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">addr</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IpAddr</span><span class="op">&gt;</span>) {
-        <span class="self">self</span>.<span class="ident">local_address</span> <span class="op">=</span> <span class="ident">addr</span>;
+        <span class="kw">let</span> (<span class="ident">v4</span>, <span class="ident">v6</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">addr</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">IpAddr</span>::<span class="ident">V4</span>(<span class="ident">a</span>)) <span class="op">=</span><span class="op">&gt;</span> (<span class="prelude-val">Some</span>(<span class="ident">a</span>), <span class="prelude-val">None</span>),
+            <span class="prelude-val">Some</span>(<span class="ident">IpAddr</span>::<span class="ident">V6</span>(<span class="ident">a</span>)) <span class="op">=</span><span class="op">&gt;</span> (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="ident">a</span>)),
+            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>),
+        };
+
+        <span class="kw">let</span> <span class="ident">cfg</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_mut</span>();
+
+        <span class="ident">cfg</span>.<span class="ident">local_address_ipv4</span> <span class="op">=</span> <span class="ident">v4</span>;
+        <span class="ident">cfg</span>.<span class="ident">local_address_ipv6</span> <span class="op">=</span> <span class="ident">v6</span>;
+    }
+
+    <span class="doccomment">/// Set that all sockets are bound to the configured IPv4 or IPv6 address (depending on host&#39;s</span>
+    <span class="doccomment">/// preferences) before connection.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_local_addresses</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">addr_ipv4</span>: <span class="ident">Ipv4Addr</span>, <span class="ident">addr_ipv6</span>: <span class="ident">Ipv6Addr</span>) {
+        <span class="kw">let</span> <span class="ident">cfg</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config_mut</span>();
+
+        <span class="ident">cfg</span>.<span class="ident">local_address_ipv4</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">addr_ipv4</span>);
+        <span class="ident">cfg</span>.<span class="ident">local_address_ipv6</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">addr_ipv6</span>);
+    }
+
+    <span class="doccomment">/// Set the connect timeout.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// If a domain resolves to multiple IP addresses, the timeout will be</span>
+    <span class="doccomment">/// evenly divided across them.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Default is `None`.</span>
+    <span class="attribute">#[<span class="ident">inline</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_connect_timeout</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">dur</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>) {
+        <span class="self">self</span>.<span class="ident">config_mut</span>().<span class="ident">connect_timeout</span> <span class="op">=</span> <span class="ident">dur</span>;
     }
 
     <span class="doccomment">/// Set timeout for [RFC 6555 (Happy Eyeballs)][RFC 6555] algorithm.</span>
@@ -985,7 +1212,7 @@
     <span class="doccomment">/// [RFC 6555]: https://tools.ietf.org/html/rfc6555</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_happy_eyeballs_timeout</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">dur</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>) {
-        <span class="self">self</span>.<span class="ident">happy_eyeballs_timeout</span> <span class="op">=</span> <span class="ident">dur</span>;
+        <span class="self">self</span>.<span class="ident">config_mut</span>().<span class="ident">happy_eyeballs_timeout</span> <span class="op">=</span> <span class="ident">dur</span>;
     }
 
     <span class="doccomment">/// Set that all socket have `SO_REUSEADDR` set to the supplied value `reuse_address`.</span>
@@ -993,63 +1220,157 @@
     <span class="doccomment">/// Default is `false`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_reuse_address</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">reuse_address</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">reuse_address</span> <span class="op">=</span> <span class="ident">reuse_address</span>;
+        <span class="self">self</span>.<span class="ident">config_mut</span>().<span class="ident">reuse_address</span> <span class="op">=</span> <span class="ident">reuse_address</span>;
         <span class="self">self</span>
     }
+
+    <span class="comment">// private</span>
+
+    <span class="kw">fn</span> <span class="ident">config_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Config</span> {
+        <span class="comment">// If the are HttpConnector clones, this will clone the inner</span>
+        <span class="comment">// config. So mutating the config won&#39;t ever affect previous</span>
+        <span class="comment">// clones.</span>
+        <span class="ident">Arc</span>::<span class="ident">make_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">config</span>)
+    }
 }
+
+<span class="kw">static</span> <span class="ident">INVALID_NOT_HTTP</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;invalid URL, scheme is not http&quot;</span>;
+<span class="kw">static</span> <span class="ident">INVALID_MISSING_SCHEME</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;invalid URL, scheme is missing&quot;</span>;
+<span class="kw">static</span> <span class="ident">INVALID_MISSING_HOST</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;invalid URL, host is missing&quot;</span>;
 
 <span class="comment">// R: Debug required for now to allow adding it to debug output later...</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">fmt</span>::<span class="ident">Debug</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">HttpConnector</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
-        <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;HttpConnector&quot;</span>)
-            .<span class="ident">finish</span>()
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
+        <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;HttpConnector&quot;</span>).<span class="ident">finish</span>()
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="ident">Connect</span> <span class="kw">for</span> <span class="ident">HttpConnector</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="ident">tower_service</span>::<span class="ident">Service</span><span class="op">&lt;</span><span class="ident">Uri</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">HttpConnector</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">R</span>: <span class="ident">Resolve</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span>,
+    <span class="ident">R</span>: <span class="ident">Resolve</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
     <span class="ident">R</span>::<span class="ident">Future</span>: <span class="ident">Send</span>,
 {
-    <span class="kw">type</span> <span class="ident">Transport</span> <span class="op">=</span> <span class="ident">TcpStream</span>;
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">io</span>::<span class="ident">Error</span>;
+    <span class="kw">type</span> <span class="ident">Response</span> <span class="op">=</span> <span class="ident">TcpStream</span>;
+    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">ConnectError</span>;
     <span class="kw">type</span> <span class="ident">Future</span> <span class="op">=</span> <span class="ident">HttpConnecting</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">connect</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dst</span>: <span class="ident">Destination</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">Future</span> {
+    <span class="kw">fn</span> <span class="ident">poll_ready</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task</span>::<span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="macro">ready</span><span class="macro">!</span>(<span class="self">self</span>.<span class="ident">resolver</span>.<span class="ident">poll_ready</span>(<span class="ident">cx</span>)).<span class="ident">map_err</span>(<span class="ident">ConnectError</span>::<span class="ident">dns</span>)<span class="question-mark">?</span>;
+        <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Ok</span>(()))
+    }
+
+    <span class="kw">fn</span> <span class="ident">call</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">dst</span>: <span class="ident">Uri</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">Future</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">self_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">clone</span>();
+        <span class="ident">HttpConnecting</span> {
+            <span class="ident">fut</span>: <span class="ident">Box</span>::<span class="ident">pin</span>(<span class="kw">async</span> <span class="kw">move</span> { <span class="ident">self_</span>.<span class="ident">call_async</span>(<span class="ident">dst</span>).<span class="kw">await</span> }),
+            <span class="ident">_marker</span>: <span class="ident">PhantomData</span>,
+        }
+    }
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="ident">HttpConnector</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+    <span class="ident">R</span>: <span class="ident">Resolve</span>,
+{
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">call_async</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">dst</span>: <span class="ident">Uri</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TcpStream</span>, <span class="ident">ConnectError</span><span class="op">&gt;</span> {
         <span class="macro">trace</span><span class="macro">!</span>(
-            <span class="string">&quot;Http::connect; scheme={}, host={}, port={:?}&quot;</span>,
+            <span class="string">&quot;Http::connect; scheme={:?}, host={:?}, port={:?}&quot;</span>,
             <span class="ident">dst</span>.<span class="ident">scheme</span>(),
             <span class="ident">dst</span>.<span class="ident">host</span>(),
             <span class="ident">dst</span>.<span class="ident">port</span>(),
         );
 
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">enforce_http</span> {
-            <span class="kw">if</span> <span class="ident">dst</span>.<span class="ident">uri</span>.<span class="ident">scheme_part</span>() <span class="op">!</span><span class="op">=</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">Scheme</span>::<span class="ident">HTTP</span>) {
-                <span class="kw">return</span> <span class="ident">invalid_url</span>(<span class="ident">InvalidUrl</span>::<span class="ident">NotHttp</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">handle</span>);
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">enforce_http</span> {
+            <span class="kw">if</span> <span class="ident">dst</span>.<span class="ident">scheme</span>() <span class="op">!</span><span class="op">=</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">Scheme</span>::<span class="ident">HTTP</span>) {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ConnectError</span> {
+                    <span class="ident">msg</span>: <span class="ident">INVALID_NOT_HTTP</span>.<span class="ident">into</span>(),
+                    <span class="ident">cause</span>: <span class="prelude-val">None</span>,
+                });
             }
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">dst</span>.<span class="ident">uri</span>.<span class="ident">scheme_part</span>().<span class="ident">is_none</span>() {
-            <span class="kw">return</span> <span class="ident">invalid_url</span>(<span class="ident">InvalidUrl</span>::<span class="ident">MissingScheme</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">handle</span>);
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">dst</span>.<span class="ident">scheme</span>().<span class="ident">is_none</span>() {
+            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ConnectError</span> {
+                <span class="ident">msg</span>: <span class="ident">INVALID_MISSING_SCHEME</span>.<span class="ident">into</span>(),
+                <span class="ident">cause</span>: <span class="prelude-val">None</span>,
+            });
         }
 
-        <span class="kw">let</span> <span class="ident">host</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">dst</span>.<span class="ident">uri</span>.<span class="ident">host</span>() {
+        <span class="kw">let</span> <span class="ident">host</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">dst</span>.<span class="ident">host</span>() {
             <span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>,
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">invalid_url</span>(<span class="ident">InvalidUrl</span>::<span class="ident">MissingAuthority</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">handle</span>),
+            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ConnectError</span> {
+                    <span class="ident">msg</span>: <span class="ident">INVALID_MISSING_HOST</span>.<span class="ident">into</span>(),
+                    <span class="ident">cause</span>: <span class="prelude-val">None</span>,
+                })
+            }
         };
-        <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">dst</span>.<span class="ident">uri</span>.<span class="ident">port_part</span>() {
+        <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">dst</span>.<span class="ident">port</span>() {
             <span class="prelude-val">Some</span>(<span class="ident">port</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">port</span>.<span class="ident">as_u16</span>(),
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">if</span> <span class="ident">dst</span>.<span class="ident">uri</span>.<span class="ident">scheme_part</span>() <span class="op">=</span><span class="op">=</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">Scheme</span>::<span class="ident">HTTPS</span>) { <span class="number">443</span> } <span class="kw">else</span> { <span class="number">80</span> },
+            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">if</span> <span class="ident">dst</span>.<span class="ident">scheme</span>() <span class="op">=</span><span class="op">=</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">Scheme</span>::<span class="ident">HTTPS</span>) {
+                    <span class="number">443</span>
+                } <span class="kw">else</span> {
+                    <span class="number">80</span>
+                }
+            }
         };
 
-        <span class="ident">HttpConnecting</span> {
-            <span class="ident">state</span>: <span class="ident">State</span>::<span class="ident">Lazy</span>(<span class="self">self</span>.<span class="ident">resolver</span>.<span class="ident">clone</span>(), <span class="ident">host</span>.<span class="ident">into</span>(), <span class="self">self</span>.<span class="ident">local_address</span>),
-            <span class="ident">handle</span>: <span class="self">self</span>.<span class="ident">handle</span>.<span class="ident">clone</span>(),
-            <span class="ident">happy_eyeballs_timeout</span>: <span class="self">self</span>.<span class="ident">happy_eyeballs_timeout</span>,
-            <span class="ident">keep_alive_timeout</span>: <span class="self">self</span>.<span class="ident">keep_alive_timeout</span>,
-            <span class="ident">nodelay</span>: <span class="self">self</span>.<span class="ident">nodelay</span>,
-            <span class="ident">port</span>,
-            <span class="ident">reuse_address</span>: <span class="self">self</span>.<span class="ident">reuse_address</span>,
-            <span class="ident">send_buffer_size</span>: <span class="self">self</span>.<span class="ident">send_buffer_size</span>,
-            <span class="ident">recv_buffer_size</span>: <span class="self">self</span>.<span class="ident">recv_buffer_size</span>,
+        <span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">config</span>;
+
+        <span class="comment">// If the host is already an IP addr (v4 or v6),</span>
+        <span class="comment">// skip resolving the dns and start connecting right away.</span>
+        <span class="kw">let</span> <span class="ident">addrs</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">addrs</span>) <span class="op">=</span> <span class="ident">dns</span>::<span class="ident">IpAddrs</span>::<span class="ident">try_parse</span>(<span class="ident">host</span>, <span class="ident">port</span>) {
+            <span class="ident">addrs</span>
+        } <span class="kw">else</span> {
+            <span class="kw">let</span> <span class="ident">addrs</span> <span class="op">=</span> <span class="ident">resolve</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">resolver</span>, <span class="ident">dns</span>::<span class="ident">Name</span>::<span class="ident">new</span>(<span class="ident">host</span>.<span class="ident">into</span>()))
+                .<span class="kw">await</span>
+                .<span class="ident">map_err</span>(<span class="ident">ConnectError</span>::<span class="ident">dns</span>)<span class="question-mark">?</span>;
+            <span class="kw">let</span> <span class="ident">addrs</span> <span class="op">=</span> <span class="ident">addrs</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">addr</span><span class="op">|</span> <span class="ident">SocketAddr</span>::<span class="ident">new</span>(<span class="ident">addr</span>, <span class="ident">port</span>)).<span class="ident">collect</span>();
+            <span class="ident">dns</span>::<span class="ident">IpAddrs</span>::<span class="ident">new</span>(<span class="ident">addrs</span>)
+        };
+
+        <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">ConnectingTcp</span>::<span class="ident">new</span>(
+            <span class="ident">config</span>.<span class="ident">local_address_ipv4</span>,
+            <span class="ident">config</span>.<span class="ident">local_address_ipv6</span>,
+            <span class="ident">addrs</span>,
+            <span class="ident">config</span>.<span class="ident">connect_timeout</span>,
+            <span class="ident">config</span>.<span class="ident">happy_eyeballs_timeout</span>,
+            <span class="ident">config</span>.<span class="ident">reuse_address</span>,
+        );
+
+        <span class="kw">let</span> <span class="ident">sock</span> <span class="op">=</span> <span class="ident">c</span>
+            .<span class="ident">connect</span>()
+            .<span class="kw">await</span>
+            .<span class="ident">map_err</span>(<span class="ident">ConnectError</span>::<span class="ident">m</span>(<span class="string">&quot;tcp connect error&quot;</span>))<span class="question-mark">?</span>;
+
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">dur</span>) <span class="op">=</span> <span class="ident">config</span>.<span class="ident">keep_alive_timeout</span> {
+            <span class="ident">sock</span>.<span class="ident">set_keepalive</span>(<span class="prelude-val">Some</span>(<span class="ident">dur</span>))
+                .<span class="ident">map_err</span>(<span class="ident">ConnectError</span>::<span class="ident">m</span>(<span class="string">&quot;tcp set_keepalive error&quot;</span>))<span class="question-mark">?</span>;
+        }
+
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">size</span>) <span class="op">=</span> <span class="ident">config</span>.<span class="ident">send_buffer_size</span> {
+            <span class="ident">sock</span>.<span class="ident">set_send_buffer_size</span>(<span class="ident">size</span>)
+                .<span class="ident">map_err</span>(<span class="ident">ConnectError</span>::<span class="ident">m</span>(<span class="string">&quot;tcp set_send_buffer_size error&quot;</span>))<span class="question-mark">?</span>;
+        }
+
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">size</span>) <span class="op">=</span> <span class="ident">config</span>.<span class="ident">recv_buffer_size</span> {
+            <span class="ident">sock</span>.<span class="ident">set_recv_buffer_size</span>(<span class="ident">size</span>)
+                .<span class="ident">map_err</span>(<span class="ident">ConnectError</span>::<span class="ident">m</span>(<span class="string">&quot;tcp set_recv_buffer_size error&quot;</span>))<span class="question-mark">?</span>;
+        }
+
+        <span class="ident">sock</span>.<span class="ident">set_nodelay</span>(<span class="ident">config</span>.<span class="ident">nodelay</span>)
+            .<span class="ident">map_err</span>(<span class="ident">ConnectError</span>::<span class="ident">m</span>(<span class="string">&quot;tcp set_nodelay error&quot;</span>))<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(<span class="ident">sock</span>)
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">Connection</span> <span class="kw">for</span> <span class="ident">TcpStream</span> {
+    <span class="kw">fn</span> <span class="ident">connected</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Connected</span> {
+        <span class="kw">let</span> <span class="ident">connected</span> <span class="op">=</span> <span class="ident">Connected</span>::<span class="ident">new</span>();
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">remote_addr</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">peer_addr</span>() {
+            <span class="ident">connected</span>.<span class="ident">extra</span>(<span class="ident">HttpInfo</span> { <span class="ident">remote_addr</span> })
+        } <span class="kw">else</span> {
+            <span class="ident">connected</span>
         }
     }
 }
@@ -1061,137 +1382,99 @@
     }
 }
 
-<span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">invalid_url</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Resolve</span><span class="op">&gt;</span>(<span class="ident">err</span>: <span class="ident">InvalidUrl</span>, <span class="ident">handle</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Handle</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HttpConnecting</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> {
-    <span class="ident">HttpConnecting</span> {
-        <span class="ident">state</span>: <span class="ident">State</span>::<span class="ident">Error</span>(<span class="prelude-val">Some</span>(<span class="ident">io</span>::<span class="ident">Error</span>::<span class="ident">new</span>(<span class="ident">io</span>::<span class="ident">ErrorKind</span>::<span class="ident">InvalidInput</span>, <span class="ident">err</span>))),
-        <span class="ident">handle</span>: <span class="ident">handle</span>.<span class="ident">clone</span>(),
-        <span class="ident">keep_alive_timeout</span>: <span class="prelude-val">None</span>,
-        <span class="ident">nodelay</span>: <span class="bool-val">false</span>,
-        <span class="ident">port</span>: <span class="number">0</span>,
-        <span class="ident">happy_eyeballs_timeout</span>: <span class="prelude-val">None</span>,
-        <span class="ident">reuse_address</span>: <span class="bool-val">false</span>,
-        <span class="ident">send_buffer_size</span>: <span class="prelude-val">None</span>,
-        <span class="ident">recv_buffer_size</span>: <span class="prelude-val">None</span>,
-    }
-}
-
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>)]</span>
-<span class="kw">enum</span> <span class="ident">InvalidUrl</span> {
-    <span class="ident">MissingScheme</span>,
-    <span class="ident">NotHttp</span>,
-    <span class="ident">MissingAuthority</span>,
-}
-
-<span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Display</span> <span class="kw">for</span> <span class="ident">InvalidUrl</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
-        <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="self">self</span>.<span class="ident">description</span>())
-    }
-}
-
-<span class="kw">impl</span> <span class="ident">StdError</span> <span class="kw">for</span> <span class="ident">InvalidUrl</span> {
-    <span class="kw">fn</span> <span class="ident">description</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">str</span> {
-        <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="ident">InvalidUrl</span>::<span class="ident">MissingScheme</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;invalid URL, missing scheme&quot;</span>,
-            <span class="ident">InvalidUrl</span>::<span class="ident">NotHttp</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;invalid URL, scheme must be http&quot;</span>,
-            <span class="ident">InvalidUrl</span>::<span class="ident">MissingAuthority</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;invalid URL, missing domain&quot;</span>,
-        }
-    }
-}
-<span class="doccomment">/// A Future representing work to connect to a URL.</span>
+<span class="comment">// Not publicly exported (so missing_docs doesn&#39;t trigger).</span>
+<span class="comment">//</span>
+<span class="comment">// We return this `Future` instead of the `Pin&lt;Box&lt;dyn Future&gt;&gt;` directly</span>
+<span class="comment">// so that users don&#39;t rely on it fitting in a `Pin&lt;Box&lt;dyn Future&gt;&gt;` slot</span>
+<span class="comment">// (and thus we can change the type in the future).</span>
 <span class="attribute">#[<span class="ident">must_use</span> <span class="op">=</span> <span class="string">&quot;futures do nothing unless polled&quot;</span>]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HttpConnecting</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Resolve</span> <span class="op">=</span> <span class="ident">GaiResolver</span><span class="op">&gt;</span> {
-    <span class="ident">state</span>: <span class="ident">State</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>,
-    <span class="ident">handle</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Handle</span><span class="op">&gt;</span>,
-    <span class="ident">happy_eyeballs_timeout</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>,
-    <span class="ident">keep_alive_timeout</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>,
-    <span class="ident">nodelay</span>: <span class="ident">bool</span>,
-    <span class="ident">port</span>: <span class="ident">u16</span>,
-    <span class="ident">reuse_address</span>: <span class="ident">bool</span>,
-    <span class="ident">send_buffer_size</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
-    <span class="ident">recv_buffer_size</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
+<span class="attribute">#[<span class="ident">pin_project</span>]</span>
+<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_debug_implementations</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">HttpConnecting</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">pin</span>]</span>
+    <span class="ident">fut</span>: <span class="ident">BoxConnecting</span>,
+    <span class="ident">_marker</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">enum</span> <span class="ident">State</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Resolve</span><span class="op">&gt;</span> {
-    <span class="ident">Lazy</span>(<span class="ident">R</span>, <span class="ident">String</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IpAddr</span><span class="op">&gt;</span>),
-    <span class="ident">Resolving</span>(<span class="ident">R</span>::<span class="ident">Future</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IpAddr</span><span class="op">&gt;</span>),
-    <span class="ident">Connecting</span>(<span class="ident">ConnectingTcp</span>),
-    <span class="ident">Error</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">io</span>::<span class="ident">Error</span><span class="op">&gt;</span>),
-}
+<span class="kw">type</span> <span class="ident">ConnectResult</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TcpStream</span>, <span class="ident">ConnectError</span><span class="op">&gt;</span>;
+<span class="kw">type</span> <span class="ident">BoxConnecting</span> <span class="op">=</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">ConnectResult</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Resolve</span><span class="op">&gt;</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">HttpConnecting</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> {
-    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> (<span class="ident">TcpStream</span>, <span class="ident">Connected</span>);
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">io</span>::<span class="ident">Error</span>;
+    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">ConnectResult</span>;
 
-    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span>, <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">loop</span> {
-            <span class="kw">let</span> <span class="ident">state</span>;
-            <span class="kw">match</span> <span class="self">self</span>.<span class="ident">state</span> {
-                <span class="ident">State</span>::<span class="ident">Lazy</span>(<span class="kw-2">ref</span> <span class="ident">resolver</span>, <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">host</span>, <span class="ident">local_addr</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="comment">// If the host is already an IP addr (v4 or v6),</span>
-                    <span class="comment">// skip resolving the dns and start connecting right away.</span>
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">addrs</span>) <span class="op">=</span> <span class="ident">dns</span>::<span class="ident">IpAddrs</span>::<span class="ident">try_parse</span>(<span class="ident">host</span>, <span class="self">self</span>.<span class="ident">port</span>) {
-                        <span class="ident">state</span> <span class="op">=</span> <span class="ident">State</span>::<span class="ident">Connecting</span>(<span class="ident">ConnectingTcp</span>::<span class="ident">new</span>(
-                            <span class="ident">local_addr</span>, <span class="ident">addrs</span>, <span class="self">self</span>.<span class="ident">happy_eyeballs_timeout</span>, <span class="self">self</span>.<span class="ident">reuse_address</span>));
-                    } <span class="kw">else</span> {
-                        <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">dns</span>::<span class="ident">Name</span>::<span class="ident">new</span>(<span class="ident">mem</span>::<span class="ident">replace</span>(<span class="ident">host</span>, <span class="ident">String</span>::<span class="ident">new</span>()));
-                        <span class="ident">state</span> <span class="op">=</span> <span class="ident">State</span>::<span class="ident">Resolving</span>(<span class="ident">resolver</span>.<span class="ident">resolve</span>(<span class="ident">name</span>), <span class="ident">local_addr</span>);
-                    }
-                },
-                <span class="ident">State</span>::<span class="ident">Resolving</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">future</span>, <span class="ident">local_addr</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="kw">match</span> <span class="ident">future</span>.<span class="ident">poll</span>()<span class="question-mark">?</span> {
-                        <span class="ident">Async</span>::<span class="ident">NotReady</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>),
-                        <span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="ident">addrs</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                            <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">port</span>;
-                            <span class="kw">let</span> <span class="ident">addrs</span> <span class="op">=</span> <span class="ident">addrs</span>
-                                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">addr</span><span class="op">|</span> <span class="ident">SocketAddr</span>::<span class="ident">new</span>(<span class="ident">addr</span>, <span class="ident">port</span>))
-                                .<span class="ident">collect</span>();
-                            <span class="kw">let</span> <span class="ident">addrs</span> <span class="op">=</span> <span class="ident">dns</span>::<span class="ident">IpAddrs</span>::<span class="ident">new</span>(<span class="ident">addrs</span>);
-                            <span class="ident">state</span> <span class="op">=</span> <span class="ident">State</span>::<span class="ident">Connecting</span>(<span class="ident">ConnectingTcp</span>::<span class="ident">new</span>(
-                                <span class="ident">local_addr</span>, <span class="ident">addrs</span>, <span class="self">self</span>.<span class="ident">happy_eyeballs_timeout</span>, <span class="self">self</span>.<span class="ident">reuse_address</span>));
-                        }
-                    };
-                },
-                <span class="ident">State</span>::<span class="ident">Connecting</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="kw">let</span> <span class="ident">sock</span> <span class="op">=</span> <span class="macro">try_ready</span><span class="macro">!</span>(<span class="ident">c</span>.<span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">handle</span>));
+    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task</span>::<span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Output</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">project</span>().<span class="ident">fut</span>.<span class="ident">poll</span>(<span class="ident">cx</span>)
+    }
+}
 
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">dur</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">keep_alive_timeout</span> {
-                        <span class="ident">sock</span>.<span class="ident">set_keepalive</span>(<span class="prelude-val">Some</span>(<span class="ident">dur</span>))<span class="question-mark">?</span>;
-                    }
+<span class="comment">// Not publicly exported (so missing_docs doesn&#39;t trigger).</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ConnectError</span> {
+    <span class="ident">msg</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>,
+    <span class="ident">cause</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+}
 
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">size</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">send_buffer_size</span> {
-                        <span class="ident">sock</span>.<span class="ident">set_send_buffer_size</span>(<span class="ident">size</span>)<span class="question-mark">?</span>;
-                    }
+<span class="kw">impl</span> <span class="ident">ConnectError</span> {
+    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>(<span class="ident">msg</span>: <span class="ident">S</span>, <span class="ident">cause</span>: <span class="ident">E</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ConnectError</span>
+    <span class="kw">where</span>
+        <span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">E</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    {
+        <span class="ident">ConnectError</span> {
+            <span class="ident">msg</span>: <span class="ident">msg</span>.<span class="ident">into</span>(),
+            <span class="ident">cause</span>: <span class="prelude-val">Some</span>(<span class="ident">cause</span>.<span class="ident">into</span>()),
+        }
+    }
 
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">size</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">recv_buffer_size</span> {
-                        <span class="ident">sock</span>.<span class="ident">set_recv_buffer_size</span>(<span class="ident">size</span>)<span class="question-mark">?</span>;
-                    }
+    <span class="kw">fn</span> <span class="ident">dns</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span>(<span class="ident">cause</span>: <span class="ident">E</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ConnectError</span>
+    <span class="kw">where</span>
+        <span class="ident">E</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    {
+        <span class="ident">ConnectError</span>::<span class="ident">new</span>(<span class="string">&quot;dns error&quot;</span>, <span class="ident">cause</span>)
+    }
 
-                    <span class="ident">sock</span>.<span class="ident">set_nodelay</span>(<span class="self">self</span>.<span class="ident">nodelay</span>)<span class="question-mark">?</span>;
+    <span class="kw">fn</span> <span class="ident">m</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>(<span class="ident">msg</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="ident">E</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ConnectError</span>
+    <span class="kw">where</span>
+        <span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">E</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    {
+        <span class="kw">move</span> <span class="op">|</span><span class="ident">cause</span><span class="op">|</span> <span class="ident">ConnectError</span>::<span class="ident">new</span>(<span class="ident">msg</span>, <span class="ident">cause</span>)
+    }
+}
 
-                    <span class="kw">let</span> <span class="ident">extra</span> <span class="op">=</span> <span class="ident">HttpInfo</span> {
-                        <span class="ident">remote_addr</span>: <span class="ident">sock</span>.<span class="ident">peer_addr</span>()<span class="question-mark">?</span>,
-                    };
-                    <span class="kw">let</span> <span class="ident">connected</span> <span class="op">=</span> <span class="ident">Connected</span>::<span class="ident">new</span>()
-                        .<span class="ident">extra</span>(<span class="ident">extra</span>);
-
-                    <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>((<span class="ident">sock</span>, <span class="ident">connected</span>)));
-                },
-                <span class="ident">State</span>::<span class="ident">Error</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>.<span class="ident">take</span>().<span class="ident">expect</span>(<span class="string">&quot;polled more than once&quot;</span>)),
-            }
-            <span class="self">self</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">state</span>;
+<span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">ConnectError</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">cause</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">cause</span> {
+            <span class="ident">f</span>.<span class="ident">debug_tuple</span>(<span class="string">&quot;ConnectError&quot;</span>)
+                .<span class="ident">field</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">msg</span>)
+                .<span class="ident">field</span>(<span class="ident">cause</span>)
+                .<span class="ident">finish</span>()
+        } <span class="kw">else</span> {
+            <span class="self">self</span>.<span class="ident">msg</span>.<span class="ident">fmt</span>(<span class="ident">f</span>)
         }
     }
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Resolve</span> <span class="op">+</span> <span class="ident">fmt</span>::<span class="ident">Debug</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">HttpConnecting</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
-        <span class="ident">f</span>.<span class="ident">pad</span>(<span class="string">&quot;HttpConnecting&quot;</span>)
+<span class="kw">impl</span> <span class="ident">fmt</span>::<span class="ident">Display</span> <span class="kw">for</span> <span class="ident">ConnectError</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt</span>::<span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt</span>::<span class="prelude-ty">Result</span> {
+        <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">msg</span>)<span class="question-mark">?</span>;
+
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">cause</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">cause</span> {
+            <span class="macro">write</span><span class="macro">!</span>(<span class="ident">f</span>, <span class="string">&quot;: {}&quot;</span>, <span class="ident">cause</span>)<span class="question-mark">?</span>;
+        }
+
+        <span class="prelude-val">Ok</span>(())
+    }
+}
+
+<span class="kw">impl</span> <span class="ident">StdError</span> <span class="kw">for</span> <span class="ident">ConnectError</span> {
+    <span class="kw">fn</span> <span class="ident">source</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>(<span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>)<span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="ident">cause</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">e</span> <span class="kw">as</span> <span class="kw">_</span>)
     }
 }
 
 <span class="kw">struct</span> <span class="ident">ConnectingTcp</span> {
-    <span class="ident">local_addr</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IpAddr</span><span class="op">&gt;</span>,
+    <span class="ident">local_addr_ipv4</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ipv4Addr</span><span class="op">&gt;</span>,
+    <span class="ident">local_addr_ipv6</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ipv6Addr</span><span class="op">&gt;</span>,
     <span class="ident">preferred</span>: <span class="ident">ConnectingTcpRemote</span>,
     <span class="ident">fallback</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ConnectingTcpFallback</span><span class="op">&gt;</span>,
     <span class="ident">reuse_address</span>: <span class="ident">bool</span>,
@@ -1199,35 +1482,41 @@
 
 <span class="kw">impl</span> <span class="ident">ConnectingTcp</span> {
     <span class="kw">fn</span> <span class="ident">new</span>(
-        <span class="ident">local_addr</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IpAddr</span><span class="op">&gt;</span>,
+        <span class="ident">local_addr_ipv4</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ipv4Addr</span><span class="op">&gt;</span>,
+        <span class="ident">local_addr_ipv6</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ipv6Addr</span><span class="op">&gt;</span>,
         <span class="ident">remote_addrs</span>: <span class="ident">dns</span>::<span class="ident">IpAddrs</span>,
+        <span class="ident">connect_timeout</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>,
         <span class="ident">fallback_timeout</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>,
         <span class="ident">reuse_address</span>: <span class="ident">bool</span>,
     ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ConnectingTcp</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">fallback_timeout</span>) <span class="op">=</span> <span class="ident">fallback_timeout</span> {
-            <span class="kw">let</span> (<span class="ident">preferred_addrs</span>, <span class="ident">fallback_addrs</span>) <span class="op">=</span> <span class="ident">remote_addrs</span>.<span class="ident">split_by_preference</span>();
+            <span class="kw">let</span> (<span class="ident">preferred_addrs</span>, <span class="ident">fallback_addrs</span>) <span class="op">=</span>
+                <span class="ident">remote_addrs</span>.<span class="ident">split_by_preference</span>(<span class="ident">local_addr_ipv4</span>, <span class="ident">local_addr_ipv6</span>);
             <span class="kw">if</span> <span class="ident">fallback_addrs</span>.<span class="ident">is_empty</span>() {
                 <span class="kw">return</span> <span class="ident">ConnectingTcp</span> {
-                    <span class="ident">local_addr</span>,
-                    <span class="ident">preferred</span>: <span class="ident">ConnectingTcpRemote</span>::<span class="ident">new</span>(<span class="ident">preferred_addrs</span>),
+                    <span class="ident">local_addr_ipv4</span>,
+                    <span class="ident">local_addr_ipv6</span>,
+                    <span class="ident">preferred</span>: <span class="ident">ConnectingTcpRemote</span>::<span class="ident">new</span>(<span class="ident">preferred_addrs</span>, <span class="ident">connect_timeout</span>),
                     <span class="ident">fallback</span>: <span class="prelude-val">None</span>,
                     <span class="ident">reuse_address</span>,
                 };
             }
 
             <span class="ident">ConnectingTcp</span> {
-                <span class="ident">local_addr</span>,
-                <span class="ident">preferred</span>: <span class="ident">ConnectingTcpRemote</span>::<span class="ident">new</span>(<span class="ident">preferred_addrs</span>),
+                <span class="ident">local_addr_ipv4</span>,
+                <span class="ident">local_addr_ipv6</span>,
+                <span class="ident">preferred</span>: <span class="ident">ConnectingTcpRemote</span>::<span class="ident">new</span>(<span class="ident">preferred_addrs</span>, <span class="ident">connect_timeout</span>),
                 <span class="ident">fallback</span>: <span class="prelude-val">Some</span>(<span class="ident">ConnectingTcpFallback</span> {
-                    <span class="ident">delay</span>: <span class="ident">Delay</span>::<span class="ident">new</span>(<span class="ident">Instant</span>::<span class="ident">now</span>() <span class="op">+</span> <span class="ident">fallback_timeout</span>),
-                    <span class="ident">remote</span>: <span class="ident">ConnectingTcpRemote</span>::<span class="ident">new</span>(<span class="ident">fallback_addrs</span>),
+                    <span class="ident">delay</span>: <span class="ident">tokio</span>::<span class="ident">time</span>::<span class="ident">delay_for</span>(<span class="ident">fallback_timeout</span>),
+                    <span class="ident">remote</span>: <span class="ident">ConnectingTcpRemote</span>::<span class="ident">new</span>(<span class="ident">fallback_addrs</span>, <span class="ident">connect_timeout</span>),
                 }),
                 <span class="ident">reuse_address</span>,
             }
         } <span class="kw">else</span> {
             <span class="ident">ConnectingTcp</span> {
-                <span class="ident">local_addr</span>,
-                <span class="ident">preferred</span>: <span class="ident">ConnectingTcpRemote</span>::<span class="ident">new</span>(<span class="ident">remote_addrs</span>),
+                <span class="ident">local_addr_ipv4</span>,
+                <span class="ident">local_addr_ipv6</span>,
+                <span class="ident">preferred</span>: <span class="ident">ConnectingTcpRemote</span>::<span class="ident">new</span>(<span class="ident">remote_addrs</span>, <span class="ident">connect_timeout</span>),
                 <span class="ident">fallback</span>: <span class="prelude-val">None</span>,
                 <span class="ident">reuse_address</span>,
             }
@@ -1242,133 +1531,170 @@
 
 <span class="kw">struct</span> <span class="ident">ConnectingTcpRemote</span> {
     <span class="ident">addrs</span>: <span class="ident">dns</span>::<span class="ident">IpAddrs</span>,
-    <span class="ident">current</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ConnectFuture</span><span class="op">&gt;</span>,
+    <span class="ident">connect_timeout</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">ConnectingTcpRemote</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">addrs</span>: <span class="ident">dns</span>::<span class="ident">IpAddrs</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">addrs</span>: <span class="ident">dns</span>::<span class="ident">IpAddrs</span>, <span class="ident">connect_timeout</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">let</span> <span class="ident">connect_timeout</span> <span class="op">=</span> <span class="ident">connect_timeout</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="ident">t</span> <span class="op">/</span> (<span class="ident">addrs</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>));
+
         <span class="self">Self</span> {
             <span class="ident">addrs</span>,
-            <span class="ident">current</span>: <span class="prelude-val">None</span>,
+            <span class="ident">connect_timeout</span>,
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">ConnectingTcpRemote</span> {
-    <span class="comment">// not a Future, since passing a &amp;Handle to poll</span>
-    <span class="kw">fn</span> <span class="ident">poll</span>(
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">connect</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
-        <span class="ident">local_addr</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IpAddr</span><span class="op">&gt;</span>,
-        <span class="ident">handle</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Handle</span><span class="op">&gt;</span>,
+        <span class="ident">local_addr_ipv4</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ipv4Addr</span><span class="op">&gt;</span>,
+        <span class="ident">local_addr_ipv6</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ipv6Addr</span><span class="op">&gt;</span>,
         <span class="ident">reuse_address</span>: <span class="ident">bool</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident">TcpStream</span>, <span class="ident">io</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TcpStream</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">err</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-        <span class="kw">loop</span> {
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">current</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">current</span> {
-                <span class="kw">match</span> <span class="ident">current</span>.<span class="ident">poll</span>() {
-                    <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="ident">tcp</span>)) <span class="op">=</span><span class="op">&gt;</span> {
-                        <span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;connected to {:?}&quot;</span>, <span class="ident">tcp</span>.<span class="ident">peer_addr</span>().<span class="ident">ok</span>());
-                        <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="ident">tcp</span>));
-                    },
-                    <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>),
-                    <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                        <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;connect error {:?}&quot;</span>, <span class="ident">e</span>);
-                        <span class="ident">err</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">e</span>);
-                        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">addr</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">addrs</span>.<span class="ident">next</span>() {
-                            <span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;connecting to {}&quot;</span>, <span class="ident">addr</span>);
-                            <span class="kw-2">*</span><span class="ident">current</span> <span class="op">=</span> <span class="ident">connect</span>(<span class="kw-2">&amp;</span><span class="ident">addr</span>, <span class="ident">local_addr</span>, <span class="ident">handle</span>, <span class="ident">reuse_address</span>)<span class="question-mark">?</span>;
-                            <span class="kw">continue</span>;
-                        }
-                    }
+        <span class="kw">for</span> <span class="ident">addr</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">addrs</span> {
+            <span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;connecting to {}&quot;</span>, <span class="ident">addr</span>);
+            <span class="kw">match</span> <span class="ident">connect</span>(
+                <span class="kw-2">&amp;</span><span class="ident">addr</span>,
+                <span class="ident">local_addr_ipv4</span>,
+                <span class="ident">local_addr_ipv6</span>,
+                <span class="ident">reuse_address</span>,
+                <span class="self">self</span>.<span class="ident">connect_timeout</span>,
+            )<span class="question-mark">?</span>
+            .<span class="kw">await</span>
+            {
+                <span class="prelude-val">Ok</span>(<span class="ident">tcp</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;connected to {}&quot;</span>, <span class="ident">addr</span>);
+                    <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">tcp</span>);
                 }
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">addr</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">addrs</span>.<span class="ident">next</span>() {
-                <span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;connecting to {}&quot;</span>, <span class="ident">addr</span>);
-                <span class="self">self</span>.<span class="ident">current</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">connect</span>(<span class="kw-2">&amp;</span><span class="ident">addr</span>, <span class="ident">local_addr</span>, <span class="ident">handle</span>, <span class="ident">reuse_address</span>)<span class="question-mark">?</span>);
-                <span class="kw">continue</span>;
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;connect error for {}: {:?}&quot;</span>, <span class="ident">addr</span>, <span class="ident">e</span>);
+                    <span class="ident">err</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">e</span>);
+                }
             }
+        }
 
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>.<span class="ident">take</span>().<span class="ident">expect</span>(<span class="string">&quot;missing connect error&quot;</span>));
+        <span class="kw">match</span> <span class="ident">err</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Error</span>::<span class="ident">new</span>(
+                <span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">ErrorKind</span>::<span class="ident">NotConnected</span>,
+                <span class="string">&quot;Network unreachable&quot;</span>,
+            )),
         }
     }
 }
 
-<span class="kw">fn</span> <span class="ident">connect</span>(<span class="ident">addr</span>: <span class="kw-2">&amp;</span><span class="ident">SocketAddr</span>, <span class="ident">local_addr</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IpAddr</span><span class="op">&gt;</span>, <span class="ident">handle</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Handle</span><span class="op">&gt;</span>, <span class="ident">reuse_address</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ConnectFuture</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">builder</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">addr</span> {
-        <span class="kw-2">&amp;</span><span class="ident">SocketAddr</span>::<span class="ident">V4</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">TcpBuilder</span>::<span class="ident">new_v4</span>()<span class="question-mark">?</span>,
-        <span class="kw-2">&amp;</span><span class="ident">SocketAddr</span>::<span class="ident">V6</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">TcpBuilder</span>::<span class="ident">new_v6</span>()<span class="question-mark">?</span>,
+<span class="kw">fn</span> <span class="ident">bind_local_address</span>(
+    <span class="ident">socket</span>: <span class="kw-2">&amp;</span><span class="ident">socket2</span>::<span class="ident">Socket</span>,
+    <span class="ident">dst_addr</span>: <span class="kw-2">&amp;</span><span class="ident">SocketAddr</span>,
+    <span class="ident">local_addr_ipv4</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ipv4Addr</span><span class="op">&gt;</span>,
+    <span class="ident">local_addr_ipv6</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ipv6Addr</span><span class="op">&gt;</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">match</span> (<span class="kw-2">*</span><span class="ident">dst_addr</span>, <span class="ident">local_addr_ipv4</span>, <span class="ident">local_addr_ipv6</span>) {
+        (<span class="ident">SocketAddr</span>::<span class="ident">V4</span>(<span class="kw">_</span>), <span class="prelude-val">Some</span>(<span class="ident">addr</span>), <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">socket</span>.<span class="ident">bind</span>(<span class="kw-2">&amp;</span><span class="ident">SocketAddr</span>::<span class="ident">new</span>(<span class="ident">addr</span>.<span class="ident">clone</span>().<span class="ident">into</span>(), <span class="number">0</span>).<span class="ident">into</span>())<span class="question-mark">?</span>;
+        }
+        (<span class="ident">SocketAddr</span>::<span class="ident">V6</span>(<span class="kw">_</span>), <span class="kw">_</span>, <span class="prelude-val">Some</span>(<span class="ident">addr</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">socket</span>.<span class="ident">bind</span>(<span class="kw-2">&amp;</span><span class="ident">SocketAddr</span>::<span class="ident">new</span>(<span class="ident">addr</span>.<span class="ident">clone</span>().<span class="ident">into</span>(), <span class="number">0</span>).<span class="ident">into</span>())<span class="question-mark">?</span>;
+        }
+        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">if</span> <span class="macro">cfg</span><span class="macro">!</span>(<span class="ident">windows</span>) {
+                <span class="comment">// Windows requires a socket be bound before calling connect</span>
+                <span class="kw">let</span> <span class="ident">any</span>: <span class="ident">SocketAddr</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">dst_addr</span> {
+                    <span class="ident">SocketAddr</span>::<span class="ident">V4</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> ([<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>], <span class="number">0</span>).<span class="ident">into</span>(),
+                    <span class="ident">SocketAddr</span>::<span class="ident">V6</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> ([<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>], <span class="number">0</span>).<span class="ident">into</span>(),
+                };
+                <span class="ident">socket</span>.<span class="ident">bind</span>(<span class="kw-2">&amp;</span><span class="ident">any</span>.<span class="ident">into</span>())<span class="question-mark">?</span>;
+            }
+        }
+    }
+
+    <span class="prelude-val">Ok</span>(())
+}
+
+<span class="kw">fn</span> <span class="ident">connect</span>(
+    <span class="ident">addr</span>: <span class="kw-2">&amp;</span><span class="ident">SocketAddr</span>,
+    <span class="ident">local_addr_ipv4</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ipv4Addr</span><span class="op">&gt;</span>,
+    <span class="ident">local_addr_ipv6</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ipv6Addr</span><span class="op">&gt;</span>,
+    <span class="ident">reuse_address</span>: <span class="ident">bool</span>,
+    <span class="ident">connect_timeout</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TcpStream</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">use</span> <span class="ident">socket2</span>::{<span class="ident">Domain</span>, <span class="ident">Protocol</span>, <span class="ident">Socket</span>, <span class="ident">Type</span>};
+    <span class="kw">let</span> <span class="ident">domain</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">addr</span> {
+        <span class="ident">SocketAddr</span>::<span class="ident">V4</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Domain</span>::<span class="ident">ipv4</span>(),
+        <span class="ident">SocketAddr</span>::<span class="ident">V6</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Domain</span>::<span class="ident">ipv6</span>(),
     };
+    <span class="kw">let</span> <span class="ident">socket</span> <span class="op">=</span> <span class="ident">Socket</span>::<span class="ident">new</span>(<span class="ident">domain</span>, <span class="ident">Type</span>::<span class="ident">stream</span>(), <span class="prelude-val">Some</span>(<span class="ident">Protocol</span>::<span class="ident">tcp</span>()))<span class="question-mark">?</span>;
 
     <span class="kw">if</span> <span class="ident">reuse_address</span> {
-        <span class="ident">builder</span>.<span class="ident">reuse_address</span>(<span class="ident">reuse_address</span>)<span class="question-mark">?</span>;
+        <span class="ident">socket</span>.<span class="ident">set_reuse_address</span>(<span class="bool-val">true</span>)<span class="question-mark">?</span>;
     }
 
-    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">local_addr</span>) <span class="op">=</span> <span class="kw-2">*</span><span class="ident">local_addr</span> {
-        <span class="comment">// Caller has requested this socket be bound before calling connect</span>
-        <span class="ident">builder</span>.<span class="ident">bind</span>(<span class="ident">SocketAddr</span>::<span class="ident">new</span>(<span class="ident">local_addr</span>.<span class="ident">clone</span>(), <span class="number">0</span>))<span class="question-mark">?</span>;
-    }
-    <span class="kw">else</span> <span class="kw">if</span> <span class="macro">cfg</span><span class="macro">!</span>(<span class="ident">windows</span>) {
-        <span class="comment">// Windows requires a socket be bound before calling connect</span>
-        <span class="kw">let</span> <span class="ident">any</span>: <span class="ident">SocketAddr</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">addr</span> {
-            <span class="kw-2">&amp;</span><span class="ident">SocketAddr</span>::<span class="ident">V4</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                ([<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>], <span class="number">0</span>).<span class="ident">into</span>()
+    <span class="ident">bind_local_address</span>(<span class="kw-2">&amp;</span><span class="ident">socket</span>, <span class="ident">addr</span>, <span class="ident">local_addr_ipv4</span>, <span class="ident">local_addr_ipv6</span>)<span class="question-mark">?</span>;
+
+    <span class="kw">let</span> <span class="ident">addr</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">addr</span>;
+
+    <span class="kw">let</span> <span class="ident">std_tcp</span> <span class="op">=</span> <span class="ident">socket</span>.<span class="ident">into_tcp_stream</span>();
+
+    <span class="prelude-val">Ok</span>(<span class="kw">async</span> <span class="kw">move</span> {
+        <span class="kw">let</span> <span class="ident">connect</span> <span class="op">=</span> <span class="ident">TcpStream</span>::<span class="ident">connect_std</span>(<span class="ident">std_tcp</span>, <span class="kw-2">&amp;</span><span class="ident">addr</span>);
+        <span class="kw">match</span> <span class="ident">connect_timeout</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">dur</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">tokio</span>::<span class="ident">time</span>::<span class="ident">timeout</span>(<span class="ident">dur</span>, <span class="ident">connect</span>).<span class="kw">await</span> {
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">s</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">s</span>),
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">io</span>::<span class="ident">Error</span>::<span class="ident">new</span>(<span class="ident">io</span>::<span class="ident">ErrorKind</span>::<span class="ident">TimedOut</span>, <span class="ident">e</span>)),
             },
-            <span class="kw-2">&amp;</span><span class="ident">SocketAddr</span>::<span class="ident">V6</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                ([<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>], <span class="number">0</span>).<span class="ident">into</span>()
-            }
-        };
-        <span class="ident">builder</span>.<span class="ident">bind</span>(<span class="ident">any</span>)<span class="question-mark">?</span>;
-    }
-
-    <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">handle</span> {
-        <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">handle</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Cow</span>::<span class="ident">Borrowed</span>(<span class="ident">handle</span>),
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Cow</span>::<span class="ident">Owned</span>(<span class="ident">Handle</span>::<span class="ident">default</span>()),
-    };
-
-    <span class="prelude-val">Ok</span>(<span class="ident">TcpStream</span>::<span class="ident">connect_std</span>(<span class="ident">builder</span>.<span class="ident">to_tcp_stream</span>()<span class="question-mark">?</span>, <span class="ident">addr</span>, <span class="kw-2">&amp;</span><span class="ident">handle</span>))
+            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">connect</span>.<span class="kw">await</span>,
+        }
+    })
 }
 
 <span class="kw">impl</span> <span class="ident">ConnectingTcp</span> {
-    <span class="comment">// not a Future, since passing a &amp;Handle to poll</span>
-    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">handle</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Handle</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident">TcpStream</span>, <span class="ident">io</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">fallback</span>.<span class="ident">take</span>() {
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">preferred</span>.<span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">local_addr</span>, <span class="ident">handle</span>, <span class="self">self</span>.<span class="ident">reuse_address</span>),
-            <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">fallback</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">preferred</span>.<span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">local_addr</span>, <span class="ident">handle</span>, <span class="self">self</span>.<span class="ident">reuse_address</span>) {
-                <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="ident">stream</span>)) <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="comment">// Preferred successful - drop fallback.</span>
-                    <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="ident">stream</span>))
-                }
-                <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">fallback</span>.<span class="ident">delay</span>.<span class="ident">poll</span>() {
-                    <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">fallback</span>.<span class="ident">remote</span>.<span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">local_addr</span>, <span class="ident">handle</span>, <span class="self">self</span>.<span class="ident">reuse_address</span>) {
-                        <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="ident">stream</span>)) <span class="op">=</span><span class="op">&gt;</span> {
-                            <span class="comment">// Fallback successful - drop current preferred,</span>
-                            <span class="comment">// but keep fallback as new preferred.</span>
-                            <span class="self">self</span>.<span class="ident">preferred</span> <span class="op">=</span> <span class="ident">fallback</span>.<span class="ident">remote</span>;
-                            <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="ident">stream</span>))
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">connect</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TcpStream</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="self">Self</span> {
+            <span class="kw-2">ref</span> <span class="ident">local_addr_ipv4</span>,
+            <span class="kw-2">ref</span> <span class="ident">local_addr_ipv6</span>,
+            <span class="ident">reuse_address</span>,
+            ..
+        } <span class="op">=</span> <span class="self">self</span>;
+        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">fallback</span> {
+            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="self">self</span>.<span class="ident">preferred</span>
+                    .<span class="ident">connect</span>(<span class="ident">local_addr_ipv4</span>, <span class="ident">local_addr_ipv6</span>, <span class="ident">reuse_address</span>)
+                    .<span class="kw">await</span>
+            }
+            <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">fallback</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">let</span> <span class="ident">preferred_fut</span> <span class="op">=</span>
+                    <span class="self">self</span>.<span class="ident">preferred</span>
+                        .<span class="ident">connect</span>(<span class="ident">local_addr_ipv4</span>, <span class="ident">local_addr_ipv6</span>, <span class="ident">reuse_address</span>);
+                <span class="ident">futures_util</span>::<span class="macro">pin_mut</span><span class="macro">!</span>(<span class="ident">preferred_fut</span>);
+
+                <span class="kw">let</span> <span class="ident">fallback_fut</span> <span class="op">=</span>
+                    <span class="ident">fallback</span>
+                        .<span class="ident">remote</span>
+                        .<span class="ident">connect</span>(<span class="ident">local_addr_ipv4</span>, <span class="ident">local_addr_ipv6</span>, <span class="ident">reuse_address</span>);
+                <span class="ident">futures_util</span>::<span class="macro">pin_mut</span><span class="macro">!</span>(<span class="ident">fallback_fut</span>);
+
+                <span class="kw">let</span> (<span class="ident">result</span>, <span class="ident">future</span>) <span class="op">=</span>
+                    <span class="kw">match</span> <span class="ident">futures_util</span>::<span class="ident">future</span>::<span class="ident">select</span>(<span class="ident">preferred_fut</span>, <span class="ident">fallback</span>.<span class="ident">delay</span>).<span class="kw">await</span> {
+                        <span class="ident">Either</span>::<span class="ident">Left</span>((<span class="ident">result</span>, <span class="ident">_fallback_delay</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+                            (<span class="ident">result</span>, <span class="ident">Either</span>::<span class="ident">Right</span>(<span class="ident">fallback_fut</span>))
                         }
-                        <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                            <span class="comment">// Neither preferred nor fallback are ready.</span>
-                            <span class="self">self</span>.<span class="ident">fallback</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">fallback</span>);
-                            <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>)
+                        <span class="ident">Either</span>::<span class="ident">Right</span>(((), <span class="ident">preferred_fut</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="comment">// Delay is done, start polling both the preferred and the fallback</span>
+                            <span class="ident">futures_util</span>::<span class="ident">future</span>::<span class="ident">select</span>(<span class="ident">preferred_fut</span>, <span class="ident">fallback_fut</span>)
+                                .<span class="kw">await</span>
+                                .<span class="ident">factor_first</span>()
                         }
-                        <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                            <span class="comment">// Fallback failed - resume with preferred only.</span>
-                            <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>)
-                        }
-                    },
-                    <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                        <span class="comment">// Too early to attempt fallback.</span>
-                        <span class="self">self</span>.<span class="ident">fallback</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">fallback</span>);
-                        <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>)
-                    }
-                    <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                        <span class="comment">// Fallback delay failed - resume with preferred only.</span>
-                        <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>)
-                    }
-                }
-                <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="comment">// Preferred failed - use fallback as new preferred.</span>
-                    <span class="self">self</span>.<span class="ident">preferred</span> <span class="op">=</span> <span class="ident">fallback</span>.<span class="ident">remote</span>;
-                    <span class="self">self</span>.<span class="ident">preferred</span>.<span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">local_addr</span>, <span class="ident">handle</span>, <span class="self">self</span>.<span class="ident">reuse_address</span>)
+                    };
+
+                <span class="kw">if</span> <span class="ident">result</span>.<span class="ident">is_err</span>() {
+                    <span class="comment">// Fallback to the remaining future (could be preferred or fallback)</span>
+                    <span class="comment">// if we get an error</span>
+                    <span class="ident">future</span>.<span class="kw">await</span>
+                } <span class="kw">else</span> {
+                    <span class="ident">result</span>
                 }
             }
         }
@@ -1378,54 +1704,109 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">io</span>;
-    <span class="kw">use</span> <span class="ident">futures</span>::<span class="ident">Future</span>;
-    <span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Connect</span>, <span class="ident">Destination</span>, <span class="ident">HttpConnector</span>};
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_errors_missing_authority</span>() {
-        <span class="kw">let</span> <span class="ident">uri</span> <span class="op">=</span> <span class="string">&quot;/foo/bar?baz&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">Destination</span> {
-            <span class="ident">uri</span>,
-        };
-        <span class="kw">let</span> <span class="ident">connector</span> <span class="op">=</span> <span class="ident">HttpConnector</span>::<span class="ident">new</span>(<span class="number">1</span>);
+    <span class="kw">use</span> ::<span class="ident">http</span>::<span class="ident">Uri</span>;
 
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">connector</span>.<span class="ident">connect</span>(<span class="ident">dst</span>).<span class="ident">wait</span>().<span class="ident">unwrap_err</span>().<span class="ident">kind</span>(), <span class="ident">io</span>::<span class="ident">ErrorKind</span>::<span class="ident">InvalidInput</span>);
+    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw">super</span>::<span class="ident">sealed</span>::{<span class="ident">Connect</span>, <span class="ident">ConnectSvc</span>};
+    <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">HttpConnector</span>;
+
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">connect</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>(
+        <span class="ident">connector</span>: <span class="ident">C</span>,
+        <span class="ident">dst</span>: <span class="ident">Uri</span>,
+    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">C</span>::<span class="ident">_Svc</span> <span class="kw">as</span> <span class="ident">ConnectSvc</span><span class="op">&gt;</span>::<span class="ident">Connection</span>, <span class="op">&lt;</span><span class="ident">C</span>::<span class="ident">_Svc</span> <span class="kw">as</span> <span class="ident">ConnectSvc</span><span class="op">&gt;</span>::<span class="ident">Error</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">C</span>: <span class="ident">Connect</span>,
+    {
+        <span class="ident">connector</span>.<span class="ident">connect</span>(<span class="kw">super</span>::<span class="kw">super</span>::<span class="ident">sealed</span>::<span class="ident">Internal</span>, <span class="ident">dst</span>).<span class="kw">await</span>
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_errors_enforce_http</span>() {
-        <span class="kw">let</span> <span class="ident">uri</span> <span class="op">=</span> <span class="string">&quot;https://example.domain/foo/bar?baz&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">Destination</span> {
-            <span class="ident">uri</span>,
-        };
-        <span class="kw">let</span> <span class="ident">connector</span> <span class="op">=</span> <span class="ident">HttpConnector</span>::<span class="ident">new</span>(<span class="number">1</span>);
+    <span class="attribute">#[<span class="ident">tokio</span>::<span class="ident">test</span>]</span>
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">test_errors_enforce_http</span>() {
+        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="string">&quot;https://example.domain/foo/bar?baz&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">connector</span> <span class="op">=</span> <span class="ident">HttpConnector</span>::<span class="ident">new</span>();
 
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">connector</span>.<span class="ident">connect</span>(<span class="ident">dst</span>).<span class="ident">wait</span>().<span class="ident">unwrap_err</span>().<span class="ident">kind</span>(), <span class="ident">io</span>::<span class="ident">ErrorKind</span>::<span class="ident">InvalidInput</span>);
+        <span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="ident">connect</span>(<span class="ident">connector</span>, <span class="ident">dst</span>).<span class="kw">await</span>.<span class="ident">unwrap_err</span>();
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">err</span>.<span class="ident">msg</span>, <span class="kw">super</span>::<span class="ident">INVALID_NOT_HTTP</span>);
     }
 
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;macos&quot;</span>))]</span>
+    <span class="kw">fn</span> <span class="ident">get_local_ips</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">std</span>::<span class="ident">net</span>::<span class="ident">Ipv4Addr</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">std</span>::<span class="ident">net</span>::<span class="ident">Ipv6Addr</span><span class="op">&gt;</span>) {
+        <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">net</span>::{<span class="ident">IpAddr</span>, <span class="ident">TcpListener</span>};
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_errors_missing_scheme</span>() {
-        <span class="kw">let</span> <span class="ident">uri</span> <span class="op">=</span> <span class="string">&quot;example.domain&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">Destination</span> {
-            <span class="ident">uri</span>,
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ip_v4</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ip_v6</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+
+        <span class="kw">let</span> <span class="ident">ips</span> <span class="op">=</span> <span class="ident">pnet</span>::<span class="ident">datalink</span>::<span class="ident">interfaces</span>()
+            .<span class="ident">into_iter</span>()
+            .<span class="ident">flat_map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span>.<span class="ident">ips</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">n</span>.<span class="ident">ip</span>()));
+
+        <span class="kw">for</span> <span class="ident">ip</span> <span class="kw">in</span> <span class="ident">ips</span> {
+            <span class="kw">match</span> <span class="ident">ip</span> {
+                <span class="ident">IpAddr</span>::<span class="ident">V4</span>(<span class="ident">ip</span>) <span class="kw">if</span> <span class="ident">TcpListener</span>::<span class="ident">bind</span>((<span class="ident">ip</span>, <span class="number">0</span>)).<span class="ident">is_ok</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ip_v4</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">ip</span>),
+                <span class="ident">IpAddr</span>::<span class="ident">V6</span>(<span class="ident">ip</span>) <span class="kw">if</span> <span class="ident">TcpListener</span>::<span class="ident">bind</span>((<span class="ident">ip</span>, <span class="number">0</span>)).<span class="ident">is_ok</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ip_v6</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">ip</span>),
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> (),
+            }
+
+            <span class="kw">if</span> <span class="ident">ip_v4</span>.<span class="ident">is_some</span>() <span class="kw-2">&amp;</span><span class="op">&amp;</span> <span class="ident">ip_v6</span>.<span class="ident">is_some</span>() {
+                <span class="kw">break</span>;
+            }
+        }
+
+        (<span class="ident">ip_v4</span>, <span class="ident">ip_v6</span>)
+    }
+
+    <span class="attribute">#[<span class="ident">tokio</span>::<span class="ident">test</span>]</span>
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">test_errors_missing_scheme</span>() {
+        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="string">&quot;example.domain&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">connector</span> <span class="op">=</span> <span class="ident">HttpConnector</span>::<span class="ident">new</span>();
+        <span class="ident">connector</span>.<span class="ident">enforce_http</span>(<span class="bool-val">false</span>);
+
+        <span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="ident">connect</span>(<span class="ident">connector</span>, <span class="ident">dst</span>).<span class="kw">await</span>.<span class="ident">unwrap_err</span>();
+        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">err</span>.<span class="ident">msg</span>, <span class="kw">super</span>::<span class="ident">INVALID_MISSING_SCHEME</span>);
+    }
+
+    <span class="comment">// NOTE: pnet crate that we use in this test doesn&#39;t compile on Windows</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;macos&quot;</span>))]</span>
+    <span class="attribute">#[<span class="ident">tokio</span>::<span class="ident">test</span>]</span>
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">local_address</span>() {
+        <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">net</span>::{<span class="ident">IpAddr</span>, <span class="ident">TcpListener</span>};
+
+        <span class="kw">let</span> (<span class="ident">bind_ip_v4</span>, <span class="ident">bind_ip_v6</span>) <span class="op">=</span> <span class="ident">get_local_ips</span>();
+        <span class="kw">let</span> <span class="ident">server4</span> <span class="op">=</span> <span class="ident">TcpListener</span>::<span class="ident">bind</span>(<span class="string">&quot;127.0.0.1:0&quot;</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">server4</span>.<span class="ident">local_addr</span>().<span class="ident">unwrap</span>().<span class="ident">port</span>();
+        <span class="kw">let</span> <span class="ident">server6</span> <span class="op">=</span> <span class="ident">TcpListener</span>::<span class="ident">bind</span>(<span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;[::1]:{}&quot;</span>, <span class="ident">port</span>)).<span class="ident">unwrap</span>();
+
+        <span class="kw">let</span> <span class="ident">assert_client_ip</span> <span class="op">=</span> <span class="op">|</span><span class="ident">dst</span>: <span class="ident">String</span>, <span class="ident">server</span>: <span class="ident">TcpListener</span>, <span class="ident">expected_ip</span>: <span class="ident">IpAddr</span><span class="op">|</span> <span class="kw">async</span> <span class="kw">move</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">connector</span> <span class="op">=</span> <span class="ident">HttpConnector</span>::<span class="ident">new</span>();
+
+            <span class="kw">match</span> (<span class="ident">bind_ip_v4</span>, <span class="ident">bind_ip_v6</span>) {
+                (<span class="prelude-val">Some</span>(<span class="ident">v4</span>), <span class="prelude-val">Some</span>(<span class="ident">v6</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">connector</span>.<span class="ident">set_local_addresses</span>(<span class="ident">v4</span>, <span class="ident">v6</span>),
+                (<span class="prelude-val">Some</span>(<span class="ident">v4</span>), <span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">connector</span>.<span class="ident">set_local_address</span>(<span class="prelude-val">Some</span>(<span class="ident">v4</span>.<span class="ident">into</span>())),
+                (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="ident">v6</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">connector</span>.<span class="ident">set_local_address</span>(<span class="prelude-val">Some</span>(<span class="ident">v6</span>.<span class="ident">into</span>())),
+                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable</span><span class="macro">!</span>(),
+            }
+
+            <span class="ident">connect</span>(<span class="ident">connector</span>, <span class="ident">dst</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>()).<span class="kw">await</span>.<span class="ident">unwrap</span>();
+
+            <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">client_addr</span>) <span class="op">=</span> <span class="ident">server</span>.<span class="ident">accept</span>().<span class="ident">unwrap</span>();
+
+            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">client_addr</span>.<span class="ident">ip</span>(), <span class="ident">expected_ip</span>);
         };
-        <span class="kw">let</span> <span class="ident">connector</span> <span class="op">=</span> <span class="ident">HttpConnector</span>::<span class="ident">new</span>(<span class="number">1</span>);
 
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">connector</span>.<span class="ident">connect</span>(<span class="ident">dst</span>).<span class="ident">wait</span>().<span class="ident">unwrap_err</span>().<span class="ident">kind</span>(), <span class="ident">io</span>::<span class="ident">ErrorKind</span>::<span class="ident">InvalidInput</span>);
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ip</span>) <span class="op">=</span> <span class="ident">bind_ip_v4</span> {
+            <span class="ident">assert_client_ip</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;http://127.0.0.1:{}&quot;</span>, <span class="ident">port</span>), <span class="ident">server4</span>, <span class="ident">ip</span>.<span class="ident">into</span>()).<span class="kw">await</span>;
+        }
+
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ip</span>) <span class="op">=</span> <span class="ident">bind_ip_v6</span> {
+            <span class="ident">assert_client_ip</span>(<span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;http://[::1]:{}&quot;</span>, <span class="ident">port</span>), <span class="ident">server6</span>, <span class="ident">ip</span>.<span class="ident">into</span>()).<span class="kw">await</span>;
+        }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;__internal_happy_eyeballs_tests&quot;</span>), <span class="ident">ignore</span>)]</span>
     <span class="kw">fn</span> <span class="ident">client_happy_eyeballs</span>() {
-        <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">pretty_env_logger</span>;
-
         <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">net</span>::{<span class="ident">IpAddr</span>, <span class="ident">Ipv4Addr</span>, <span class="ident">Ipv6Addr</span>, <span class="ident">TcpListener</span>};
         <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">time</span>::{<span class="ident">Duration</span>, <span class="ident">Instant</span>};
-
-        <span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">Async</span>, <span class="ident">Poll</span>};
-        <span class="kw">use</span> <span class="ident">tokio</span>::<span class="ident">runtime</span>::<span class="ident">current_thread</span>::<span class="ident">Runtime</span>;
-        <span class="kw">use</span> <span class="ident">tokio_reactor</span>::<span class="ident">Handle</span>;
 
         <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">dns</span>;
         <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">ConnectingTcp</span>;
@@ -1434,54 +1815,100 @@
         <span class="kw">let</span> <span class="ident">server4</span> <span class="op">=</span> <span class="ident">TcpListener</span>::<span class="ident">bind</span>(<span class="string">&quot;127.0.0.1:0&quot;</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">addr</span> <span class="op">=</span> <span class="ident">server4</span>.<span class="ident">local_addr</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">_server6</span> <span class="op">=</span> <span class="ident">TcpListener</span>::<span class="ident">bind</span>(<span class="kw-2">&amp;</span><span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;[::1]:{}&quot;</span>, <span class="ident">addr</span>.<span class="ident">port</span>())).<span class="ident">unwrap</span>();
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rt</span> <span class="op">=</span> <span class="ident">Runtime</span>::<span class="ident">new</span>().<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rt</span> <span class="op">=</span> <span class="ident">tokio</span>::<span class="ident">runtime</span>::<span class="ident">Builder</span>::<span class="ident">new</span>()
+            .<span class="ident">enable_io</span>()
+            .<span class="ident">enable_time</span>()
+            .<span class="ident">basic_scheduler</span>()
+            .<span class="ident">build</span>()
+            .<span class="ident">unwrap</span>();
 
         <span class="kw">let</span> <span class="ident">local_timeout</span> <span class="op">=</span> <span class="ident">Duration</span>::<span class="ident">default</span>();
         <span class="kw">let</span> <span class="ident">unreachable_v4_timeout</span> <span class="op">=</span> <span class="ident">measure_connect</span>(<span class="ident">unreachable_ipv4_addr</span>()).<span class="number">1</span>;
         <span class="kw">let</span> <span class="ident">unreachable_v6_timeout</span> <span class="op">=</span> <span class="ident">measure_connect</span>(<span class="ident">unreachable_ipv6_addr</span>()).<span class="number">1</span>;
-        <span class="kw">let</span> <span class="ident">fallback_timeout</span> <span class="op">=</span> ::<span class="ident">std</span>::<span class="ident">cmp</span>::<span class="ident">max</span>(<span class="ident">unreachable_v4_timeout</span>, <span class="ident">unreachable_v6_timeout</span>)
+        <span class="kw">let</span> <span class="ident">fallback_timeout</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">cmp</span>::<span class="ident">max</span>(<span class="ident">unreachable_v4_timeout</span>, <span class="ident">unreachable_v6_timeout</span>)
             <span class="op">+</span> <span class="ident">Duration</span>::<span class="ident">from_millis</span>(<span class="number">250</span>);
 
         <span class="kw">let</span> <span class="ident">scenarios</span> <span class="op">=</span> <span class="kw-2">&amp;</span>[
             <span class="comment">// Fast primary, without fallback.</span>
-            (<span class="kw-2">&amp;</span>[<span class="ident">local_ipv4_addr</span>()][..],
-                <span class="number">4</span>, <span class="ident">local_timeout</span>, <span class="bool-val">false</span>),
-            (<span class="kw-2">&amp;</span>[<span class="ident">local_ipv6_addr</span>()][..],
-                <span class="number">6</span>, <span class="ident">local_timeout</span>, <span class="bool-val">false</span>),
-
+            (<span class="kw-2">&amp;</span>[<span class="ident">local_ipv4_addr</span>()][..], <span class="number">4</span>, <span class="ident">local_timeout</span>, <span class="bool-val">false</span>),
+            (<span class="kw-2">&amp;</span>[<span class="ident">local_ipv6_addr</span>()][..], <span class="number">6</span>, <span class="ident">local_timeout</span>, <span class="bool-val">false</span>),
             <span class="comment">// Fast primary, with (unused) fallback.</span>
-            (<span class="kw-2">&amp;</span>[<span class="ident">local_ipv4_addr</span>(), <span class="ident">local_ipv6_addr</span>()][..],
-                <span class="number">4</span>, <span class="ident">local_timeout</span>, <span class="bool-val">false</span>),
-            (<span class="kw-2">&amp;</span>[<span class="ident">local_ipv6_addr</span>(), <span class="ident">local_ipv4_addr</span>()][..],
-                <span class="number">6</span>, <span class="ident">local_timeout</span>, <span class="bool-val">false</span>),
-
+            (
+                <span class="kw-2">&amp;</span>[<span class="ident">local_ipv4_addr</span>(), <span class="ident">local_ipv6_addr</span>()][..],
+                <span class="number">4</span>,
+                <span class="ident">local_timeout</span>,
+                <span class="bool-val">false</span>,
+            ),
+            (
+                <span class="kw-2">&amp;</span>[<span class="ident">local_ipv6_addr</span>(), <span class="ident">local_ipv4_addr</span>()][..],
+                <span class="number">6</span>,
+                <span class="ident">local_timeout</span>,
+                <span class="bool-val">false</span>,
+            ),
             <span class="comment">// Unreachable + fast primary, without fallback.</span>
-            (<span class="kw-2">&amp;</span>[<span class="ident">unreachable_ipv4_addr</span>(), <span class="ident">local_ipv4_addr</span>()][..],
-                <span class="number">4</span>, <span class="ident">unreachable_v4_timeout</span>, <span class="bool-val">false</span>),
-            (<span class="kw-2">&amp;</span>[<span class="ident">unreachable_ipv6_addr</span>(), <span class="ident">local_ipv6_addr</span>()][..],
-                <span class="number">6</span>, <span class="ident">unreachable_v6_timeout</span>, <span class="bool-val">false</span>),
-
+            (
+                <span class="kw-2">&amp;</span>[<span class="ident">unreachable_ipv4_addr</span>(), <span class="ident">local_ipv4_addr</span>()][..],
+                <span class="number">4</span>,
+                <span class="ident">unreachable_v4_timeout</span>,
+                <span class="bool-val">false</span>,
+            ),
+            (
+                <span class="kw-2">&amp;</span>[<span class="ident">unreachable_ipv6_addr</span>(), <span class="ident">local_ipv6_addr</span>()][..],
+                <span class="number">6</span>,
+                <span class="ident">unreachable_v6_timeout</span>,
+                <span class="bool-val">false</span>,
+            ),
             <span class="comment">// Unreachable + fast primary, with (unused) fallback.</span>
-            (<span class="kw-2">&amp;</span>[<span class="ident">unreachable_ipv4_addr</span>(), <span class="ident">local_ipv4_addr</span>(), <span class="ident">local_ipv6_addr</span>()][..],
-                <span class="number">4</span>, <span class="ident">unreachable_v4_timeout</span>, <span class="bool-val">false</span>),
-            (<span class="kw-2">&amp;</span>[<span class="ident">unreachable_ipv6_addr</span>(), <span class="ident">local_ipv6_addr</span>(), <span class="ident">local_ipv4_addr</span>()][..],
-                <span class="number">6</span>, <span class="ident">unreachable_v6_timeout</span>, <span class="bool-val">true</span>),
-
+            (
+                <span class="kw-2">&amp;</span>[
+                    <span class="ident">unreachable_ipv4_addr</span>(),
+                    <span class="ident">local_ipv4_addr</span>(),
+                    <span class="ident">local_ipv6_addr</span>(),
+                ][..],
+                <span class="number">4</span>,
+                <span class="ident">unreachable_v4_timeout</span>,
+                <span class="bool-val">false</span>,
+            ),
+            (
+                <span class="kw-2">&amp;</span>[
+                    <span class="ident">unreachable_ipv6_addr</span>(),
+                    <span class="ident">local_ipv6_addr</span>(),
+                    <span class="ident">local_ipv4_addr</span>(),
+                ][..],
+                <span class="number">6</span>,
+                <span class="ident">unreachable_v6_timeout</span>,
+                <span class="bool-val">true</span>,
+            ),
             <span class="comment">// Slow primary, with (used) fallback.</span>
-            (<span class="kw-2">&amp;</span>[<span class="ident">slow_ipv4_addr</span>(), <span class="ident">local_ipv4_addr</span>(), <span class="ident">local_ipv6_addr</span>()][..],
-                <span class="number">6</span>, <span class="ident">fallback_timeout</span>, <span class="bool-val">false</span>),
-            (<span class="kw-2">&amp;</span>[<span class="ident">slow_ipv6_addr</span>(), <span class="ident">local_ipv6_addr</span>(), <span class="ident">local_ipv4_addr</span>()][..],
-                <span class="number">4</span>, <span class="ident">fallback_timeout</span>, <span class="bool-val">true</span>),
-
+            (
+                <span class="kw-2">&amp;</span>[<span class="ident">slow_ipv4_addr</span>(), <span class="ident">local_ipv4_addr</span>(), <span class="ident">local_ipv6_addr</span>()][..],
+                <span class="number">6</span>,
+                <span class="ident">fallback_timeout</span>,
+                <span class="bool-val">false</span>,
+            ),
+            (
+                <span class="kw-2">&amp;</span>[<span class="ident">slow_ipv6_addr</span>(), <span class="ident">local_ipv6_addr</span>(), <span class="ident">local_ipv4_addr</span>()][..],
+                <span class="number">4</span>,
+                <span class="ident">fallback_timeout</span>,
+                <span class="bool-val">true</span>,
+            ),
             <span class="comment">// Slow primary, with (used) unreachable + fast fallback.</span>
-            (<span class="kw-2">&amp;</span>[<span class="ident">slow_ipv4_addr</span>(), <span class="ident">unreachable_ipv6_addr</span>(), <span class="ident">local_ipv6_addr</span>()][..],
-                <span class="number">6</span>, <span class="ident">fallback_timeout</span> <span class="op">+</span> <span class="ident">unreachable_v6_timeout</span>, <span class="bool-val">false</span>),
-            (<span class="kw-2">&amp;</span>[<span class="ident">slow_ipv6_addr</span>(), <span class="ident">unreachable_ipv4_addr</span>(), <span class="ident">local_ipv4_addr</span>()][..],
-                <span class="number">4</span>, <span class="ident">fallback_timeout</span> <span class="op">+</span> <span class="ident">unreachable_v4_timeout</span>, <span class="bool-val">true</span>),
+            (
+                <span class="kw-2">&amp;</span>[<span class="ident">slow_ipv4_addr</span>(), <span class="ident">unreachable_ipv6_addr</span>(), <span class="ident">local_ipv6_addr</span>()][..],
+                <span class="number">6</span>,
+                <span class="ident">fallback_timeout</span> <span class="op">+</span> <span class="ident">unreachable_v6_timeout</span>,
+                <span class="bool-val">false</span>,
+            ),
+            (
+                <span class="kw-2">&amp;</span>[<span class="ident">slow_ipv6_addr</span>(), <span class="ident">unreachable_ipv4_addr</span>(), <span class="ident">local_ipv4_addr</span>()][..],
+                <span class="number">4</span>,
+                <span class="ident">fallback_timeout</span> <span class="op">+</span> <span class="ident">unreachable_v4_timeout</span>,
+                <span class="bool-val">true</span>,
+            ),
         ];
 
         <span class="comment">// Scenarios for IPv6 -&gt; IPv4 fallback require that host can access IPv6 network.</span>
-        <span class="comment">// Otherwise, connection to &quot;slow&quot; IPv6 address will error-out immediatelly.</span>
+        <span class="comment">// Otherwise, connection to &quot;slow&quot; IPv6 address will error-out immediately.</span>
         <span class="kw">let</span> <span class="ident">ipv6_accessible</span> <span class="op">=</span> <span class="ident">measure_connect</span>(<span class="ident">slow_ipv6_addr</span>()).<span class="number">0</span>;
 
         <span class="kw">for</span> <span class="kw-2">&amp;</span>(<span class="ident">hosts</span>, <span class="ident">family</span>, <span class="ident">timeout</span>, <span class="ident">needs_ipv6_access</span>) <span class="kw">in</span> <span class="ident">scenarios</span> {
@@ -1489,12 +1916,29 @@
                 <span class="kw">continue</span>;
             }
 
-            <span class="kw">let</span> <span class="ident">addrs</span> <span class="op">=</span> <span class="ident">hosts</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">host</span><span class="op">|</span> (<span class="ident">host</span>.<span class="ident">clone</span>(), <span class="ident">addr</span>.<span class="ident">port</span>()).<span class="ident">into</span>()).<span class="ident">collect</span>();
-            <span class="kw">let</span> <span class="ident">connecting_tcp</span> <span class="op">=</span> <span class="ident">ConnectingTcp</span>::<span class="ident">new</span>(<span class="prelude-val">None</span>, <span class="ident">dns</span>::<span class="ident">IpAddrs</span>::<span class="ident">new</span>(<span class="ident">addrs</span>), <span class="prelude-val">Some</span>(<span class="ident">fallback_timeout</span>), <span class="bool-val">false</span>);
-            <span class="kw">let</span> <span class="ident">fut</span> <span class="op">=</span> <span class="ident">ConnectingTcpFuture</span>(<span class="ident">connecting_tcp</span>);
-
-            <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">Instant</span>::<span class="ident">now</span>();
-            <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">rt</span>.<span class="ident">block_on</span>(<span class="ident">fut</span>).<span class="ident">unwrap</span>();
+            <span class="kw">let</span> (<span class="ident">start</span>, <span class="ident">stream</span>) <span class="op">=</span> <span class="ident">rt</span>
+                .<span class="ident">block_on</span>(<span class="kw">async</span> <span class="kw">move</span> {
+                    <span class="kw">let</span> <span class="ident">addrs</span> <span class="op">=</span> <span class="ident">hosts</span>
+                        .<span class="ident">iter</span>()
+                        .<span class="ident">map</span>(<span class="op">|</span><span class="ident">host</span><span class="op">|</span> (<span class="ident">host</span>.<span class="ident">clone</span>(), <span class="ident">addr</span>.<span class="ident">port</span>()).<span class="ident">into</span>())
+                        .<span class="ident">collect</span>();
+                    <span class="kw">let</span> <span class="ident">connecting_tcp</span> <span class="op">=</span> <span class="ident">ConnectingTcp</span>::<span class="ident">new</span>(
+                        <span class="prelude-val">None</span>,
+                        <span class="prelude-val">None</span>,
+                        <span class="ident">dns</span>::<span class="ident">IpAddrs</span>::<span class="ident">new</span>(<span class="ident">addrs</span>),
+                        <span class="prelude-val">None</span>,
+                        <span class="prelude-val">Some</span>(<span class="ident">fallback_timeout</span>),
+                        <span class="bool-val">false</span>,
+                    );
+                    <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">Instant</span>::<span class="ident">now</span>();
+                    <span class="prelude-val">Ok</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">io</span>::<span class="ident">Error</span><span class="op">&gt;</span>((<span class="ident">start</span>, <span class="ident">connecting_tcp</span>.<span class="ident">connect</span>().<span class="kw">await</span><span class="question-mark">?</span>))
+                })
+                .<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">stream</span>.<span class="ident">peer_addr</span>().<span class="ident">unwrap</span>().<span class="ident">is_ipv4</span>() {
+                <span class="number">4</span>
+            } <span class="kw">else</span> {
+                <span class="number">6</span>
+            };
             <span class="kw">let</span> <span class="ident">duration</span> <span class="op">=</span> <span class="ident">start</span>.<span class="ident">elapsed</span>();
 
             <span class="comment">// Allow actual duration to be +/- 150ms off.</span>
@@ -1508,23 +1952,6 @@
             <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">res</span>, <span class="ident">family</span>);
             <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">duration</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">min_duration</span>);
             <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">duration</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">max_duration</span>);
-        }
-
-        <span class="kw">struct</span> <span class="ident">ConnectingTcpFuture</span>(<span class="ident">ConnectingTcp</span>);
-
-        <span class="kw">impl</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">ConnectingTcpFuture</span> {
-            <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">u8</span>;
-            <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> ::<span class="ident">std</span>::<span class="ident">io</span>::<span class="ident">Error</span>;
-
-            <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span>, <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
-                <span class="kw">match</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="prelude-val">Some</span>(<span class="ident">Handle</span>::<span class="ident">default</span>())) {
-                    <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="ident">stream</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(
-                        <span class="kw">if</span> <span class="ident">stream</span>.<span class="ident">peer_addr</span>().<span class="ident">unwrap</span>().<span class="ident">is_ipv4</span>() { <span class="number">4</span> } <span class="kw">else</span> { <span class="number">6</span> }
-                    )),
-                    <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>),
-                    <span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>),
-                }
-            }
         }
 
         <span class="kw">fn</span> <span class="ident">local_ipv4_addr</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">IpAddr</span> {
@@ -1555,8 +1982,8 @@
 
         <span class="kw">fn</span> <span class="ident">measure_connect</span>(<span class="ident">addr</span>: <span class="ident">IpAddr</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">bool</span>, <span class="ident">Duration</span>) {
             <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">Instant</span>::<span class="ident">now</span>();
-            <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> ::<span class="ident">std</span>::<span class="ident">net</span>::<span class="ident">TcpStream</span>::<span class="ident">connect_timeout</span>(
-                <span class="kw-2">&amp;</span>(<span class="ident">addr</span>, <span class="number">80</span>).<span class="ident">into</span>(), <span class="ident">Duration</span>::<span class="ident">from_secs</span>(<span class="number">1</span>));
+            <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span>
+                <span class="ident">std</span>::<span class="ident">net</span>::<span class="ident">TcpStream</span>::<span class="ident">connect_timeout</span>(<span class="kw-2">&amp;</span>(<span class="ident">addr</span>, <span class="number">80</span>).<span class="ident">into</span>(), <span class="ident">Duration</span>::<span class="ident">from_secs</span>(<span class="number">1</span>));
 
             <span class="kw">let</span> <span class="ident">reachable</span> <span class="op">=</span> <span class="ident">result</span>.<span class="ident">is_ok</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">result</span>.<span class="ident">unwrap_err</span>().<span class="ident">kind</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">io</span>::<span class="ident">ErrorKind</span>::<span class="ident">TimedOut</span>;
             <span class="kw">let</span> <span class="ident">duration</span> <span class="op">=</span> <span class="ident">start</span>.<span class="ident">elapsed</span>();
@@ -1564,6 +1991,5 @@
         }
     }
 }
-
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../../";window.currentCrate = "hyper";</script><script src="../../../../aliases.js"></script><script src="../../../../main.js"></script><script src="../../../../source-script.js"></script><script src="../../../../source-files.js"></script><script defer src="../../../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../../";window.currentCrate = "hyper";</script><script src="../../../../main.js"></script><script src="../../../../source-script.js"></script><script src="../../../../source-files.js"></script><script defer src="../../../../search-index.js"></script></body></html>

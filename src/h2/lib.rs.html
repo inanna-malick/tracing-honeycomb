@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/h2-0.1.26/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../h2/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/h2-0.2.7/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../h2/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -142,6 +142,27 @@
 <span id="142">142</span>
 <span id="143">143</span>
 <span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! An asynchronous, HTTP/2.0 server and client implementation.</span>
 <span class="doccomment">//!</span>
@@ -156,13 +177,7 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```toml</span>
 <span class="doccomment">//! [dependencies]</span>
-<span class="doccomment">//! h2 = &quot;0.1&quot;</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Next, add this to your crate:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```no_run</span>
-<span class="doccomment">//! extern crate h2;</span>
+<span class="doccomment">//! h2 = &quot;0.2&quot;</span>
 <span class="doccomment">//! ```</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Layout</span>
@@ -213,7 +228,7 @@
 <span class="doccomment">//! There is also a **connection level** window governing data sent across all</span>
 <span class="doccomment">//! streams.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! Managing flow control for inbound data is done through [`ReleaseCapacity`].</span>
+<span class="doccomment">//! Managing flow control for inbound data is done through [`FlowControl`].</span>
 <span class="doccomment">//! Managing flow control for outbound data is done through [`SendStream`]. See</span>
 <span class="doccomment">//! the struct level documentation for those two types for more details.</span>
 <span class="doccomment">//!</span>
@@ -222,52 +237,38 @@
 <span class="doccomment">//! [`client`]: client/index.html</span>
 <span class="doccomment">//! [`server`]: server/index.html</span>
 <span class="doccomment">//! [Flow control]: http://httpwg.org/specs/rfc7540.html#FlowControl</span>
-<span class="doccomment">//! [`ReleaseCapacity`]: struct.ReleaseCapacity.html</span>
+<span class="doccomment">//! [`FlowControl`]: struct.FlowControl.html</span>
 <span class="doccomment">//! [`SendStream`]: struct.SendStream.html</span>
 <span class="doccomment">//! [Starting HTTP/2]: http://httpwg.org/specs/rfc7540.html#starting</span>
 <span class="doccomment">//! [upgrade]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Protocol_upgrade_mechanism</span>
 <span class="doccomment">//! [`server::handshake`]: server/fn.handshake.html</span>
 <span class="doccomment">//! [`client::handshake`]: client/fn.handshake.html</span>
 
-<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/h2/0.1.26&quot;</span>)]</span>
+<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/h2/0.2.7&quot;</span>)]</span>
 <span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_debug_implementations</span>, <span class="ident">missing_docs</span>)]</span>
 <span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">test</span>, <span class="ident">deny</span>(<span class="ident">warnings</span>))]</span>
 
-<span class="attribute">#[<span class="ident">macro_use</span>]</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">futures</span>;
-
-<span class="attribute">#[<span class="ident">macro_use</span>]</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">tokio_io</span>;
-
-<span class="comment">// HTTP types</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">http</span>;
-
-<span class="comment">// Buffer utilities</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">bytes</span>;
-
-<span class="comment">// Hash function used for HPACK encoding and tracking stream states.</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">fnv</span>;
-
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">byteorder</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">slab</span>;
-
-<span class="attribute">#[<span class="ident">macro_use</span>]</span>
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">log</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">string</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">indexmap</span>;
-
 <span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">proto_err</span> {
     (<span class="ident">conn</span>: $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">msg</span>:<span class="ident">tt</span>)<span class="op">+</span>) <span class="op">=</span><span class="op">&gt;</span> {
-        <span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;connection error PROTOCOL_ERROR -- {};&quot;</span>, <span class="macro">format_args</span><span class="macro">!</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">msg</span>)<span class="op">+</span>))
+        <span class="ident">tracing</span>::<span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;connection error PROTOCOL_ERROR -- {};&quot;</span>, <span class="macro">format_args</span><span class="macro">!</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">msg</span>)<span class="op">+</span>))
     };
     (<span class="ident">stream</span>: $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">msg</span>:<span class="ident">tt</span>)<span class="op">+</span>) <span class="op">=</span><span class="op">&gt;</span> {
-        <span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;stream error PROTOCOL_ERROR -- {};&quot;</span>, <span class="macro">format_args</span><span class="macro">!</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">msg</span>)<span class="op">+</span>))
+        <span class="ident">tracing</span>::<span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;stream error PROTOCOL_ERROR -- {};&quot;</span>, <span class="macro">format_args</span><span class="macro">!</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">msg</span>)<span class="op">+</span>))
     };
 }
 
-<span class="kw">mod</span> <span class="ident">error</span>;
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">ready</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="kw">match</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span> {
+            ::<span class="ident">std</span>::<span class="ident">task</span>::<span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">r</span>,
+            ::<span class="ident">std</span>::<span class="ident">task</span>::<span class="ident">Poll</span>::<span class="ident">Pending</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> ::<span class="ident">std</span>::<span class="ident">task</span>::<span class="ident">Poll</span>::<span class="ident">Pending</span>,
+        }
+    };
+}
+
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unstable&quot;</span>, <span class="ident">allow</span>(<span class="ident">missing_docs</span>))]</span>
 <span class="kw">mod</span> <span class="ident">codec</span>;
+<span class="kw">mod</span> <span class="ident">error</span>;
 <span class="kw">mod</span> <span class="ident">hpack</span>;
 <span class="kw">mod</span> <span class="ident">proto</span>;
 
@@ -282,10 +283,51 @@
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">server</span>;
 <span class="kw">mod</span> <span class="ident">share</span>;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">error</span>::{<span class="ident">Error</span>, <span class="ident">Reason</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">share</span>::{<span class="ident">SendStream</span>, <span class="ident">StreamId</span>, <span class="ident">RecvStream</span>, <span class="ident">ReleaseCapacity</span>, <span class="ident">PingPong</span>, <span class="ident">Ping</span>, <span class="ident">Pong</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">error</span>::{<span class="ident">Error</span>, <span class="ident">Reason</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">share</span>::{<span class="ident">FlowControl</span>, <span class="ident">Ping</span>, <span class="ident">PingPong</span>, <span class="ident">Pong</span>, <span class="ident">RecvStream</span>, <span class="ident">SendStream</span>, <span class="ident">StreamId</span>};
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unstable&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">codec</span>::{<span class="ident">Codec</span>, <span class="ident">RecvError</span>, <span class="ident">SendError</span>, <span class="ident">UserError</span>};
+
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">task</span>::<span class="ident">Poll</span>;
+
+<span class="comment">// TODO: Get rid of this trait once https://github.com/rust-lang/rust/pull/63512</span>
+<span class="comment">// is stablized.</span>
+<span class="kw">trait</span> <span class="ident">PollExt</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Changes the success value of this `Poll` with the closure provided.</span>
+    <span class="kw">fn</span> <span class="ident">map_ok_</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">E</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">U</span>;
+    <span class="doccomment">/// Changes the error value of this `Poll` with the closure provided.</span>
+    <span class="kw">fn</span> <span class="ident">map_err_</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="ident">E</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">U</span>;
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span> <span class="ident">PollExt</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">map_ok_</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">E</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">U</span>,
+    {
+        <span class="kw">match</span> <span class="self">self</span> {
+            <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">t</span>))) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">f</span>(<span class="ident">t</span>)))),
+            <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>))) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>))),
+            <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">None</span>),
+            <span class="ident">Poll</span>::<span class="ident">Pending</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll</span>::<span class="ident">Pending</span>,
+        }
+    }
+
+    <span class="kw">fn</span> <span class="ident">map_err_</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    <span class="kw">where</span>
+        <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="ident">E</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">U</span>,
+    {
+        <span class="kw">match</span> <span class="self">self</span> {
+            <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">t</span>))) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">t</span>))),
+            <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>))) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">f</span>(<span class="ident">e</span>)))),
+            <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">None</span>),
+            <span class="ident">Poll</span>::<span class="ident">Pending</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll</span>::<span class="ident">Pending</span>,
+        }
+    }
+}
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "h2";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "h2";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

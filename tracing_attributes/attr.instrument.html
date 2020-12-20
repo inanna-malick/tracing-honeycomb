@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `instrument` attr in crate `tracing_attributes`."><meta name="keywords" content="rust, rustlang, rust-lang, instrument"><title>tracing_attributes::instrument - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../dark.css"><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="shortcut icon" href="../favicon.ico"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc attr"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../tracing_attributes/index.html'><div class='logo-container'><img src='../rust-logo.png' alt='logo'></div></a><div class="sidebar-elems"><p class='location'><a href='index.html'>tracing_attributes</a></p><script>window.sidebarCurrent = {name: 'instrument', ty: 'attr', relpath: ''};</script><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../src/tracing_attributes/lib.rs.html#201-236' title='goto source code'>[src]</a></span><span class='in-band'>Attribute Macro <a href='index.html'>tracing_attributes</a>::<wbr><a class="attr" href=''>instrument</a></span></h1><pre class='rust attr'>#[instrument]</pre><div class='docblock'><p>Instruments a function to create and enter a <code>tracing</code> <a href="https://docs.rs/tracing/latest/tracing/span/index.html">span</a> every time
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `instrument` attr in crate `tracing_attributes`."><meta name="keywords" content="rust, rustlang, rust-lang, instrument"><title>tracing_attributes::instrument - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../dark.css"><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="shortcut icon" href="../favicon.ico"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc attr"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../tracing_attributes/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo.svg' alt='logo'></div></a><div class="sidebar-elems"><p class='location'><a href='index.html'>tracing_attributes</a></p><script>window.sidebarCurrent = {name: 'instrument', ty: 'attr', relpath: ''};</script><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../src/tracing_attributes/lib.rs.html#257-300' title='goto source code'>[src]</a></span><span class='in-band'>Attribute Macro <a href='index.html'>tracing_attributes</a>::<wbr><a class="attr" href=''>instrument</a></span></h1><pre class='rust attr'>#[instrument]</pre><div class='docblock'><p>Instruments a function to create and enter a <code>tracing</code> <a href="https://docs.rs/tracing/latest/tracing/span/index.html">span</a> every time
 the function is called.</p>
 <p>The generated span's name will be the name of the function. Any arguments
 to that function will be recorded as fields using <a href="https://doc.rust-lang.org/std/fmt/trait.Debug.html"><code>fmt::Debug</code></a>. To skip
@@ -33,6 +33,13 @@ will result in a compile error.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered">
 <span class="attribute">#[<span class="ident">instrument</span>(<span class="ident">level</span> <span class="op">=</span> <span class="string">&quot;debug&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">my_function</span>() {
+    <span class="comment">// ...</span>
+}</pre></div>
+<p>Overriding the generated span's name:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="attribute">#[<span class="ident">instrument</span>(<span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;my_name&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">my_function</span>() {
     <span class="comment">// ...</span>
 }</pre></div>
@@ -76,8 +83,8 @@ will result in a compile error.</p>
     <span class="comment">// ...</span>
 }</pre></div>
 <p>It also works with <a href="https://crates.io/crates/async-trait">async-trait</a>
-(a crate that allows async functions on traits,
-something not currently possible with rustc alone),
+(a crate that allows defining async functions in traits,
+something not currently possible in Rust),
 and hopefully most libraries that exhibit similar behaviors:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered">
@@ -85,15 +92,38 @@ and hopefully most libraries that exhibit similar behaviors:</p>
 
 <span class="attribute">#[<span class="ident">async_trait</span>]</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Foo</span> {
-    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">foo</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">v</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> ();
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">foo</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">arg</span>: <span class="ident">usize</span>);
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">struct</span> <span class="ident">FooImpl</span>;
+<span class="kw">struct</span> <span class="ident">FooImpl</span>(<span class="ident">usize</span>);
 
 <span class="attribute">#[<span class="ident">async_trait</span>]</span>
 <span class="kw">impl</span> <span class="ident">Foo</span> <span class="kw">for</span> <span class="ident">FooImpl</span> {
-    <span class="attribute">#[<span class="ident">instrument</span>(<span class="ident">skip</span>(<span class="self">self</span>))]</span>
-    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">foo</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">v</span>: <span class="ident">usize</span>) {}
+    <span class="attribute">#[<span class="ident">instrument</span>(<span class="ident">fields</span>(<span class="ident">value</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>, <span class="ident">tmp</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">any</span>::<span class="ident">type_name</span>::<span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>()))]</span>
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">foo</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">arg</span>: <span class="ident">usize</span>) {}
 }</pre></div>
-</div></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../";window.currentCrate = "tracing_attributes";</script><script src="../aliases.js"></script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>
+<p>An interesting note on this subject is that references to the <code>Self</code>
+type inside the <code>fields</code> argument are only allowed when the instrumented
+function is a method aka. the function receives <code>self</code> as an argument.
+For example, this <em>will not work</em> because it doesn't receive <code>self</code>:</p>
+
+<div class='information'><div class='tooltip compile_fail'>ⓘ<span class='tooltiptext'>This example deliberately fails to compile</span></div></div><div class="example-wrap"><pre class="rust rust-example-rendered compile_fail">
+<span class="kw">use</span> <span class="ident">async_trait</span>::<span class="ident">async_trait</span>;
+
+<span class="attribute">#[<span class="ident">async_trait</span>]</span>
+<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Bar</span> {
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">bar</span>();
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
+<span class="kw">struct</span> <span class="ident">BarImpl</span>(<span class="ident">usize</span>);
+
+<span class="attribute">#[<span class="ident">async_trait</span>]</span>
+<span class="kw">impl</span> <span class="ident">Bar</span> <span class="kw">for</span> <span class="ident">BarImpl</span> {
+    <span class="attribute">#[<span class="ident">instrument</span>(<span class="ident">fields</span>(<span class="ident">tmp</span> <span class="op">=</span> <span class="ident">std</span>::<span class="ident">any</span>::<span class="ident">type_name</span>::<span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>()))]</span>
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">bar</span>() {}
+}</pre></div>
+<p>Instead, you should manually rewrite any <code>Self</code> types as the type for
+which you implement the trait: <code>#[instrument(fields(tmp = std::any::type_name::&lt;Bar&gt;()))]</code>.</p>
+</div></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../";window.currentCrate = "tracing_attributes";</script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>

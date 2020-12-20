@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/hyper-0.12.35/src/server/shutdown.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>shutdown.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../hyper/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/hyper-0.13.9/src/server/shutdown.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>shutdown.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../hyper/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -122,24 +122,31 @@
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">error</span>::<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">StdError</span>;
 
-<span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">Async</span>, <span class="ident">Future</span>, <span class="ident">Stream</span>, <span class="ident">Poll</span>};
-<span class="kw">use</span> <span class="ident">tokio_io</span>::{<span class="ident">AsyncRead</span>, <span class="ident">AsyncWrite</span>};
+<span class="kw">use</span> <span class="ident">pin_project</span>::<span class="ident">pin_project</span>;
+<span class="kw">use</span> <span class="ident">tokio</span>::<span class="ident">io</span>::{<span class="ident">AsyncRead</span>, <span class="ident">AsyncWrite</span>};
 
-<span class="kw">use</span> <span class="ident">body</span>::{<span class="ident">Body</span>, <span class="ident">Payload</span>};
-<span class="kw">use</span> <span class="ident">common</span>::<span class="ident">drain</span>::{<span class="self">self</span>, <span class="ident">Draining</span>, <span class="ident">Signal</span>, <span class="ident">Watch</span>, <span class="ident">Watching</span>};
-<span class="kw">use</span> <span class="ident">common</span>::<span class="ident">exec</span>::{<span class="ident">H2Exec</span>, <span class="ident">NewSvcExec</span>};
-<span class="kw">use</span> <span class="ident">service</span>::{<span class="ident">MakeServiceRef</span>, <span class="ident">Service</span>};
 <span class="kw">use</span> <span class="kw">super</span>::<span class="ident">conn</span>::{<span class="ident">SpawnAll</span>, <span class="ident">UpgradeableConnection</span>, <span class="ident">Watcher</span>};
+<span class="kw">use</span> <span class="kw">super</span>::<span class="ident">Accept</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">body</span>::{<span class="ident">Body</span>, <span class="ident">HttpBody</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">common</span>::<span class="ident">drain</span>::{<span class="self">self</span>, <span class="ident">Draining</span>, <span class="ident">Signal</span>, <span class="ident">Watch</span>, <span class="ident">Watching</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">common</span>::<span class="ident">exec</span>::{<span class="ident">H2Exec</span>, <span class="ident">NewSvcExec</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">common</span>::{<span class="ident">task</span>, <span class="ident">Future</span>, <span class="ident">Pin</span>, <span class="ident">Poll</span>, <span class="ident">Unpin</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::<span class="ident">service</span>::{<span class="ident">HttpService</span>, <span class="ident">MakeServiceRef</span>};
 
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">missing_debug_implementations</span>)]</span>
+<span class="attribute">#[<span class="ident">pin_project</span>]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Graceful</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">F</span>, <span class="ident">E</span><span class="op">&gt;</span> {
+    <span class="attribute">#[<span class="ident">pin</span>]</span>
     <span class="ident">state</span>: <span class="ident">State</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">F</span>, <span class="ident">E</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">enum</span> <span class="ident">State</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">F</span>, <span class="ident">E</span><span class="op">&gt;</span> {
+<span class="attribute">#[<span class="ident">pin_project</span>(<span class="ident">project</span> <span class="op">=</span> <span class="ident">StateProj</span>)]</span>
+<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">enum</span> <span class="ident">State</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">F</span>, <span class="ident">E</span><span class="op">&gt;</span> {
     <span class="ident">Running</span> {
         <span class="ident">drain</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">Signal</span>, <span class="ident">Watch</span>)<span class="op">&gt;</span>,
+        <span class="attribute">#[<span class="ident">pin</span>]</span>
         <span class="ident">spawn_all</span>: <span class="ident">SpawnAll</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>,
+        <span class="attribute">#[<span class="ident">pin</span>]</span>
         <span class="ident">signal</span>: <span class="ident">F</span>,
     },
     <span class="ident">Draining</span>(<span class="ident">Draining</span>),
@@ -158,54 +165,47 @@
     }
 }
 
-
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">B</span>, <span class="ident">F</span>, <span class="ident">E</span><span class="op">&gt;</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">Graceful</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">F</span>, <span class="ident">E</span><span class="op">&gt;</span>
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">IO</span>, <span class="ident">IE</span>, <span class="ident">S</span>, <span class="ident">B</span>, <span class="ident">F</span>, <span class="ident">E</span><span class="op">&gt;</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">Graceful</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">F</span>, <span class="ident">E</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">I</span>: <span class="ident">Stream</span>,
-    <span class="ident">I</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">I</span>::<span class="ident">Item</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-    <span class="ident">S</span>: <span class="ident">MakeServiceRef</span><span class="op">&lt;</span><span class="ident">I</span>::<span class="ident">Item</span>, <span class="ident">ReqBody</span><span class="op">=</span><span class="ident">Body</span>, <span class="ident">ResBody</span><span class="op">=</span><span class="ident">B</span><span class="op">&gt;</span>,
-    <span class="ident">S</span>::<span class="ident">Service</span>: <span class="lifetime">&#39;static</span>,
-    <span class="ident">S</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">B</span>: <span class="ident">Payload</span>,
-    <span class="ident">F</span>: <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Item</span><span class="op">=</span>()<span class="op">&gt;</span>,
-    <span class="ident">E</span>: <span class="ident">H2Exec</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">S</span>::<span class="ident">Service</span> <span class="kw">as</span> <span class="ident">Service</span><span class="op">&gt;</span>::<span class="ident">Future</span>, <span class="ident">B</span><span class="op">&gt;</span>,
-    <span class="ident">E</span>: <span class="ident">NewSvcExec</span><span class="op">&lt;</span><span class="ident">I</span>::<span class="ident">Item</span>, <span class="ident">S</span>::<span class="ident">Future</span>, <span class="ident">S</span>::<span class="ident">Service</span>, <span class="ident">E</span>, <span class="ident">GracefulWatcher</span><span class="op">&gt;</span>,
+    <span class="ident">I</span>: <span class="ident">Accept</span><span class="op">&lt;</span><span class="ident">Conn</span> <span class="op">=</span> <span class="ident">IO</span>, <span class="ident">Error</span> <span class="op">=</span> <span class="ident">IE</span><span class="op">&gt;</span>,
+    <span class="ident">IE</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">IO</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span> <span class="op">+</span> <span class="ident">Unpin</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">S</span>: <span class="ident">MakeServiceRef</span><span class="op">&lt;</span><span class="ident">IO</span>, <span class="ident">Body</span>, <span class="ident">ResBody</span> <span class="op">=</span> <span class="ident">B</span><span class="op">&gt;</span>,
+    <span class="ident">S</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">B</span>: <span class="ident">HttpBody</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">B</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">F</span>: <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span>,
+    <span class="ident">E</span>: <span class="ident">H2Exec</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">S</span>::<span class="ident">Service</span> <span class="kw">as</span> <span class="ident">HttpService</span><span class="op">&lt;</span><span class="ident">Body</span><span class="op">&gt;</span><span class="op">&gt;</span>::<span class="ident">Future</span>, <span class="ident">B</span><span class="op">&gt;</span>,
+    <span class="ident">E</span>: <span class="ident">NewSvcExec</span><span class="op">&lt;</span><span class="ident">IO</span>, <span class="ident">S</span>::<span class="ident">Future</span>, <span class="ident">S</span>::<span class="ident">Service</span>, <span class="ident">E</span>, <span class="ident">GracefulWatcher</span><span class="op">&gt;</span>,
 {
-    <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> ();
-    <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> ::<span class="ident">Error</span>;
+    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="kw">crate</span>::<span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Item</span>, <span class="self">Self</span>::<span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task</span>::<span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Output</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">me</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">project</span>();
         <span class="kw">loop</span> {
-            <span class="kw">let</span> <span class="ident">next</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">state</span> {
-                <span class="ident">State</span>::<span class="ident">Running</span> {
-                    <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">drain</span>,
-                    <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">spawn_all</span>,
-                    <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">signal</span>,
-                } <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">signal</span>.<span class="ident">poll</span>() {
-                    <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(())) <span class="op">|</span> <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                        <span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;signal received, starting graceful shutdown&quot;</span>);
-                        <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">drain</span>
-                            .<span class="ident">take</span>()
-                            .<span class="ident">expect</span>(<span class="string">&quot;drain channel&quot;</span>)
-                            .<span class="number">0</span>;
-                        <span class="ident">State</span>::<span class="ident">Draining</span>(<span class="ident">sig</span>.<span class="ident">drain</span>())
+            <span class="kw">let</span> <span class="ident">next</span> <span class="op">=</span> {
+                <span class="kw">match</span> <span class="ident">me</span>.<span class="ident">state</span>.<span class="ident">as_mut</span>().<span class="ident">project</span>() {
+                    <span class="ident">StateProj</span>::<span class="ident">Running</span> {
+                        <span class="ident">drain</span>,
+                        <span class="ident">spawn_all</span>,
+                        <span class="ident">signal</span>,
+                    } <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">signal</span>.<span class="ident">poll</span>(<span class="ident">cx</span>) {
+                        <span class="ident">Poll</span>::<span class="ident">Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="macro">debug</span><span class="macro">!</span>(<span class="string">&quot;signal received, starting graceful shutdown&quot;</span>);
+                            <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">drain</span>.<span class="ident">take</span>().<span class="ident">expect</span>(<span class="string">&quot;drain channel&quot;</span>).<span class="number">0</span>;
+                            <span class="ident">State</span>::<span class="ident">Draining</span>(<span class="ident">sig</span>.<span class="ident">drain</span>())
+                        }
+                        <span class="ident">Poll</span>::<span class="ident">Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="kw">let</span> <span class="ident">watch</span> <span class="op">=</span> <span class="ident">drain</span>.<span class="ident">as_ref</span>().<span class="ident">expect</span>(<span class="string">&quot;drain channel&quot;</span>).<span class="number">1</span>.<span class="ident">clone</span>();
+                            <span class="kw">return</span> <span class="ident">spawn_all</span>.<span class="ident">poll_watch</span>(<span class="ident">cx</span>, <span class="kw-2">&amp;</span><span class="ident">GracefulWatcher</span>(<span class="ident">watch</span>));
+                        }
                     },
-                    <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                        <span class="kw">let</span> <span class="ident">watch</span> <span class="op">=</span> <span class="ident">drain</span>
-                            .<span class="ident">as_ref</span>()
-                            .<span class="ident">expect</span>(<span class="string">&quot;drain channel&quot;</span>)
-                            .<span class="number">1</span>
-                            .<span class="ident">clone</span>();
-                        <span class="kw">return</span> <span class="ident">spawn_all</span>.<span class="ident">poll_watch</span>(<span class="kw-2">&amp;</span><span class="ident">GracefulWatcher</span>(<span class="ident">watch</span>));
-                    },
-                },
-                <span class="ident">State</span>::<span class="ident">Draining</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">draining</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="kw">return</span> <span class="ident">draining</span>.<span class="ident">poll</span>()
-                        .<span class="ident">map_err</span>(<span class="op">|</span>()<span class="op">|</span> <span class="macro">unreachable</span><span class="macro">!</span>(<span class="string">&quot;drain mpsc rx never errors&quot;</span>));
+                    <span class="ident">StateProj</span>::<span class="ident">Draining</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">draining</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="kw">return</span> <span class="ident">Pin</span>::<span class="ident">new</span>(<span class="ident">draining</span>).<span class="ident">poll</span>(<span class="ident">cx</span>).<span class="ident">map</span>(<span class="prelude-val">Ok</span>);
+                    }
                 }
             };
-            <span class="self">self</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">next</span>;
+            <span class="ident">me</span>.<span class="ident">state</span>.<span class="ident">set</span>(<span class="ident">next</span>);
         }
     }
 }
@@ -216,30 +216,30 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span> <span class="ident">Watcher</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">GracefulWatcher</span>
 <span class="kw">where</span>
-    <span class="ident">I</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-    <span class="ident">S</span>: <span class="ident">Service</span><span class="op">&lt;</span><span class="ident">ReqBody</span><span class="op">=</span><span class="ident">Body</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">I</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span> <span class="op">+</span> <span class="ident">Unpin</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">S</span>: <span class="ident">HttpService</span><span class="op">&lt;</span><span class="ident">Body</span><span class="op">&gt;</span>,
     <span class="ident">E</span>: <span class="ident">H2Exec</span><span class="op">&lt;</span><span class="ident">S</span>::<span class="ident">Future</span>, <span class="ident">S</span>::<span class="ident">ResBody</span><span class="op">&gt;</span>,
+    <span class="ident">S</span>::<span class="ident">ResBody</span>: <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="op">&lt;</span><span class="ident">S</span>::<span class="ident">ResBody</span> <span class="kw">as</span> <span class="ident">HttpBody</span><span class="op">&gt;</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
-    <span class="kw">type</span> <span class="ident">Future</span> <span class="op">=</span> <span class="ident">Watching</span><span class="op">&lt;</span><span class="ident">UpgradeableConnection</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>, <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">UpgradeableConnection</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>)<span class="op">&gt;</span>;
+    <span class="kw">type</span> <span class="ident">Future</span> <span class="op">=</span>
+        <span class="ident">Watching</span><span class="op">&lt;</span><span class="ident">UpgradeableConnection</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>, <span class="kw">fn</span>(<span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">UpgradeableConnection</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span><span class="op">&gt;</span>)<span class="op">&gt;</span>;
 
     <span class="kw">fn</span> <span class="ident">watch</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">conn</span>: <span class="ident">UpgradeableConnection</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>::<span class="ident">Future</span> {
-        <span class="self">self</span>
-            .<span class="number">0</span>
-            .<span class="ident">clone</span>()
-            .<span class="ident">watch</span>(<span class="ident">conn</span>, <span class="ident">on_drain</span>)
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">clone</span>().<span class="ident">watch</span>(<span class="ident">conn</span>, <span class="ident">on_drain</span>)
     }
 }
 
-<span class="kw">fn</span> <span class="ident">on_drain</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>(<span class="ident">conn</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">UpgradeableConnection</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>)
+<span class="kw">fn</span> <span class="ident">on_drain</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span>(<span class="ident">conn</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">UpgradeableConnection</span><span class="op">&lt;</span><span class="ident">I</span>, <span class="ident">S</span>, <span class="ident">E</span><span class="op">&gt;</span><span class="op">&gt;</span>)
 <span class="kw">where</span>
-    <span class="ident">S</span>: <span class="ident">Service</span><span class="op">&lt;</span><span class="ident">ReqBody</span><span class="op">=</span><span class="ident">Body</span><span class="op">&gt;</span>,
-    <span class="ident">S</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">I</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span>,
-    <span class="ident">S</span>::<span class="ident">ResBody</span>: <span class="ident">Payload</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="ident">S</span>: <span class="ident">HttpService</span><span class="op">&lt;</span><span class="ident">Body</span><span class="op">&gt;</span>,
+    <span class="ident">S</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">I</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span> <span class="op">+</span> <span class="ident">Unpin</span>,
+    <span class="ident">S</span>::<span class="ident">ResBody</span>: <span class="ident">HttpBody</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+    <span class="op">&lt;</span><span class="ident">S</span>::<span class="ident">ResBody</span> <span class="kw">as</span> <span class="ident">HttpBody</span><span class="op">&gt;</span>::<span class="ident">Error</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">StdError</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">E</span>: <span class="ident">H2Exec</span><span class="op">&lt;</span><span class="ident">S</span>::<span class="ident">Future</span>, <span class="ident">S</span>::<span class="ident">ResBody</span><span class="op">&gt;</span>,
 {
     <span class="ident">conn</span>.<span class="ident">graceful_shutdown</span>()
 }
-
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "hyper";</script><script src="../../../aliases.js"></script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "hyper";</script><script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script><script defer src="../../../search-index.js"></script></body></html>

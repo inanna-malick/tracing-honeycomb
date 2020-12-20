@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/want-0.2.0/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../want/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/want-0.3.0/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../want/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -564,8 +564,27 @@
 <span id="564">564</span>
 <span id="565">565</span>
 <span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
 </pre><div class="example-wrap"><pre class="rust ">
-<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/want/0.2.0&quot;</span>)]</span>
+<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/want/0.3.0&quot;</span>)]</span>
 <span class="attribute">#![<span class="ident">deny</span>(<span class="ident">warnings</span>)]</span>
 <span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_docs</span>)]</span>
 <span class="attribute">#![<span class="ident">deny</span>(<span class="ident">missing_debug_implementations</span>)]</span>
@@ -588,84 +607,79 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Example</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//! extern crate futures;</span>
+<span class="doccomment">//! ```nightly</span>
+<span class="doccomment">//! # //#![feature(async_await)]</span>
 <span class="doccomment">//! extern crate want;</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! use futures::{Async, Stream};</span>
+<span class="doccomment">//! # fn spawn&lt;T&gt;(_t: T) {}</span>
+<span class="doccomment">//! # fn we_still_want_message() -&gt; bool { true }</span>
+<span class="doccomment">//! # fn mpsc_channel() -&gt; (Tx, Rx) { (Tx, Rx) }</span>
+<span class="doccomment">//! # struct Tx;</span>
+<span class="doccomment">//! # impl Tx { fn send&lt;T&gt;(&amp;mut self, _: T) {} }</span>
+<span class="doccomment">//! # struct Rx;</span>
+<span class="doccomment">//! # impl Rx { async fn recv(&amp;mut self) -&gt; Option&lt;Expensive&gt; { Some(Expensive) } }</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Some message that is expensive to produce.</span>
 <span class="doccomment">//! struct Expensive;</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! let (mut tx, mut rx) = futures::sync::mpsc::channel(0);</span>
+<span class="doccomment">//! // Some futures-aware MPSC channel...</span>
+<span class="doccomment">//! let (mut tx, mut rx) = mpsc_channel();</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! // And our `want` channel!</span>
 <span class="doccomment">//! let (mut gv, mut tk) = want::new();</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! # fn spawn&lt;T&gt;(_t: T) {}</span>
-<span class="doccomment">//! # fn can_we_print_msg() -&gt; Result&lt;(), ()&gt; { Ok(()) }</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Our receiving task...</span>
-<span class="doccomment">//! spawn(futures::future::poll_fn(move || loop {</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!     match rx.poll() {</span>
-<span class="doccomment">//!         Ok(Async::Ready(Some(_msg))) =&gt; {</span>
-<span class="doccomment">//!             println!(&quot;got a message&quot;);</span>
-<span class="doccomment">//!         },</span>
-<span class="doccomment">//!         Ok(Async::Ready(None)) =&gt; {</span>
-<span class="doccomment">//!             println!(&quot;DONE&quot;);</span>
-<span class="doccomment">//!             return Ok::&lt;_, ()&gt;(Async::Ready(()));</span>
-<span class="doccomment">//!         },</span>
-<span class="doccomment">//!         Ok(Async::NotReady) =&gt; {</span>
-<span class="doccomment">//!             // Maybe something comes up that prevents us from ever</span>
-<span class="doccomment">//!             // using the expensive message.</span>
-<span class="doccomment">//!             //</span>
-<span class="doccomment">//!             // Without `want`, the &quot;send&quot; task may have started to</span>
-<span class="doccomment">//!             // produce the expensive message even though we wouldn&#39;t</span>
-<span class="doccomment">//!             // be able to use it.</span>
-<span class="doccomment">//!             can_we_print_msg()?;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//!             // But we can use it! So tell the `want` channel.</span>
-<span class="doccomment">//!             tk.want();</span>
-<span class="doccomment">//!         },</span>
-<span class="doccomment">//!         Err(()) =&gt; unreachable!(&quot;mpsc doesn&#39;t error&quot;),</span>
+<span class="doccomment">//! spawn(async move {</span>
+<span class="doccomment">//!     // Maybe something comes up that prevents us from ever</span>
+<span class="doccomment">//!     // using the expensive message.</span>
+<span class="doccomment">//!     //</span>
+<span class="doccomment">//!     // Without `want`, the &quot;send&quot; task may have started to</span>
+<span class="doccomment">//!     // produce the expensive message even though we wouldn&#39;t</span>
+<span class="doccomment">//!     // be able to use it.</span>
+<span class="doccomment">//!     if !we_still_want_message() {</span>
+<span class="doccomment">//!         return;</span>
 <span class="doccomment">//!     }</span>
-<span class="doccomment">//! }));</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//!     // But we can use it! So tell the `want` channel.</span>
+<span class="doccomment">//!     tk.want();</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//!     match rx.recv().await {</span>
+<span class="doccomment">//!         Some(_msg) =&gt; println!(&quot;got a message&quot;),</span>
+<span class="doccomment">//!         None =&gt; println!(&quot;DONE&quot;),</span>
+<span class="doccomment">//!     }</span>
+<span class="doccomment">//! });</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! // Our sending task</span>
-<span class="doccomment">//! spawn(futures::future::poll_fn(move || {</span>
+<span class="doccomment">//! spawn(async move {</span>
 <span class="doccomment">//!     // It&#39;s expensive to create a new message, so we wait until the</span>
 <span class="doccomment">//!     // receiving end truly *wants* the message.</span>
-<span class="doccomment">//!     match gv.poll_want() {</span>
-<span class="doccomment">//!         Ok(Async::Ready(())) =&gt; {</span>
-<span class="doccomment">//!             // They want it, let&#39;s go!</span>
-<span class="doccomment">//!             tx.try_send(Expensive).unwrap();</span>
-<span class="doccomment">//!             Ok(Async::Ready(()))</span>
-<span class="doccomment">//!         },</span>
-<span class="doccomment">//!         Ok(Async::NotReady) =&gt; Ok(Async::NotReady),</span>
-<span class="doccomment">//!         Err(_) =&gt; {</span>
-<span class="doccomment">//!             // Looks like they will never want it...</span>
-<span class="doccomment">//!             Err(())</span>
-<span class="doccomment">//!         }</span>
+<span class="doccomment">//!     if let Err(_closed) = gv.want().await {</span>
+<span class="doccomment">//!         // Looks like they will never want it...</span>
+<span class="doccomment">//!         return;</span>
 <span class="doccomment">//!     }</span>
-<span class="doccomment">//! }));</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//!     // They want it, let&#39;s go!</span>
+<span class="doccomment">//!     tx.send(Expensive);</span>
+<span class="doccomment">//! });</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # fn main() {}</span>
 <span class="doccomment">//! ```</span>
 
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">futures</span>;
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
 <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">log</span>;
-<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">try_lock</span>;
 
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">fmt</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">future</span>::<span class="ident">Future</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">mem</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">pin</span>::<span class="ident">Pin</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">Arc</span>;
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">atomic</span>::<span class="ident">AtomicUsize</span>;
 <span class="comment">// SeqCst is the only ordering used to ensure accessing the state and</span>
 <span class="comment">// TryLock are never re-ordered.</span>
 <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">atomic</span>::<span class="ident">Ordering</span>::<span class="ident">SeqCst</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">task</span>::{<span class="self">self</span>, <span class="ident">Poll</span>, <span class="ident">Waker</span>};
 
-<span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">Async</span>, <span class="ident">Poll</span>};
-<span class="kw">use</span> <span class="ident">futures</span>::<span class="ident">task</span>::{<span class="self">self</span>, <span class="ident">Task</span>};
 
 <span class="kw">use</span> <span class="ident">try_lock</span>::<span class="ident">TryLock</span>;
 
@@ -743,12 +757,17 @@
 
 <span class="kw">struct</span> <span class="ident">Inner</span> {
     <span class="ident">state</span>: <span class="ident">AtomicUsize</span>,
-    <span class="ident">task</span>: <span class="ident">TryLock</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Task</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">task</span>: <span class="ident">TryLock</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Waker</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 }
 
 <span class="comment">// ===== impl Giver ======</span>
 
 <span class="kw">impl</span> <span class="ident">Giver</span> {
+    <span class="doccomment">/// Returns a `Future` that fulfills when the `Taker` has done some action.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">want</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Closed</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;a</span> {
+        <span class="ident">Want</span>(<span class="self">self</span>)
+    }
+
     <span class="doccomment">/// Poll whether the `Taker` has registered interest in another value.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// - If the `Taker` has called `want()`, this returns `Async::Ready(())`.</span>
@@ -759,17 +778,17 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// After knowing that the Taker is wanting, the state can be reset by</span>
     <span class="doccomment">/// calling [`give`](Giver::give).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_want</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span>(), <span class="ident">Closed</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_want</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task</span>::<span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Closed</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">loop</span> {
             <span class="kw">let</span> <span class="ident">state</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">state</span>.<span class="ident">load</span>(<span class="ident">SeqCst</span>).<span class="ident">into</span>();
             <span class="kw">match</span> <span class="ident">state</span> {
                 <span class="ident">State</span>::<span class="ident">Want</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;poll_want: taker wants!&quot;</span>);
-                    <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(()));
+                    <span class="kw">return</span> <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Ok</span>(()));
                 },
                 <span class="ident">State</span>::<span class="ident">Closed</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;poll_want: closed&quot;</span>);
-                    <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Closed</span> { <span class="ident">_inner</span>: () });
+                    <span class="kw">return</span> <span class="ident">Poll</span>::<span class="ident">Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">Closed</span> { <span class="ident">_inner</span>: () }));
                 },
                 <span class="ident">State</span>::<span class="ident">Idle</span> <span class="op">|</span> <span class="ident">State</span>::<span class="ident">Give</span> <span class="op">=</span><span class="op">&gt;</span> {
                     <span class="comment">// Taker doesn&#39;t want anything yet, so park.</span>
@@ -784,19 +803,19 @@
                         <span class="comment">// If it&#39;s still the first state (Idle or Give), park current task.</span>
                         <span class="kw">if</span> <span class="ident">old</span> <span class="op">=</span><span class="op">=</span> <span class="ident">state</span>.<span class="ident">into</span>() {
                             <span class="kw">let</span> <span class="ident">park</span> <span class="op">=</span> <span class="ident">locked</span>.<span class="ident">as_ref</span>()
-                                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="op">!</span><span class="ident">t</span>.<span class="ident">will_notify_current</span>())
+                                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="op">!</span><span class="ident">w</span>.<span class="ident">will_wake</span>(<span class="ident">cx</span>.<span class="ident">waker</span>()))
                                 .<span class="ident">unwrap_or</span>(<span class="bool-val">true</span>);
                             <span class="kw">if</span> <span class="ident">park</span> {
-                                <span class="kw">let</span> <span class="ident">old</span> <span class="op">=</span> <span class="ident">mem</span>::<span class="ident">replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">locked</span>, <span class="prelude-val">Some</span>(<span class="ident">task</span>::<span class="ident">current</span>()));
+                                <span class="kw">let</span> <span class="ident">old</span> <span class="op">=</span> <span class="ident">mem</span>::<span class="ident">replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">locked</span>, <span class="prelude-val">Some</span>(<span class="ident">cx</span>.<span class="ident">waker</span>().<span class="ident">clone</span>()));
                                 <span class="ident">drop</span>(<span class="ident">locked</span>);
                                 <span class="ident">old</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">prev_task</span><span class="op">|</span> {
                                     <span class="comment">// there was an old task parked here.</span>
                                     <span class="comment">// it might be waiting to be notified,</span>
                                     <span class="comment">// so poke it before dropping.</span>
-                                    <span class="ident">prev_task</span>.<span class="ident">notify</span>();
+                                    <span class="ident">prev_task</span>.<span class="ident">wake</span>();
                                 });
                             }
-                            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>)
+                            <span class="kw">return</span> <span class="ident">Poll</span>::<span class="ident">Pending</span>;
                         }
                         <span class="comment">// Otherwise, something happened! Go around the loop again.</span>
                     } <span class="kw">else</span> {
@@ -920,7 +939,7 @@
                         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">task</span>) <span class="op">=</span> <span class="ident">locked</span>.<span class="ident">take</span>() {
                             <span class="ident">drop</span>(<span class="ident">locked</span>);
                             <span class="macro">trace</span><span class="macro">!</span>(<span class="string">&quot;signal found waiting giver, notifying&quot;</span>);
-                            <span class="ident">task</span>.<span class="ident">notify</span>();
+                            <span class="ident">task</span>.<span class="ident">wake</span>();
                         }
                         <span class="kw">return</span>;
                     } <span class="kw">else</span> {
@@ -968,19 +987,38 @@
     }
 }
 
+<span class="comment">// ===== impl PollFn ======</span>
+
+<span class="kw">struct</span> <span class="ident">Want</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Giver</span>);
+
+
+<span class="kw">impl</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">Want</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
+    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Closed</span><span class="op">&gt;</span>;
+
+    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task</span>::<span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="self">Self</span>::<span class="ident">Output</span><span class="op">&gt;</span> {
+        <span class="self">self</span>.<span class="number">0</span>.<span class="ident">poll_want</span>(<span class="ident">cx</span>)
+    }
+}
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
     <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">thread</span>;
-    <span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">Async</span>, <span class="ident">Stream</span>};
-    <span class="kw">use</span> <span class="ident">futures</span>::<span class="ident">future</span>::{<span class="ident">poll_fn</span>, <span class="ident">Future</span>};
-    <span class="kw">use</span> <span class="ident">futures</span>::<span class="ident">sync</span>::{<span class="ident">mpsc</span>, <span class="ident">oneshot</span>};
+    <span class="kw">use</span> <span class="ident">tokio_sync</span>::<span class="ident">oneshot</span>;
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+
+    <span class="kw">fn</span> <span class="ident">block_on</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">Future</span><span class="op">&gt;</span>(<span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">F</span>::<span class="ident">Output</span> {
+        <span class="ident">tokio_executor</span>::<span class="ident">enter</span>()
+            .<span class="ident">expect</span>(<span class="string">&quot;block_on enter&quot;</span>)
+            .<span class="ident">block_on</span>(<span class="ident">f</span>)
+    }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">want_ready</span>() {
         <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">gv</span>, <span class="kw-2">mut</span> <span class="ident">tk</span>) <span class="op">=</span> <span class="ident">new</span>();
+
         <span class="ident">tk</span>.<span class="ident">want</span>();
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">gv</span>.<span class="ident">poll_want</span>().<span class="ident">unwrap</span>().<span class="ident">is_ready</span>());
+
+        <span class="ident">block_on</span>(<span class="ident">gv</span>.<span class="ident">want</span>()).<span class="ident">unwrap</span>();
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -992,12 +1030,10 @@
             <span class="ident">tk</span>.<span class="ident">want</span>();
             <span class="comment">// use a oneshot to keep this thread alive</span>
             <span class="comment">// until other thread was notified of want</span>
-            <span class="ident">rx</span>.<span class="ident">wait</span>().<span class="ident">expect</span>(<span class="string">&quot;rx&quot;</span>);
+            <span class="ident">block_on</span>(<span class="ident">rx</span>).<span class="ident">expect</span>(<span class="string">&quot;rx&quot;</span>);
         });
 
-        <span class="ident">poll_fn</span>(<span class="op">|</span><span class="op">|</span> {
-            <span class="ident">gv</span>.<span class="ident">poll_want</span>()
-        }).<span class="ident">wait</span>().<span class="ident">expect</span>(<span class="string">&quot;wait&quot;</span>);
+        <span class="ident">block_on</span>(<span class="ident">gv</span>.<span class="ident">want</span>()).<span class="ident">expect</span>(<span class="string">&quot;want&quot;</span>);
 
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">gv</span>.<span class="ident">is_wanting</span>(), <span class="string">&quot;still wanting after poll_want success&quot;</span>);
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">gv</span>.<span class="ident">give</span>(), <span class="string">&quot;give is true when wanting&quot;</span>);
@@ -1010,42 +1046,44 @@
         <span class="ident">tx</span>.<span class="ident">send</span>(()).<span class="ident">expect</span>(<span class="string">&quot;tx&quot;</span>);
     }
 
-    <span class="doccomment">/// This tests that if the Giver moves tasks after parking,</span>
-    <span class="doccomment">/// it will still wake up the correct task.</span>
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">want_notify_moving_tasks</span>() {
-        <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">sync</span>::<span class="ident">Arc</span>;
-        <span class="kw">use</span> <span class="ident">futures</span>::<span class="ident">executor</span>::{<span class="ident">spawn</span>, <span class="ident">Notify</span>, <span class="ident">NotifyHandle</span>};
+    <span class="comment">/*
+    /// This tests that if the Giver moves tasks after parking,
+    /// it will still wake up the correct task.
+    #[test]
+    fn want_notify_moving_tasks() {
+        use std::sync::Arc;
+        use futures::executor::{spawn, Notify, NotifyHandle};
 
-        <span class="kw">struct</span> <span class="ident">WantNotify</span>;
+        struct WantNotify;
 
-        <span class="kw">impl</span> <span class="ident">Notify</span> <span class="kw">for</span> <span class="ident">WantNotify</span> {
-            <span class="kw">fn</span> <span class="ident">notify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_id</span>: <span class="ident">usize</span>) {
+        impl Notify for WantNotify {
+            fn notify(&amp;self, _id: usize) {
             }
         }
 
-        <span class="kw">fn</span> <span class="ident">n</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">NotifyHandle</span> {
-            <span class="ident">Arc</span>::<span class="ident">new</span>(<span class="ident">WantNotify</span>).<span class="ident">into</span>()
+        fn n() -&gt; NotifyHandle {
+            Arc::new(WantNotify).into()
         }
 
-        <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">gv</span>, <span class="kw-2">mut</span> <span class="ident">tk</span>) <span class="op">=</span> <span class="ident">new</span>();
+        let (mut gv, mut tk) = new();
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">spawn</span>(<span class="ident">poll_fn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
-            <span class="ident">gv</span>.<span class="ident">poll_want</span>()
+        let mut s = spawn(poll_fn(move || {
+            gv.poll_want()
         }));
 
-        <span class="comment">// Register with t1 as the task::current()</span>
-        <span class="kw">let</span> <span class="ident">t1</span> <span class="op">=</span> <span class="ident">n</span>();
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">s</span>.<span class="ident">poll_future_notify</span>(<span class="kw-2">&amp;</span><span class="ident">t1</span>, <span class="number">1</span>).<span class="ident">unwrap</span>().<span class="ident">is_not_ready</span>());
+        // Register with t1 as the task::current()
+        let t1 = n();
+        assert!(s.poll_future_notify(&amp;t1, 1).unwrap().is_not_ready());
 
-        <span class="ident">thread</span>::<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
-            <span class="ident">thread</span>::<span class="ident">sleep</span>(::<span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">Duration</span>::<span class="ident">from_millis</span>(<span class="number">100</span>));
-            <span class="ident">tk</span>.<span class="ident">want</span>();
+        thread::spawn(move || {
+            thread::sleep(::std::time::Duration::from_millis(100));
+            tk.want();
         });
 
-        <span class="comment">// And now, move to a ThreadNotify task.</span>
-        <span class="ident">s</span>.<span class="ident">into_inner</span>().<span class="ident">wait</span>().<span class="ident">expect</span>(<span class="string">&quot;poll_want&quot;</span>);
+        // And now, move to a ThreadNotify task.
+        s.into_inner().wait().expect(&quot;poll_want&quot;);
     }
+    */</span>
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">cancel</span>() {
@@ -1057,7 +1095,7 @@
         <span class="ident">tk</span>.<span class="ident">cancel</span>();
 
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">gv</span>.<span class="ident">is_canceled</span>());
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">gv</span>.<span class="ident">poll_want</span>().<span class="ident">is_err</span>());
+        <span class="ident">block_on</span>(<span class="ident">gv</span>.<span class="ident">want</span>()).<span class="ident">unwrap_err</span>();
 
         <span class="comment">// implicit</span>
         <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">gv</span>, <span class="ident">tk</span>) <span class="op">=</span> <span class="ident">new</span>();
@@ -1067,7 +1105,7 @@
         <span class="ident">drop</span>(<span class="ident">tk</span>);
 
         <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">gv</span>.<span class="ident">is_canceled</span>());
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">gv</span>.<span class="ident">poll_want</span>().<span class="ident">is_err</span>());
+        <span class="ident">block_on</span>(<span class="ident">gv</span>.<span class="ident">want</span>()).<span class="ident">unwrap_err</span>();
 
         <span class="comment">// notifies</span>
         <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">gv</span>, <span class="ident">tk</span>) <span class="op">=</span> <span class="ident">new</span>();
@@ -1077,59 +1115,59 @@
             <span class="comment">// and dropped</span>
         });
 
-        <span class="ident">poll_fn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
-            <span class="ident">gv</span>.<span class="ident">poll_want</span>()
-        }).<span class="ident">wait</span>().<span class="ident">expect_err</span>(<span class="string">&quot;wait&quot;</span>);
+        <span class="ident">block_on</span>(<span class="ident">gv</span>.<span class="ident">want</span>()).<span class="ident">unwrap_err</span>();
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">stress</span>() {
-        <span class="kw">let</span> <span class="ident">nthreads</span> <span class="op">=</span> <span class="number">5</span>;
-        <span class="kw">let</span> <span class="ident">nwants</span> <span class="op">=</span> <span class="number">100</span>;
+    <span class="comment">/*
+    #[test]
+    fn stress() {
+        let nthreads = 5;
+        let nwants = 100;
 
-        <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">nthreads</span> {
-            <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">gv</span>, <span class="kw-2">mut</span> <span class="ident">tk</span>) <span class="op">=</span> <span class="ident">new</span>();
-            <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">tx</span>, <span class="kw-2">mut</span> <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">mpsc</span>::<span class="ident">channel</span>(<span class="number">0</span>);
+        for _ in 0..nthreads {
+            let (mut gv, mut tk) = new();
+            let (mut tx, mut rx) = mpsc::channel(0);
 
-            <span class="comment">// rx thread</span>
-            <span class="ident">thread</span>::<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cnt</span> <span class="op">=</span> <span class="number">0</span>;
-                <span class="ident">poll_fn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
-                    <span class="kw">while</span> <span class="ident">cnt</span> <span class="op">&lt;</span> <span class="ident">nwants</span> {
-                        <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">rx</span>.<span class="ident">poll</span>().<span class="ident">expect</span>(<span class="string">&quot;rx poll&quot;</span>) {
-                            <span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">n</span>.<span class="ident">expect</span>(<span class="string">&quot;rx opt&quot;</span>),
-                            <span class="ident">Async</span>::<span class="ident">NotReady</span> <span class="op">=</span><span class="op">&gt;</span> {
-                                <span class="ident">tk</span>.<span class="ident">want</span>();
-                                <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>);
+            // rx thread
+            thread::spawn(move || {
+                let mut cnt = 0;
+                poll_fn(move || {
+                    while cnt &lt; nwants {
+                        let n = match rx.poll().expect(&quot;rx poll&quot;) {
+                            Async::Ready(n) =&gt; n.expect(&quot;rx opt&quot;),
+                            Async::NotReady =&gt; {
+                                tk.want();
+                                return Ok(Async::NotReady);
                             },
                         };
-                        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">cnt</span>, <span class="ident">n</span>);
-                        <span class="ident">cnt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+                        assert_eq!(cnt, n);
+                        cnt += 1;
                     }
-                    <span class="prelude-val">Ok</span>::<span class="op">&lt;</span><span class="kw">_</span>, ()<span class="op">&gt;</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(()))
-                }).<span class="ident">wait</span>().<span class="ident">expect</span>(<span class="string">&quot;rx wait&quot;</span>);
+                    Ok::&lt;_, ()&gt;(Async::Ready(()))
+                }).wait().expect(&quot;rx wait&quot;);
             });
 
-            <span class="comment">// tx thread</span>
-            <span class="ident">thread</span>::<span class="ident">spawn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cnt</span> <span class="op">=</span> <span class="number">0</span>;
-                <span class="kw">let</span> <span class="ident">nsent</span> <span class="op">=</span> <span class="ident">poll_fn</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
-                    <span class="kw">loop</span> {
-                        <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(()) <span class="op">=</span> <span class="ident">tx</span>.<span class="ident">try_send</span>(<span class="ident">cnt</span>) {
-                            <span class="ident">cnt</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+            // tx thread
+            thread::spawn(move || {
+                let mut cnt = 0;
+                let nsent = poll_fn(move || {
+                    loop {
+                        while let Ok(()) = tx.try_send(cnt) {
+                            cnt += 1;
                         }
-                        <span class="kw">match</span> <span class="ident">gv</span>.<span class="ident">poll_want</span>() {
-                            <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> (),
-                            <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>::<span class="op">&lt;</span><span class="kw">_</span>, ()<span class="op">&gt;</span>(<span class="ident">Async</span>::<span class="ident">NotReady</span>),
-                            <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Async</span>::<span class="ident">Ready</span>(<span class="ident">cnt</span>)),
+                        match gv.poll_want() {
+                            Ok(Async::Ready(_)) =&gt; (),
+                            Ok(Async::NotReady) =&gt; return Ok::&lt;_, ()&gt;(Async::NotReady),
+                            Err(_) =&gt; return Ok(Async::Ready(cnt)),
                         }
                     }
-                }).<span class="ident">wait</span>().<span class="ident">expect</span>(<span class="string">&quot;tx wait&quot;</span>);
+                }).wait().expect(&quot;tx wait&quot;);
 
-                <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">nsent</span>, <span class="ident">nwants</span>);
-            }).<span class="ident">join</span>().<span class="ident">expect</span>(<span class="string">&quot;thread join&quot;</span>);
+                assert_eq!(nsent, nwants);
+            }).join().expect(&quot;thread join&quot;);
         }
     }
+    */</span>
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "want";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "want";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>

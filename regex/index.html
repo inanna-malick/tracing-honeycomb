@@ -279,7 +279,7 @@ $     the end of text (or end-of-line with multi-line mode)
 </pre>
 <h2 id="grouping-and-flags" class="section-header"><a href="#grouping-and-flags">Grouping and flags</a></h2><pre class="rust">
 (exp)          numbered capture group (indexed by opening parenthesis)
-(?P&lt;name&gt;exp)  named (also numbered) capture group (allowed chars: [_0-9a-zA-Z])
+(?P&lt;name&gt;exp)  named (also numbered) capture group (allowed chars: [_0-9a-zA-Z.\[\]])
 (?:exp)        non-capturing group
 (?flags)       set flags within current group
 (?flags:exp)   set flags for exp (non-capturing)
@@ -442,7 +442,7 @@ Provide the data for case insensitive matching using
 <a href="https://www.unicode.org/reports/tr18/#Simple_Loose_Matches">Unicode's &quot;simple loose matches&quot; specification</a>.</li>
 <li><strong>unicode-gencat</strong> -
 Provide the data for
-<a href="https://www.unicode.org/reports/tr44/tr44-24.html#General_Category_Values">Uncode general categories</a>.
+<a href="https://www.unicode.org/reports/tr44/tr44-24.html#General_Category_Values">Unicode general categories</a>.
 This includes, but is not limited to, <code>Decimal_Number</code>, <code>Letter</code>,
 <code>Math_Symbol</code>, <code>Number</code> and <code>Punctuation</code>.</li>
 <li><strong>unicode-perl</strong> -
@@ -515,4 +515,4 @@ appear in the regex.</p>
 <table><tr class='module-item'><td><a class="trait" href="trait.Replacer.html" title='regex::Replacer trait'>Replacer</a></td><td class='docblock-short'><p>Replacer describes types that can be used to replace matches in a string.</p>
 </td></tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
 <table><tr class='module-item'><td><a class="fn" href="fn.escape.html" title='regex::escape fn'>escape</a></td><td class='docblock-short'><p>Escapes all regular expression meta characters in <code>text</code>.</p>
-</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../";window.currentCrate = "regex";</script><script src="../aliases.js"></script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../";window.currentCrate = "regex";</script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>

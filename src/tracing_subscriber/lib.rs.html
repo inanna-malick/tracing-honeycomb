@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-subscriber-0.2.5/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing_subscriber/index.html'><div class='logo-container'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `/usr/local/cargo/registry/src/github.com-1ecc6299db9ec823/tracing-subscriber-0.2.15/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css"><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script src="../../storage.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="shortcut icon" href="../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../tracing_subscriber/index.html'><div class='logo-container'><img src='https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../settings.html"><img src="../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -175,6 +175,34 @@
 <span id="175">175</span>
 <span id="176">176</span>
 <span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
 </pre><div class="example-wrap"><pre class="rust ">
 <span class="doccomment">//! Utilities for implementing and composing [`tracing`] subscribers.</span>
 <span class="doccomment">//!</span>
@@ -187,6 +215,10 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! `tracing-subscriber` is intended for use by both `Subscriber` authors and</span>
 <span class="doccomment">//! application authors using `tracing` to instrument their applications.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! *Compiler support: [requires `rustc` 1.42+][msrv]*</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! [msrv]: #supported-rust-versions</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ## Included Subscribers</span>
 <span class="doccomment">//!</span>
@@ -203,7 +235,7 @@
 <span class="doccomment">//!   Enabled by default.</span>
 <span class="doccomment">//! - `ansi`: Enables `fmt` support for ANSI terminal colors. Enabled by</span>
 <span class="doccomment">//!   default.</span>
-<span class="doccomment">//! - `registry`: enables the experimental [`registry`] module.</span>
+<span class="doccomment">//! - `registry`: enables the [`registry`] module. Enabled by default.</span>
 <span class="doccomment">//! - `json`: Enables `fmt` support for JSON output. In JSON output, the ANSI feature does nothing.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ### Optional Dependencies</span>
@@ -217,6 +249,20 @@
 <span class="doccomment">//! - [`parking_lot`]: Use the `parking_lot` crate&#39;s `RwLock` implementation</span>
 <span class="doccomment">//!   rather than the Rust standard library&#39;s implementation.</span>
 <span class="doccomment">//!</span>
+<span class="doccomment">//! ## Supported Rust Versions</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Tracing is built against the latest stable release. The minimum supported</span>
+<span class="doccomment">//! version is 1.42. The current Tracing version is not guaranteed to build on</span>
+<span class="doccomment">//! Rust versions earlier than the minimum supported version.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Tracing follows the same compiler support policies as the rest of the Tokio</span>
+<span class="doccomment">//! project. The current stable Rust compiler and the three most recent minor</span>
+<span class="doccomment">//! versions before it will always be supported. For example, if the current</span>
+<span class="doccomment">//! stable compiler version is 1.45, the minimum supported version will not be</span>
+<span class="doccomment">//! increased past 1.42, three minor versions prior. Increasing the minimum</span>
+<span class="doccomment">//! supported compiler version is not considered a semver breaking change as</span>
+<span class="doccomment">//! long as doing so complies with this policy.</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//! [`tracing`]: https://docs.rs/tracing/latest/tracing/</span>
 <span class="doccomment">//! [`Subscriber`]: https://docs.rs/tracing-core/latest/tracing_core/subscriber/trait.Subscriber.html</span>
 <span class="doccomment">//! [`EnvFilter`]: filter/struct.EnvFilter.html</span>
@@ -227,8 +273,12 @@
 <span class="doccomment">//! [`env_logger` crate]: https://crates.io/crates/env_logger</span>
 <span class="doccomment">//! [`parking_lot`]: https://crates.io/crates/parking_lot</span>
 <span class="doccomment">//! [`registry`]: registry/index.html</span>
-<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/tracing-subscriber/0.2.4&quot;</span>)]</span>
-<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">feature</span>(<span class="ident">doc_cfg</span>))]</span>
+<span class="attribute">#![<span class="ident">doc</span>(<span class="ident">html_root_url</span> <span class="op">=</span> <span class="string">&quot;https://docs.rs/tracing-subscriber/0.2.15&quot;</span>)]</span>
+<span class="attribute">#![<span class="ident">doc</span>(
+    <span class="ident">html_logo_url</span> <span class="op">=</span> <span class="string">&quot;https://raw.githubusercontent.com/tokio-rs/tracing/master/assets/logo-type.png&quot;</span>,
+    <span class="ident">issue_tracker_base_url</span> <span class="op">=</span> <span class="string">&quot;https://github.com/tokio-rs/tracing/issues/&quot;</span>
+)]</span>
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">feature</span>(<span class="ident">doc_cfg</span>), <span class="ident">deny</span>(<span class="ident">broken_intra_doc_links</span>))]</span>
 <span class="attribute">#![<span class="ident">warn</span>(
     <span class="ident">missing_debug_implementations</span>,
     <span class="ident">missing_docs</span>,
@@ -251,6 +301,12 @@
     <span class="ident">unused_parens</span>,
     <span class="ident">while_true</span>
 )]</span>
+<span class="comment">// Using struct update syntax when a struct has no additional fields avoids</span>
+<span class="comment">// a potential source change if additional fields are added to the struct in the</span>
+<span class="comment">// future, reducing diff noise. Allow this even though clippy considers it</span>
+<span class="comment">// &quot;needless&quot;.</span>
+<span class="attribute">#![<span class="ident">allow</span>(<span class="ident">clippy</span>::<span class="ident">needless_update</span>)]</span>
+
 <span class="kw">use</span> <span class="ident">tracing_core</span>::<span class="ident">span</span>::<span class="ident">Id</span>;
 
 <span class="attribute">#[<span class="ident">macro_use</span>]</span>
@@ -354,4 +410,4 @@
     <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Sealed</span><span class="op">&lt;</span><span class="ident">A</span> <span class="op">=</span> ()<span class="op">&gt;</span> {}
 }
 </pre></div>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "tracing_subscriber";</script><script src="../../aliases.js"></script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../";window.currentCrate = "tracing_subscriber";</script><script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script><script defer src="../../search-index.js"></script></body></html>
