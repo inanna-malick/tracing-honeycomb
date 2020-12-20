@@ -20,7 +20,10 @@ impl HoneycombTelemetry {
         // FIXME: may not be performant, investigate options (eg mpsc)
         let honeycomb_client = Mutex::new(honeycomb_client);
 
-        HoneycombTelemetry { honeycomb_client, sample_rate }
+        HoneycombTelemetry {
+            honeycomb_client,
+            sample_rate,
+        }
     }
 
     fn report_data(&self, data: HashMap<String, ::libhoney::Value>) {

@@ -87,7 +87,7 @@ pub(crate) fn span_to_values(
     // TODO: examine use of is_remote
     SpanData {
         span_context: SpanContext::new(span.trace_id, span.id, 0, false),
-        parent_span_id: span.parent_id.unwrap_or(SpanId::invalid()), // idea: invalid == no parent, for root span
+        parent_span_id: span.parent_id.unwrap_or_else(SpanId::invalid), // idea: invalid == no parent, for root span
         span_kind: SpanKind::Internal,
         name: span.meta.name().to_string(),
         start_time: span.initialized_at,

@@ -38,20 +38,16 @@ impl Telemetry for OpenTelemetry {
     }
 
     fn report_event(&self, event: Event<Self::Visitor, Self::SpanId, Self::TraceId>) {
-        match event.parent_id {
-            Some(id) => {
-                let mut events = self.events.lock().unwrap();
+        // events are reported as part of spandata, event must have a parent to be recorded
+        if let Some(id) = event.parent_id {
+            let mut events = self.events.lock().unwrap();
 
-                if let Some(q) = events.get_mut(&id) {
-                    q.append_vec(&mut vec![event_to_values(event)]);
-                } else {
-                    let mut q = EvictedQueue::new(self.config.max_events_per_span);
-                    q.append_vec(&mut vec![event_to_values(event)]);
-                    events.insert(id, q);
-                }
-            }
-            None => {
-                // events are reported as part of spandata, event must have a parent to be recorded
+            if let Some(q) = events.get_mut(&id) {
+                q.append_vec(&mut vec![event_to_values(event)]);
+            } else {
+                let mut q = EvictedQueue::new(self.config.max_events_per_span);
+                q.append_vec(&mut vec![event_to_values(event)]);
+                events.insert(id, q);
             }
         }
     }
