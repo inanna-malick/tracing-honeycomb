@@ -4,10 +4,10 @@ use std::collections::HashMap;
 use std::str::FromStr;
 use tracing_distributed::{Event, Span, Telemetry};
 
-#[cfg(not(feature = "use_parking_lot"))]
-use std::sync::Mutex;
 #[cfg(feature = "use_parking_lot")]
 use parking_lot::Mutex;
+#[cfg(not(feature = "use_parking_lot"))]
+use std::sync::Mutex;
 
 /// Telemetry capability that publishes events and spans to Honeycomb.io.
 #[derive(Debug)]

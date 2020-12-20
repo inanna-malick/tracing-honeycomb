@@ -24,10 +24,10 @@ use std::collections::HashMap;
 #[doc(no_inline)]
 pub use tracing_distributed::{TelemetryLayer, TraceCtxError};
 
-#[cfg(not(feature = "use_parking_lot"))]
-use std::sync::Mutex;
 #[cfg(feature = "use_parking_lot")]
 use parking_lot::Mutex;
+#[cfg(not(feature = "use_parking_lot"))]
+use std::sync::Mutex;
 
 /// Register the current span as the local root of a distributed trace.
 ///

@@ -7,10 +7,10 @@ use tracing::span::{Attributes, Id, Record};
 use tracing::{Event, Subscriber};
 use tracing_subscriber::{layer::Context, registry, Layer};
 
-#[cfg(not(feature = "use_parking_lot"))]
-use std::sync::RwLock;
 #[cfg(feature = "use_parking_lot")]
 use parking_lot::RwLock;
+#[cfg(not(feature = "use_parking_lot"))]
+use std::sync::RwLock;
 
 /// A `tracing_subscriber::Layer` that publishes events and spans to some backend
 /// using the provided `Telemetry` capability.
