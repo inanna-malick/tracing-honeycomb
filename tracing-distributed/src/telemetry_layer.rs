@@ -414,7 +414,7 @@ mod tests {
 
     fn with_test_scenario_runner<F>(f: F)
     where
-        F: Fn() -> (),
+        F: Fn(),
     {
         let spans = Arc::new(Mutex::new(Vec::new()));
         let events = Arc::new(Mutex::new(Vec::new()));
