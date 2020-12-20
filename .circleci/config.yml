@@ -12,6 +12,7 @@ jobs:
           name: Install Rust Components
           command: |
             rustup component add rustfmt
+            rustup component add clippy
       - run:
           name: Setup Env
           command: |
