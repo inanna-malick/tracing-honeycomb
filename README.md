@@ -5,7 +5,7 @@
 This repo contains the source code for:
 - [`tracing-distributed`](tracing-distributed/README.md), which contains generic machinery for publishing distributed trace telemetry to arbitrary backends.
 - [`tracing-honeycomb`](tracing-honeycomb/README.md), which contains a concrete implementation that uses [honeycomb.io](https://honeycomb.io) as a backend.
-- [`tracing-honeycomb`](tracing-jaeger/README.md), which contains a concrete implementation that uses [jaegertraing.io](https://www.jaegertracing.io/) as a backend.
+- [`tracing-jaeger`](tracing-jaeger/README.md), which contains a concrete implementation that uses [jaegertracing.io](https://www.jaegertracing.io/) as a backend.
 
 ## Usage
 
