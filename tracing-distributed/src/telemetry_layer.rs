@@ -99,7 +99,7 @@ where
 
                             for span_ref in path.into_iter() {
                                 let mut write_guard = span_ref.extensions_mut();
-                                write_guard.insert::<LazyTraceCtx<SpanId, TraceId>>(LazyTraceCtx(
+                                write_guard.replace::<LazyTraceCtx<SpanId, TraceId>>(LazyTraceCtx(
                                     TraceCtx {
                                         trace_id: local_trace_root.trace_id.clone(),
                                         parent_span: None,
@@ -122,7 +122,7 @@ where
 
                     for span_ref in path.into_iter() {
                         let mut write_guard = span_ref.extensions_mut();
-                        write_guard.insert::<LazyTraceCtx<SpanId, TraceId>>(LazyTraceCtx(
+                        write_guard.replace::<LazyTraceCtx<SpanId, TraceId>>(LazyTraceCtx(
                             TraceCtx {
                                 trace_id: already_evaluated.trace_id.clone(),
                                 parent_span: None,
