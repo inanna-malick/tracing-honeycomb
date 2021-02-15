@@ -4,10 +4,7 @@ use std::collections::HashMap;
 use std::str::FromStr;
 use tracing_distributed::{Event, Span, Telemetry};
 
-#[cfg(feature = "use_parking_lot")]
 use parking_lot::Mutex;
-#[cfg(not(feature = "use_parking_lot"))]
-use std::sync::Mutex;
 
 /// Telemetry capability that publishes events and spans to Honeycomb.io.
 #[derive(Debug)]
@@ -31,10 +28,6 @@ impl HoneycombTelemetry {
     }
 
     fn report_data(&self, data: HashMap<String, ::libhoney::Value>) {
-        // succeed or die. failure is unrecoverable (mutex poisoned)
-        #[cfg(not(feature = "use_parking_lot"))]
-        let mut client = self.honeycomb_client.lock().unwrap();
-        #[cfg(feature = "use_parking_lot")]
         let mut client = self.honeycomb_client.lock();
 
         let mut ev = client.new_event();
