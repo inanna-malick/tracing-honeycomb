@@ -1,10 +1,11 @@
-use crate::honeycomb::{SpanId, TraceId};
-use ::libhoney::{json, Value};
 use chrono::{DateTime, Utc};
+use libhoney::{json, Value};
 use std::collections::HashMap;
 use std::fmt;
 use tracing::field::{Field, Visit};
 use tracing_distributed::{Event, Span};
+
+use crate::{SpanId, TraceId};
 
 // Visitor that builds honeycomb-compatible values from tracing fields.
 #[derive(Default, Debug)]
