@@ -12,7 +12,7 @@ use tracing_subscriber::registry;
 
 #[instrument]
 async fn spawn_children(n: u32, process_name: String) {
-    register_dist_tracing_root(TraceId::generate(), None).unwrap();
+    register_dist_tracing_root(TraceId::new(), None).unwrap();
 
     for _ in 0..n {
         spawn_child_process(&process_name).await;
