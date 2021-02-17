@@ -11,8 +11,6 @@
 //!
 //! As a tracing layer, `TelemetryLayer` can be composed with other layers to provide stdout logging, filtering, etc.
 
-use rand::{self, Rng};
-
 mod honeycomb;
 mod span_id;
 mod trace_id;
@@ -52,14 +50,10 @@ pub fn current_dist_trace_ctx() -> Result<(TraceId, SpanId), TraceCtxError> {
 /// Specialized to the honeycomb.io-specific SpanId and TraceId provided by this crate.
 pub fn new_blackhole_telemetry_layer(
 ) -> TelemetryLayer<tracing_distributed::BlackholeTelemetry<SpanId, TraceId>, SpanId, TraceId> {
-    let instance_id: u64 = 0;
     TelemetryLayer::new(
         "honeycomb_blackhole_tracing_layer",
         tracing_distributed::BlackholeTelemetry::default(),
-        move |tracing_id| SpanId {
-            instance_id,
-            tracing_id,
-        },
+        move |tracing_id| SpanId { tracing_id },
     )
 }
 
@@ -70,14 +64,10 @@ pub fn new_honeycomb_telemetry_layer(
     service_name: &'static str,
     honeycomb_config: libhoney::Config,
 ) -> TelemetryLayer<HoneycombTelemetry, SpanId, TraceId> {
-    let instance_id: u64 = rand::thread_rng().gen();
     TelemetryLayer::new(
         service_name,
         HoneycombTelemetry::new(honeycomb_config, None),
-        move |tracing_id| SpanId {
-            instance_id,
-            tracing_id,
-        },
+        move |tracing_id| SpanId { tracing_id },
     )
 }
 
@@ -101,13 +91,9 @@ pub fn new_honeycomb_telemetry_layer_with_trace_sampling(
     honeycomb_config: libhoney::Config,
     sample_rate: u32,
 ) -> TelemetryLayer<HoneycombTelemetry, SpanId, TraceId> {
-    let instance_id: u64 = rand::thread_rng().gen();
     TelemetryLayer::new(
         service_name,
         HoneycombTelemetry::new(honeycomb_config, Some(sample_rate)),
-        move |tracing_id| SpanId {
-            instance_id,
-            tracing_id,
-        },
+        move |tracing_id| SpanId { tracing_id },
     )
 }
