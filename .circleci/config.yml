@@ -80,4 +80,7 @@ workflows:
             - docs-build
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - main
+                
